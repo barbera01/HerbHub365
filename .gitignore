@@ -1,48 +1,3 @@
-m variables files (optional)
-# *.auto.tfvars
-# *.auto.tfvars.json
-
-# Terraform plan files
-*.tfplan
-
-# Terraform directories
-.terraform/
-terraform.tfstate.d/
-
-# ====================
-# Docker
-# ====================
-
-# Docker Compose override files
-docker-compose.override.yml
-
-# Docker specific files
-Dockerfile
-.dockerignore
-
-# Docker volumes and caches
-*.tar
-*.tgz
-*.bak
-
-# ====================
-# Optional: Other Useful Ignored Files
-# ====================
-
-# Binary files
-*.bin
-
-# Temporary files
-tmp/
-temp/
-
-# Logs
-logs/
-*.log
-
-# Environment variables
-.env
-.env.*
 # ====================
 # General
 # ====================
@@ -104,4 +59,48 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
-# Terrafor
+# Terraform variables files (optional)
+ *.auto.tfvars
+ *.auto.tfvars.json
+ *.tfvars
+# Terraform plan files
+*.tfplan
+
+# Terraform directories
+.terraform/
+terraform.tfstate.d/
+
+# ====================
+# Docker
+# ====================
+
+# Docker Compose override files
+docker-compose.override.yml
+
+# Docker specific files
+Dockerfile
+.dockerignore
+
+# Docker volumes and caches
+*.tar
+*.tgz
+*.bak
+
+# ====================
+# Optional: Other Useful Ignored Files
+# ====================
+
+# Binary files
+*.bin
+
+# Temporary files
+tmp/
+temp/
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.*

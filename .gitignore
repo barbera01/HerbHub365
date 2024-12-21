@@ -61,9 +61,9 @@ override.tf.json
 *_override.tf.json
 
 # Terraform variables files (optional)
- *.auto.tfvars
- *.auto.tfvars.json
- *.tfvars
+*.auto.tfvars
+*.auto.tfvars.json
+*.tfvars
 # Terraform plan files
 *.tfplan
 

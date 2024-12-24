@@ -1,4 +1,5 @@
 
+
 services:
   rabbitmq:
     image: rabbitmq:3-management
@@ -22,9 +23,9 @@ services:
       - "--configFile=/etc/traefik/traefik.yml"
     networks:
       herbhub:
-        ipv4_address: 172.18.0.3  # Static IP on herbhub network
+        ipv4_address: 172.18.0.3      # Static IP on herbhub network
       herbhub-wifi:
-        ipv4_address: 192.168.1.228  # Static IP on herbhub-wifi (ipvlan) network
+        ipv4_address: 192.168.1.228   # Static IP on herbhub-wifi (ipvlan) network
     environment:
       - TZ=Your/Timezone  # Replace with your actual timezone, e.g., "America/New_York"
     volumes:
@@ -51,6 +52,7 @@ networks:
 
   herbhub-wifi:
     external: true  # This is your existing ipvlan network
+
 
 
 

@@ -4,8 +4,7 @@
 networks:
   herbhub:
     driver: bridge
-  ipvlan_herbhub:
-    external: true
+
 
 services:
   rabbitmq:

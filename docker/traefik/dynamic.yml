@@ -1,18 +1,21 @@
-# traefik/dynamic.yml
+# docker/traefik/dynamic.yml
 
 http:
+  middlewares:
+    auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$...$..."
+
   routers:
-    rabbitmq:
-      rule: "Host(`rabbitmq.herbhub365.local`)"
-      service: rabbitmq
+    traefik-dashboard:
+      rule: "Host(`traefik.herbhub365.local`)"
+      service: api@internal
       entryPoints:
         - web
+      middlewares:
+        - auth
       tls:
         certResolver: myresolver
 
-  services:
-    rabbitmq:
-      loadBalancer:
-        servers:
-          - url: "http://rabbitmq:5672"
 

@@ -4,7 +4,7 @@
 networks:
   herbhub:
     driver: bridge
-  real_network:
+  ipvlan_herbhub:
     external: true
 
 services:
@@ -27,23 +27,34 @@ services:
     container_name: traefik
     command:
       - "--configFile=/etc/traefik/traefik.yml"
-    ports:
-      - "80:80"       # HTTP
-      - "443:443"     # HTTPS
-      - "8080:8080"   # Traefik Dashboard
+    networks:
+      - herbhub
+      - herbhub-wifi
+    environment:
+      - TZ=Your/Timezone
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
       - ./traefik/acme.json:/acme.json
-    networks:
-      - herbhub
-      - real_network
-    environment:
-      - TZ=Your/Timezone
     labels:
       - "traefik.enable=true"
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+    # Assign a static IP on IPvlan network
+    networks:
+      herbhub:
+        ipv4_address: 172.18.0.2  # Example internal IP
+      ipvlan_herbhub:
+        ipv4_address: 192.168.1.200
+    # Note: Assigning static IPs within Docker Compose requires the network to have IPAM configured
+    # Alternatively, omit static IP and manage via external methods
 
 volumes:
   rabbitmq_data:
+
+networks:
+  herbhub-wifi:
+    external: true
 

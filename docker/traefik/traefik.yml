@@ -26,3 +26,12 @@ certificatesResolvers:
       httpChallenge:
         entryPoint: web
 
+log:
+  level: INFO
+  filePath: /var/log/traefik.log
+  format: common
+accessLog:
+  filePath: /var/log/access.log
+  format: common
+
+

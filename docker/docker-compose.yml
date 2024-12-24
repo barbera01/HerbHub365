@@ -1,5 +1,6 @@
 
 
+
 services:
   rabbitmq:
     image: rabbitmq:3-management
@@ -44,14 +45,10 @@ volumes:
 
 networks:
   herbhub:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.18.0.0/16
-          gateway: 172.18.0.1
-
+    external: true
   herbhub-wifi:
-    external: true  # This is your existing ipvlan network
+    external: true
+
 
 
 

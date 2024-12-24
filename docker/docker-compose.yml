@@ -26,6 +26,9 @@ services:
     command:
       - "--configFile=/etc/traefik/traefik.yml"
     networks:
+      herbhub-wifi:
+        ipv4_address: 192.168.5.228
+    networks:
       - herbhub
       - herbhub-wifi
     environment:

@@ -19,6 +19,10 @@ services:
   traefik:
     image: traefik:v2.9
     container_name: traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
     command:
       - "--configFile=/etc/traefik/traefik.yml"
     networks:

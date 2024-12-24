@@ -1,16 +1,15 @@
 
-
+version: '3.8'
 
 services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     networks:
-      herbhub:
-        ipv4_address: 172.18.0.2  # Static IP on herbhub network
+      - herbhub
     ports:
-      - "5672:5672"      # AMQP protocol
-      - "15672:15672"    # RabbitMQ Management UI
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: yourpassword
@@ -23,12 +22,10 @@ services:
     command:
       - "--configFile=/etc/traefik/traefik.yml"
     networks:
-      herbhub:
-        ipv4_address: 172.18.0.3      # Static IP on herbhub network
-      herbhub-wifi:
-        ipv4_address: 192.168.1.228   # Static IP on herbhub-wifi (ipvlan) network
+      - herbhub
+      - herbhub-wifi
     environment:
-      - TZ=Your/Timezone  # Replace with your actual timezone, e.g., "America/New_York"
+      - TZ=Your/Timezone
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
@@ -48,7 +45,6 @@ networks:
     external: true
   herbhub-wifi:
     external: true
-
 
 
 

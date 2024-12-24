@@ -1,0 +1,18 @@
+# traefik/dynamic.yml
+
+http:
+  routers:
+    rabbitmq:
+      rule: "Host(`rabbitmq.herbhub365.local`)"
+      service: rabbitmq
+      entryPoints:
+        - web
+      tls:
+        certResolver: myresolver
+
+  services:
+    rabbitmq:
+      loadBalancer:
+        servers:
+          - url: "http://rabbitmq:5672"
+

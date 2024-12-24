@@ -1,0 +1,15 @@
+
+version: '3.8'
+
+services:
+  web-deployer:
+    build: ./services/web-deployer
+    container_name: web_deployer
+    environment:
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID}
+    volumes:
+      - ~/.azure:/root/.azure
+      - ./services/web-deployer/html:/app/html

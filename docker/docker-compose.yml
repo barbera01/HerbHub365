@@ -1,0 +1,50 @@
+# docker/docker-compose.yml
+
+version: '3.8'
+
+networks:
+  herbhub:
+    driver: bridge
+  real_network:
+    external: true
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    networks:
+      - herbhub
+    ports:
+      - "5672:5672"      # AMQP protocol
+      - "15672:15672"    # RabbitMQ Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: yourpassword
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  traefik:
+    image: traefik:v2.9
+    container_name: traefik
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "80:80"       # HTTP
+      - "443:443"     # HTTPS
+      - "8080:8080"   # Traefik Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./traefik/acme.json:/acme.json
+    networks:
+      - herbhub
+      - real_network
+    environment:
+      - TZ=Your/Timezone
+    labels:
+      - "traefik.enable=true"
+
+volumes:
+  rabbitmq_data:
+

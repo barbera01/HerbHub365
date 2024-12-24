@@ -1,17 +1,11 @@
-# docker/docker-compose.yml
-
-
-networks:
-  herbhub:
-    driver: bridge
-
 
 services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     networks:
-      - herbhub
+      herbhub:
+        ipv4_address: 172.18.0.2  # Static IP on herbhub network
     ports:
       - "5672:5672"      # AMQP protocol
       - "15672:15672"    # RabbitMQ Management UI
@@ -27,10 +21,12 @@ services:
     command:
       - "--configFile=/etc/traefik/traefik.yml"
     networks:
-      - herbhub
-      - herbhub-wifi
+      herbhub:
+        ipv4_address: 172.18.0.3  # Static IP on herbhub network
+      herbhub-wifi:
+        ipv4_address: 192.168.1.228  # Static IP on herbhub-wifi (ipvlan) network
     environment:
-      - TZ=Your/Timezone
+      - TZ=Your/Timezone  # Replace with your actual timezone, e.g., "America/New_York"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
@@ -41,19 +37,20 @@ services:
     deploy:
       restart_policy:
         condition: unless-stopped
-    # Assign a static IP on IPvlan network
-    networks:
-      herbhub:
-        ipv4_address: 172.18.0.2  # Example internal IP
-      ipvlan_herbhub:
-        ipv4_address: 192.168.1.200
-    # Note: Assigning static IPs within Docker Compose requires the network to have IPAM configured
-    # Alternatively, omit static IP and manage via external methods
 
 volumes:
   rabbitmq_data:
 
 networks:
+  herbhub:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1
+
   herbhub-wifi:
-    external: true
+    external: true  # This is your existing ipvlan network
+
+
 

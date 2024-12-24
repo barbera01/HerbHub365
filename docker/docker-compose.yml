@@ -25,7 +25,7 @@ services:
     networks:
        herbhub:
        herbhub-wifi:
-          ipv4_address: 192.168.5.228
+        ipv4_address: 192.168.5.228
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

@@ -28,11 +28,10 @@ services:
       - "8080:8080"
     networks:
       herbhub:
-
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/traefik:/etc/traefik:ro
-      - /var/lib/docker/data/certs/herbhub365:/etc/traefik/certs
+      - /var/lib/docker/data/certs/herbhub365/:/etc/traefik/certs/:ro
     
     restart: unless-stopped
 

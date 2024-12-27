@@ -23,26 +23,20 @@ services:
       - "443:443"
       - "8080:8080"
     networks:
-      herbhub-wifi:
       herbhub:
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
-    labels:
-      - "traefik.enable=true"
-    deploy:
-      restart_policy:
-        condition: unless-stopped
+      - /etc/traefik:/etc/traefik:ro
+      - /var/lib/docker/data/certs/herbhub365.com:/etc/traefik/certs
+    
+    restart: unless-stopped
 
 volumes:
   rabbitmq_data:
 
 networks:
   herbhub:
-    external: true
-  herbhub-wifi:
     external: true
 
 

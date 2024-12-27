@@ -16,10 +16,10 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nodered.rule=Host('rabbit.herbbub365.com')"
-      - "traefik.http.routers.nodered.entrypoints=websecure"
-      - "traefik.http.services.nodered.loadbalancer.server.port=15672"  
-      - "traefik.http.routers.nodered.tls=true"
+      - "traefik.http.routers.rabbitmq.rule=Host('rabbit.herbbub365.com')"
+      - "traefik.http.routers.rabbitmq.entrypoints=websecure"
+      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"  
+      - "traefik.http.routers.rabbitmq.tls=true"
 
   traefik:
     image: docker.io/library/traefik:v3.0.1

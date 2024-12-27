@@ -32,7 +32,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/traefik:/etc/traefik:ro
-      - /var/lib/docker/data/certs/herbhub365.com:/etc/traefik/certs
+      - /var/lib/docker/data/certs/herbhub365:/etc/traefik/certs
     
     restart: unless-stopped
 

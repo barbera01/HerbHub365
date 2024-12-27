@@ -16,7 +16,7 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.rabbitmq.rule=Host('rabbit.herbhub365.com')"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rabbit.herbhub365.com`)"
       - "traefik.http.routers.rabbitmq.entrypoints=websecure"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"  
       - "traefik.http.routers.rabbitmq.tls=true"

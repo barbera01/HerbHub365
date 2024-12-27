@@ -6,7 +6,6 @@ services:
     container_name: rabbitmq
     networks:
       - herbhub
-
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: yourpassword

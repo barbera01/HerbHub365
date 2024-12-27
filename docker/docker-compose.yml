@@ -11,8 +11,13 @@ services:
       RABBITMQ_DEFAULT_PASS: yourpassword
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    ports:
-      - 15672:15672
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rabbitmq.rule=Host(\"rabbit.herbhub365.com\")"
+      - "traefik.http.routers.rabbitmq.entrypoints=websecure"
+      - "traefik.http.routers.rabbitmq.tls=true"
+      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+
 
   traefik:
     image: docker.io/library/traefik:v3.0.1

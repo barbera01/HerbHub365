@@ -18,6 +18,24 @@ services:
       - "traefik.http.routers.rabbitmq.tls=false"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
+  admin:
+    build:
+      context: ./admin
+      dockerfile: dockerfile
+    container_name: admin
+    networks:
+      - herbhub
+    environment:
+      RABBITMQ_URL: amqp://admin:yourpassword@rabbitmq:5672/
+    volumes:
+      - ./admin/frontend:/app/frontend # Serve frontend dynamically
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.admin.rule=Host(`admin.herbhub365.com`)"
+      - "traefik.http.routers.admin.entrypoints=web"
+      - "traefik.http.routers.admin.tls=false"
+      - "traefik.http.services.admin.loadbalancer.server.port=8080"
+
 
   traefik:
     image: docker.io/library/traefik:v3.0.1

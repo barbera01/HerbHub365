@@ -33,7 +33,7 @@ services:
       - "traefik.http.routers.admin.rule=Host(`admin.herbhub365.com`)"
       - "traefik.http.routers.admin.entrypoints=web"
       - "traefik.http.routers.admin.tls=false"
-      - "traefik.http.services.admin.loadbalancer.server.port=8080"
+      - "traefik.http.services.admin.loadbalancer.server.port=8081"
 
 
   traefik:

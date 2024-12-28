@@ -75,8 +75,8 @@ func main() {
 	r.Handle("/*", http.FileServer(http.Dir("./frontend")))
 
 	// Start the HTTP server
-	log.Println("Server running on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Println("Server running on port 8081")
+	log.Fatal(http.ListenAndServe(":8081", r))
 }
 
 

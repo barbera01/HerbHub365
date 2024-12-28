@@ -79,7 +79,7 @@ terraform.tfstate.d/
 docker-compose.override.yml
 
 # Docker specific files
-Dockerfile
+
 .dockerignore
 
 # Docker volumes and caches

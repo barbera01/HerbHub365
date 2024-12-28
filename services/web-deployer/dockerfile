@@ -1,0 +1,15 @@
+# Use the official Azure CLI image as the base
+FROM mcr.microsoft.com/azure-cli:latest
+
+# Set working directory
+WORKDIR /app
+
+# Copy deployment script and html files
+COPY deploy.sh .
+COPY html/ ./html
+
+# Make the deployment script executable
+RUN chmod +x deploy.sh
+
+# Entry point to execute the deployment script
+ENTRYPOINT ["./deploy.sh"]

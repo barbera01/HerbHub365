@@ -1,9 +1,26 @@
-FROM golang:1.21-alpine
+# Use an official Go image as the base
+# Use an official Go image as the base
+FROM golang:1.21-bullseye
 
+# Set the working directory inside the container
 WORKDIR /app
-COPY app /app
-RUN go mod init goapp && go mod tidy
 
-EXPOSE 8081
-CMD ["go", "run", "main.go"]
+# Copy Go modules and dependencies
+COPY app/go.mod app/go.sum ./
+RUN go mod download
+
+# Copy the application source code
+COPY app/ .
+
+# Copy the frontend files
+COPY frontend/ ./frontend
+
+# Build the backend application
+RUN go build -o watering-service main.go
+
+# Set the entry point for the container
+CMD ["./watering-service"]
+
+# Ensure the container has access to GPIO and device files
+# Use 'privileged' mode during deployment to enable GPIO interaction
 

@@ -47,8 +47,8 @@ services:
       herbhub:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /etc/traefik:/etc/traefik:
-      - /usr/share/certs/herbhub365:/etc/traefik/certs:
+      - /etc/traefik/:/etc/traefik:
+      - /usr/share/certs/herbhub365/:/etc/traefik/certs:
     
     restart: unless-stopped
 

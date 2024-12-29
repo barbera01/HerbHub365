@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   rabbitmq:
     image: rabbitmq:3-management
@@ -16,24 +18,27 @@ services:
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
-  admin:
+  watering-service:
     build:
       context: ./admin
-      dockerfile: dockerfile
-    container_name: admin
+      dockerfile: Dockerfile
+    container_name: watering-service
     networks:
       - herbhub
+    ports:
+      - "8080:8080"
     environment:
-      RABBITMQ_URL: amqp://admin:yourpassword@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://admin:yourpassword@rabbitmq:5672/
     volumes:
-      - ./admin/frontend:/app/frontend # Serve frontend dynamically
+      - /sys:/sys
+      - /dev:/dev
+    privileged: true
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.admin.rule=Host(\"admin.herbhub365.com\")"
-      - "traefik.http.routers.admin.entrypoints=websecure"
-      - "traefik.http.routers.admin.tls=true"
-      - "traefik.http.services.admin.loadbalancer.server.port=8081"
-
+      - "traefik.http.routers.watering-service.rule=Host(\"admin.herbhub365.com\")"
+      - "traefik.http.routers.watering-service.entrypoints=websecure"
+      - "traefik.http.routers.watering-service.tls=true"
+      - "traefik.http.services.watering-service.loadbalancer.server.port=8080"
 
   traefik:
     image: docker.io/library/traefik:v3.2.3
@@ -48,7 +53,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/traefik:/etc/traefik
       - /usr/share/certs/herbhub365:/etc/traefik/certs
-    
     restart: unless-stopped
 
 volumes:
@@ -57,6 +61,7 @@ volumes:
 networks:
   herbhub:
     external: true
+
 
 
 

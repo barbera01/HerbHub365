@@ -39,8 +39,7 @@ GOPATH
 vendor/
 
 # Go module files
-go.sum
-go.mod
+
 
 # ====================
 # Terraform

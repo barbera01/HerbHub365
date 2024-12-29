@@ -1,28 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RabbitMQ Event Sender</title>
+    <title>Watering System</title>
 </head>
 <body>
-    <h1>Send Event to RabbitMQ</h1>
-    <form id="eventForm">
-        <input type="text" id="event" placeholder="Event" required>
-        <button type="submit">Send</button>
-    </form>
-    <script>
-        document.getElementById('eventForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const event = document.getElementById('event').value;
-            const response = await fetch('/send-event', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `event=${encodeURIComponent(event)}`,
-            });
-            alert(await response.text());
-        });
-    </script>
+    <h1>Welcome to the Watering System</h1>
+    <p>Control your plant watering system here.</p>
 </body>
 </html>
-

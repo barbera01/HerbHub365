@@ -30,7 +30,7 @@ services:
       - ./admin/frontend:/app/frontend # Serve frontend dynamically
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.admin.rule=Host(`admin.herbhub365.com`)"
+      - "traefik.http.routers.admin.rule=Host(\"admin.herbhub365.com\")"
       - "traefik.http.routers.admin.entrypoints=websecure"
       - "traefik.http.routers.admin.tls=true"
       - "traefik.http.services.admin.loadbalancer.server.port=8081"

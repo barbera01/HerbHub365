@@ -35,7 +35,7 @@ services:
 
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cronicle.rule=Host(`schedular.herbhub365.com`)"
+      - "traefik.http.routers.cronicle.rule=Host(`scheduler.herbhub365.com`)"
       - "traefik.http.routers.cronicle.entrypoints=websecure"
       - "traefik.http.routers.cronicle.tls=true"
       - "traefik.http.services.cronicle.loadbalancer.server.port=3012"

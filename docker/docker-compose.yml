@@ -17,27 +17,26 @@ services:
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
-  watering-service:
+  cronicle:
     build:
-      context: ./admin
+      context: ./schedular
       dockerfile: Dockerfile
-    container_name: watering-service
+    container_name: schedular
     networks:
       - herbhub
     ports:
-      - "8080:8080"
-    environment:
-      - RABBITMQ_URL=amqp://admin:yourpassword@rabbitmq:5672/
+      - "3012:3012"
     volumes:
-      - /sys:/sys
-      - /dev:/dev
-    privileged: true
+      - ./schedular/config:/opt/cronicle/config
+      - ./schedular/data:/opt/cronicle/data
+    environment:
+      - CRONICLE_AdminEmail=andy@andy-barber.co.uk
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.watering-service.rule=Host(\"admin.herbhub365.com\")"
-      - "traefik.http.routers.watering-service.entrypoints=websecure"
-      - "traefik.http.routers.watering-service.tls=true"
-      - "traefik.http.services.watering-service.loadbalancer.server.port=8080"
+      - "traefik.http.routers.cronicle.rule=Host(`schedular.herbhub365.com`)"
+      - "traefik.http.routers.cronicle.entrypoints=websecure"
+      - "traefik.http.routers.cronicle.tls=true"
+      - "traefik.http.services.cronicle.loadbalancer.server.port=3012"
 
   traefik:
     image: docker.io/library/traefik:v3.2.3
@@ -56,6 +55,8 @@ services:
 
 volumes:
   rabbitmq_data:
+  schedular:
+
 
 networks:
   herbhub:

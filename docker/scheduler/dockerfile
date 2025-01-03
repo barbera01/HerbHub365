@@ -1,5 +1,5 @@
 # Base image
-FROM node:16-slim
+FROM node:16-bullseye-slim
 
 # Set working directory
 WORKDIR /opt/cronicle
@@ -7,25 +7,24 @@ WORKDIR /opt/cronicle
 # Install dependencies
 RUN apt-get update && apt-get install -y \
   curl \
+  tar \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Download and install Cronicle
-RUN curl -L https://github.com/jhuckaby/Cronicle/archive/master.tar.gz | tar zxvf - --strip-components=1
+# Clone the Cronicle Edge repository and build
+RUN curl -L https://github.com/cronicle-edge/cronicle-edge/archive/main.tar.gz | tar zxvf - --strip-components=1
 
 # Install Node.js dependencies
 RUN npm install
 
 # Configure Cronicle
 RUN node bin/build.js dist && \
-  mkdir -p /opt/cronicle/data && \
-  mkdir -p /opt/cronicle/logs && \
-  mkdir -p /opt/cronicle/config && \
+  mkdir -p /opt/cronicle/data /opt/cronicle/logs /opt/cronicle/config && \
   cp conf/config.json /opt/cronicle/config/config.json
 
 # Expose the default web server port
 EXPOSE 3012
 
-# Default command to start Cronicle
-CMD ["bin/control.sh", "start"]
+# Entrypoint script for Cronicle
+CMD ["cronicle-start"]
 

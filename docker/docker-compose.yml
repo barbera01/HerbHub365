@@ -24,8 +24,6 @@ services:
     container_name: scheduler
     networks:
       - herbhub
-    ports:
-      - "3012:3012"
     volumes:
       - ./schedular/config:/opt/cronicle/config
       - ./schedular/data:/opt/cronicle/data

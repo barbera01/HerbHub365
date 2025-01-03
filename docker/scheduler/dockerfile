@@ -1,0 +1,31 @@
+# Base image
+FROM node:16-slim
+
+# Set working directory
+WORKDIR /opt/cronicle
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+  curl \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# Download and install Cronicle
+RUN curl -L https://github.com/jhuckaby/Cronicle/archive/master.tar.gz | tar zxvf - --strip-components=1
+
+# Install Node.js dependencies
+RUN npm install
+
+# Configure Cronicle
+RUN node bin/build.js dist && \
+  mkdir -p /opt/cronicle/data && \
+  mkdir -p /opt/cronicle/logs && \
+  mkdir -p /opt/cronicle/config && \
+  cp conf/config.json /opt/cronicle/config/config.json
+
+# Expose the default web server port
+EXPOSE 3012
+
+# Default command to start Cronicle
+CMD ["bin/control.sh", "start"]
+

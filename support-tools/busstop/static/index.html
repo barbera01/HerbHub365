@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Web Interface</title>
+    <script>
+        async function triggerGoFunction() {
+            try {
+                const response = await fetch('/trigger', {
+                    method: 'POST',
+                });
+                const result = await response.text();
+                alert(result); // Show success message
+            } catch (error) {
+                alert('An error occurred: ' + error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Welcome to the Simple Web Interface!</h1>
+    <button onclick="triggerGoFunction()">Trigger Go Function</button>
+</body>
+</html>
+

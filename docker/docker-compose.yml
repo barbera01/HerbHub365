@@ -17,11 +17,11 @@ services:
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
-  cronicle:
+  schedular:
     build:
-      context: ./schedular
+      context: ./scheduler
       dockerfile: Dockerfile
-    container_name: schedular
+    container_name: scheduler
     networks:
       - herbhub
     ports:

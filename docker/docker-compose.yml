@@ -18,18 +18,24 @@ services:
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
   schedular:
-    build:
-      context: ./scheduler
-      dockerfile: Dockerfile
+    image: soulteary/cronicle:0.9.63
+    restart: always
     container_name: scheduler
     networks:
       - herbhub
     volumes:
-      - ./schedular/config:/opt/cronicle/config
-      - ./schedular/data:/opt/cronicle/data
-    environment:
-      - CRONICLE_AdminEmail=andy@andy-barber.co.uk
-    command: sh -c "bin/control.sh start && tail -f /dev/null"
+      - ./scheduler/config:/opt/cronicle/config
+      - ./scheduler/data:/opt/cronicle/data
+      - ./scheduler/plugins:/opt/cronicle/plugins
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:3012/api/app/ping || exit 1"]
+      interval: 5s
+      timeout: 1s
+      retries: 3
+    logging:
+        driver: "json-file"
+        options:
+            max-size: "10m"
 
     labels:
       - "traefik.enable=true"

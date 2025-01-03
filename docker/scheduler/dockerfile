@@ -1,30 +1,32 @@
-# Base image
-FROM node:16-bullseye-slim
 
-# Set working directory
-WORKDIR /opt/cronicle
+FROM arm32v7/alpine:3.19.1 as base
+RUN apk add --no-cache bash nodejs tini 
+RUN apk add --no-cache bash nodejs tini util-linux bash openssl procps coreutils curl tar jq
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-  curl \
-  tar \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+FROM  base as build
+RUN apk add --no-cache npm 
+COPY . /build
+WORKDIR /build
 
-# Clone the Cronicle Edge repository and build
-RUN curl -L https://github.com/cronicle-edge/cronicle-edge/archive/main.tar.gz | tar zxvf - --strip-components=1
+RUN ./bundle /dist --mysql --pgsql --s3 --lmdb
 
-# Install Node.js dependencies
-RUN npm install
+FROM base
 
-# Configure Cronicle
-RUN node bin/build.js dist && \
-  mkdir -p /opt/cronicle/data /opt/cronicle/logs /opt/cronicle/config && \
-  cp conf/config.json /opt/cronicle/config/config.json
+# non root user for shell plugin
+ARG CRONICLE_UID=1000
+ARG CRONICLE_GID=1099
+RUN  addgroup cronicle --gid $CRONICLE_GID && adduser -D -h /opt/cronicle -u $CRONICLE_UID -G cronicle cronicle
 
-# Expose the default web server port
-EXPOSE 3012
+COPY --from=build /dist /opt/cronicle
 
-# Entrypoint script for Cronicle
-CMD ["cronicle-start"]
+ENV PATH "/opt/cronicle/bin:${PATH}"
+ENV CRONICLE_foreground=1
+ENV CRONICLE_echo=1
+ENV TZ=America/New_York 
 
+WORKDIR /opt/cronicle 
+
+# protect sensitive folders
+RUN  mkdir -p /opt/cronicle/data /opt/cronicle/conf && chmod 0700 /opt/cronicle/data /opt/cronicle/conf
+
+ENTRYPOINT ["/sbin/tini", "--"]

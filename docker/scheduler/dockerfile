@@ -27,5 +27,5 @@ RUN node bin/build.js dist && \
 EXPOSE 3012
 
 # Default command to start Cronicle
-CMD ["bin/control.sh", "start"]
+CMD ["bin/control.sh", "start", "--foreground"]
 

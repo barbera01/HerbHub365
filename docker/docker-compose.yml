@@ -31,6 +31,8 @@ services:
       - ./schedular/data:/opt/cronicle/data
     environment:
       - CRONICLE_AdminEmail=andy@andy-barber.co.uk
+    command: sh -c "bin/control.sh start && tail -f /dev/null"
+
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.cronicle.rule=Host(`schedular.herbhub365.com`)"

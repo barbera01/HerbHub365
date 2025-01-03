@@ -57,7 +57,7 @@ services:
 
 volumes:
   rabbitmq_data:
-  schedular:
+  scheduler:
 
 
 networks:

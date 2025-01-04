@@ -20,13 +20,11 @@ services:
   dashboard:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: dashboard
-
     volumes:
       - ./dashboard:/app/config # Make sure your local config directory exists
       - /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations, see alternative methods
-    environment:
-      PUID: $PUID
-      PGID: $PGID
+   
+
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(\"dashboard.herbhub365.com\")"

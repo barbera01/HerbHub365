@@ -20,6 +20,8 @@ services:
   dashboard:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: dashboard
+    networks:
+      - herbhub
     volumes:
       - ./dashboard:/app/config # Make sure your local config directory exists
       - /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations, see alternative methods

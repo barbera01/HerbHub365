@@ -9,7 +9,7 @@ services:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: yourpassword
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq:/var/lib/rabbitmq
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.rabbitmq.rule=Host(\"rabbit.herbhub365.com\")"
@@ -17,20 +17,20 @@ services:
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
-    dashboard:
-      image: ghcr.io/gethomepage/homepage:latest
-      container_name: dashboard
-      volumes:
-        - ./dashboard:/app/config # Make sure your local config directory exists
-        - /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations, see alternative methods
-   
+  dashboard:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: dashboard
+    volumes:
+      - ./dashboard:/app/config # Make sure your local config directory exists
+      - /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations, see alternative methods
+  
 
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.dashboard.rule=Host(\"dashboard.herbhub365.com\")"
-        - "traefik.http.routers.dashboard.entrypoints=websecure"
-        - "traefik.http.routers.dashboard.tls=true"
-        - "traefik.http.services.dashboard.loadbalancer.server.port=3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(\"dashboard.herbhub365.com\")"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=3000"
 
 
   schedular:

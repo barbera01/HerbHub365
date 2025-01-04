@@ -17,6 +17,24 @@ services:
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
+  dashboard:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: dashboard
+
+    volumes:
+      - ./dashboard:/app/config # Make sure your local config directory exists
+      - /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations, see alternative methods
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(\"dashboard.herbhub365.com\")"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=3000"
+
+
   schedular:
     image: soulteary/cronicle:0.9.63
     restart: always
@@ -58,11 +76,6 @@ services:
       - /etc/traefik:/etc/traefik
       - /usr/share/certs/herbhub365:/etc/traefik/certs
     restart: unless-stopped
-
-volumes:
-  rabbitmq_data:
-  scheduler:
-
 
 networks:
   herbhub:

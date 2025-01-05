@@ -4,3 +4,5 @@
 
 layout: home
 ---
+
+![herb hub logo](/assets/images/logo.png)

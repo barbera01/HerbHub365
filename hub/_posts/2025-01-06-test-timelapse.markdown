@@ -16,10 +16,6 @@ for file in [0-9]*-??-??-????.jpg; do
 done
 ```
 
-```
-
-```
-
 <video width="640" height="360" controls>
   <source src="/assets/video/timelapse.mp4" type="video/mp4">
   Your browser does not support the video tag.

@@ -63,7 +63,7 @@ services:
       - "traefik.http.services.cronicle.loadbalancer.server.port=3012"
 
   traefik:
-    image: docker.io/library/traefik:v3.2.3
+    image: docker.io/library/traefik:latest
     container_name: traefik
     ports:
       - "80:80"

@@ -1,0 +1,17 @@
+FROM alpine:3.20
+
+WORKDIR /app
+
+RUN apk add --no-cache \
+  bash \
+  coreutils \
+  ffmpeg \
+  findutils \
+  imagemagick
+
+COPY scripts/make-timelapse.sh /usr/local/bin/make-timelapse.sh
+COPY services/timelapse-builder/entrypoint.sh /usr/local/bin/timelapse-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/make-timelapse.sh /usr/local/bin/timelapse-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/timelapse-entrypoint.sh"]

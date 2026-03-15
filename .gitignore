@@ -117,3 +117,6 @@ logs/
 
 # Blog poster snapshot archive
 /services/blog-poster/data/snapshots/
+
+# Timelapse builder output
+/services/timelapse-builder/output/

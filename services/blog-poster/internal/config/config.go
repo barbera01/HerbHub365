@@ -20,6 +20,7 @@ type Config struct {
 	RabbitMQ           RabbitMQConfig
 	LLM                LLMConfig
 	Blog               BlogConfig
+	RepoPost           RepoPostConfig
 	Git                GitConfig
 }
 
@@ -66,6 +67,17 @@ type GitConfig struct {
 	AuthorEmail    string
 }
 
+type RepoPostConfig struct {
+	Prompt        string
+	Title         string
+	Paths         []string
+	Draft         bool
+	Categories    string
+	MaxFiles      int
+	MaxFileBytes  int
+	MaxTotalBytes int
+}
+
 func Load() Config {
 	hubDir := getEnv("HUB_DIR", "/workspace/hub")
 	postsDir := getEnv("BLOG_POSTS_DIR", filepath.Join(hubDir, "_posts"))
@@ -107,6 +119,16 @@ func Load() Config {
 			Author:       os.Getenv("BLOG_AUTHOR"),
 			Overwrite:    getBoolEnv("BLOG_OVERWRITE", false),
 			SlugMaxWords: getIntEnv("BLOG_SLUG_MAX_WORDS", 8),
+		},
+		RepoPost: RepoPostConfig{
+			Prompt:        os.Getenv("BLOG_REPO_POST_PROMPT"),
+			Title:         os.Getenv("BLOG_REPO_POST_TITLE"),
+			Paths:         getCSVEnv("BLOG_REPO_POST_PATHS"),
+			Draft:         getBoolEnv("BLOG_REPO_POST_DRAFT", true),
+			Categories:    getEnv("BLOG_REPO_POST_CATEGORIES", "Platform Update"),
+			MaxFiles:      getIntEnv("BLOG_REPO_POST_MAX_FILES", 12),
+			MaxFileBytes:  getIntEnv("BLOG_REPO_POST_MAX_FILE_BYTES", 12000),
+			MaxTotalBytes: getIntEnv("BLOG_REPO_POST_MAX_TOTAL_BYTES", 48000),
 		},
 		Git: GitConfig{
 			PublishEnabled: getBoolEnv("GIT_PUBLISH_ENABLED", false),
@@ -199,4 +221,20 @@ func getDurationEnv(key string, fallback time.Duration) time.Duration {
 		panic(fmt.Sprintf("invalid duration for %s: %v", key, err))
 	}
 	return parsed
+}
+
+func getCSVEnv(key string) []string {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return nil
+	}
+	parts := strings.Split(value, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }

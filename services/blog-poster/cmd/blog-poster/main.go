@@ -18,6 +18,7 @@ import (
 	"HerbHub365/services/blog-poster/internal/llm"
 	"HerbHub365/services/blog-poster/internal/model"
 	"HerbHub365/services/blog-poster/internal/rabbitmq"
+	"HerbHub365/services/blog-poster/internal/repopost"
 	"github.com/robfig/cron/v3"
 )
 
@@ -43,6 +44,10 @@ func main() {
 		}
 	case "generate", "once":
 		if err := runGenerate(ctx, cfg, generator, publisher); err != nil {
+			log.Fatal(err)
+		}
+	case "repo-post":
+		if err := runRepoPost(ctx, cfg, generator, publisher); err != nil {
 			log.Fatal(err)
 		}
 	case "daemon":
@@ -168,6 +173,39 @@ func runDraft(ctx context.Context, cfg config.Config, generator *blog.Generator)
 	}
 
 	log.Printf("generated draft %s", path)
+	return nil
+}
+
+func runRepoPost(ctx context.Context, cfg config.Config, generator *blog.Generator, publisher *gitpublish.Publisher) error {
+	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
+	defer cancel()
+
+	request, err := repopost.BuildPrompt(cfg)
+	if err != nil {
+		return err
+	}
+
+	targetDate, err := cfg.ResolveTargetDate(time.Now())
+	if err != nil {
+		return err
+	}
+
+	path, err := generator.GenerateRepoPost(jobCtx, targetDate, request.Prompt, cfg.RepoPost.Title, cfg.RepoPost.Draft, cfg.RepoPost.Categories)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("repo-post used sources: %s", strings.Join(request.SourcePaths, ", "))
+	if cfg.RepoPost.Draft {
+		log.Printf("generated repo post draft %s", path)
+		return nil
+	}
+
+	if err := publisher.PublishPost(jobCtx, path, targetDate); err != nil {
+		return err
+	}
+
+	log.Printf("generated repo post %s", path)
 	return nil
 }
 

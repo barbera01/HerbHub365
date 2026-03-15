@@ -8,6 +8,7 @@
 - `collect`: only consume and archive queue messages
 - `generate`: create one post from archived snapshots for `BLOG_TARGET_DATE`
 - `draft`: pull one live queue message, keep it in RabbitMQ, and write a draft markdown file for testing
+- `repo-post`: create an ad hoc technical post from selected repository files and a user prompt
 
 This gives you two deployment styles:
 
@@ -58,8 +59,20 @@ Important settings:
 - `BLOG_TARGET_DATE`: `today`, `yesterday`, or a `YYYY-MM-DD` date
 - `BLOG_DRAFTS_DIR`: output directory for test drafts, defaults to `hub/_drafts`
 - `BLOG_DRAFT_PREFIX`: filename prefix for draft runs
+- `BLOG_REPO_POST_PROMPT`: ad hoc technical post request for `repo-post` mode
+- `BLOG_REPO_POST_TITLE`: optional preferred title for `repo-post`
+- `BLOG_REPO_POST_PATHS`: comma-separated repo paths to inspect; required for `repo-post`
+- `BLOG_REPO_POST_DRAFT`: write repo posts to drafts by default for safety
+- `BLOG_REPO_POST_CATEGORIES`: front matter categories for repo posts, defaults to `Platform Update`
 - `GIT_PUBLISH_ENABLED`: enable commit and push after non-draft generation
 - `GIT_PAT`: GitHub personal access token used for HTTPS push
+
+`repo-post` has extra safety checks:
+
+- it only reads the paths listed in `BLOG_REPO_POST_PATHS`
+- it blocks common sensitive files such as `.env`, `*.pem`, `*.key`, `*.tfvars`, and token-like filenames
+- it only includes a small set of text-based source files and trims total prompt size
+- it redacts obvious secret/token patterns before sending context to the model
 
 ## Local development
 
@@ -108,6 +121,25 @@ For a live draft test through Docker:
 
 ```bash
 docker compose run --rm blog-poster draft
+```
+
+For an ad hoc repository explainer draft:
+
+```bash
+docker compose run --rm \
+  -e BLOG_POSTER_MODE=repo-post \
+  -e BLOG_REPO_POST_PROMPT="Create a blog post on the timelapse service explaining what it does and how it works." \
+  -e BLOG_REPO_POST_TITLE="How the Herb Hub timelapse service works" \
+  -e BLOG_REPO_POST_PATHS="services/timelapse-builder,scripts/make-timelapse.sh,docker/docker-compose.yml" \
+  blog-poster
+```
+
+To publish an approved repository post instead of writing a draft, set:
+
+```bash
+BLOG_REPO_POST_DRAFT=false
+GIT_PUBLISH_ENABLED=true
+GIT_PAT=github_pat_your_token_here
 ```
 
 To enable automatic push in Docker, provide a PAT in the environment before starting the container, for example:

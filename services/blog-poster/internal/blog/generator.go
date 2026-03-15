@@ -19,6 +19,7 @@ import (
 )
 
 var ErrNoSnapshots = errors.New("no snapshots found for target date")
+var errInvalidRepoPost = errors.New("repo-post model output did not match blog format")
 
 type markdownGenerator interface {
 	GenerateMarkdown(ctx context.Context, prompt string) (string, error)
@@ -95,6 +96,9 @@ func (g *Generator) GenerateDraft(ctx context.Context, day time.Time, snapshots 
 func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt, titleHint string, draft bool, categories string) (string, error) {
 	markdown, err := g.llm.GenerateMarkdownWithSystemPrompt(ctx, repoPostSystemPrompt(), prompt)
 	if err != nil {
+		return "", err
+	}
+	if err := validateRepoPostMarkdown(markdown); err != nil {
 		return "", err
 	}
 
@@ -338,7 +342,34 @@ func fallbackTitle(day time.Time) string {
 }
 
 func repoPostSystemPrompt() string {
-	return "You are writing a public Herb Hub 365 technical blog post. Use only the supplied repository excerpts as factual sources. Do not reveal secrets, credentials, tokens, or private configuration details. Write clear markdown beginning with a level-1 heading, then explain what the component does, how it works, and why it matters."
+	return "You are writing a public Herb Hub 365 technical blog post. Use only the supplied repository excerpts as factual sources. Do not reveal secrets, credentials, tokens, or private configuration details. Write clear markdown beginning with a level-1 heading, then explain what the component does, how it works, and why it matters. Do not critique the implementation, do not propose fixes, do not produce review notes, and do not include fenced code blocks."
+}
+
+func validateRepoPostMarkdown(markdown string) error {
+	trimmed := strings.TrimSpace(markdown)
+	if trimmed == "" {
+		return errInvalidRepoPost
+	}
+	lowered := strings.ToLower(trimmed)
+	invalidSnippets := []string{
+		"## issues found",
+		"corrected code",
+		"code review",
+		"critical bug",
+		"key fixes",
+		"issue | before | after",
+		"| issue |",
+		"```",
+	}
+	for _, snippet := range invalidSnippets {
+		if strings.Contains(lowered, snippet) {
+			return fmt.Errorf("%w: contains disallowed review-style output", errInvalidRepoPost)
+		}
+	}
+	if !strings.HasPrefix(trimmed, "#") {
+		return fmt.Errorf("%w: missing markdown title", errInvalidRepoPost)
+	}
+	return nil
 }
 
 func slugify(value string, maxWords int) string {

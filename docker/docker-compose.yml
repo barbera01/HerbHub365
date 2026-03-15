@@ -17,6 +17,10 @@ services:
       LLM_BASE_URL: ${BLOG_POSTER_LLM_BASE_URL:-http://ollama.la.home-cloud.uk}
       LLM_API_KEY: ${BLOG_POSTER_LLM_API_KEY:-}
       LLM_MODEL: ${BLOG_POSTER_LLM_MODEL:-qwen2.5:latest}
+      LLM_TEMPERATURE: ${BLOG_POSTER_LLM_TEMPERATURE:-0.6}
+      LLM_MAX_TOKENS: ${BLOG_POSTER_LLM_MAX_TOKENS:-900}
+      LLM_REQUEST_TIMEOUT: ${BLOG_POSTER_LLM_REQUEST_TIMEOUT:-5m}
+      LLM_DEBUG: ${BLOG_POSTER_LLM_DEBUG:-false}
       GIT_PUBLISH_ENABLED: ${BLOG_POSTER_GIT_PUBLISH_ENABLED:-false}
       GIT_REPO_DIR: /repo
       GIT_REMOTE_NAME: ${BLOG_POSTER_GIT_REMOTE_NAME:-origin}
@@ -117,4 +121,3 @@ services:
 networks:
   herbhub:
     external: true
-

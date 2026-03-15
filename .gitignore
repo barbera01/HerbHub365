@@ -86,6 +86,15 @@ docker-compose.override.yml
 *.tgz
 *.bak
 
+# Local Docker bind-mount data
+/docker/rabbitmq/
+/docker/dashboard/
+/docker/scheduler/data/
+/docker/scheduler/config/
+/docker/scheduler/plugins/
+/docker/traefik/acme.json
+/docker/traefik/*.log
+
 # ====================
 # Optional: Other Useful Ignored Files
 # ====================

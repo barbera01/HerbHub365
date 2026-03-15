@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Daily Greenhouse Update: March 15, 2026"
-date: 2026-03-15 20:00:00 +0000
+date: 2026-03-15 17:30:00 +0000
 categories: Herb Hub Update
 ---
 

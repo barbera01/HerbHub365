@@ -44,7 +44,9 @@ func (p *Publisher) PublishPost(ctx context.Context, postPath string, day time.T
 		return fmt.Errorf("generated post is outside git repo: %s", absolutePostPath)
 	}
 
-	if err := p.run(ctx, nil, "add generated post", "git", "-C", repoDir, "add", "--", relPath); err != nil {
+	gitEnv := p.gitEnv(repoDir)
+
+	if err := p.run(ctx, gitEnv, "add generated post", "git", "-C", repoDir, "add", "--", relPath); err != nil {
 		return err
 	}
 
@@ -57,7 +59,7 @@ func (p *Publisher) PublishPost(ctx context.Context, postPath string, day time.T
 	}
 
 	commitMessage := fmt.Sprintf("Add daily Herb Hub post for %s", day.Format("2006-01-02"))
-	if err := p.run(ctx, nil, "commit generated post",
+	if err := p.run(ctx, gitEnv, "commit generated post",
 		"git", "-C", repoDir,
 		"-c", "user.name="+p.config.AuthorName,
 		"-c", "user.email="+p.config.AuthorEmail,
@@ -80,6 +82,7 @@ func (p *Publisher) PublishPost(ctx context.Context, postPath string, day time.T
 
 func (p *Publisher) hasStagedChanges(ctx context.Context, repoDir, relPath string) (bool, error) {
 	cmd := exec.CommandContext(ctx, "git", "-C", repoDir, "diff", "--cached", "--quiet", "--", relPath)
+	cmd.Env = append(cmd.Environ(), p.gitEnv(repoDir)...)
 	if err := cmd.Run(); err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
 			return true, nil
@@ -94,7 +97,7 @@ func (p *Publisher) pushTarget(ctx context.Context, repoDir string) (string, []s
 		return "", nil, fmt.Errorf("GIT_PAT is required when GIT_PUBLISH_ENABLED=true")
 	}
 
-	remoteURL, err := p.capture(ctx, nil, "resolve git remote", "git", "-C", repoDir, "remote", "get-url", p.config.RemoteName)
+	remoteURL, err := p.capture(ctx, p.gitEnv(repoDir), "resolve git remote", "git", "-C", repoDir, "remote", "get-url", p.config.RemoteName)
 	if err != nil {
 		return "", nil, err
 	}
@@ -113,12 +116,22 @@ func (p *Publisher) pushTarget(ctx context.Context, repoDir string) (string, []s
 	token := base64.StdEncoding.EncodeToString([]byte("x-access-token:" + p.config.PAT))
 	authEnv := []string{
 		"GIT_TERMINAL_PROMPT=0",
-		"GIT_CONFIG_COUNT=1",
-		"GIT_CONFIG_KEY_0=" + headerKey,
-		"GIT_CONFIG_VALUE_0=AUTHORIZATION: basic " + token,
+		"GIT_CONFIG_COUNT=2",
+		"GIT_CONFIG_KEY_0=safe.directory",
+		"GIT_CONFIG_VALUE_0=" + repoDir,
+		"GIT_CONFIG_KEY_1=" + headerKey,
+		"GIT_CONFIG_VALUE_1=AUTHORIZATION: basic " + token,
 	}
 
 	return pushURL, authEnv, nil
+}
+
+func (p *Publisher) gitEnv(repoDir string) []string {
+	return []string{
+		"GIT_CONFIG_COUNT=1",
+		"GIT_CONFIG_KEY_0=safe.directory",
+		"GIT_CONFIG_VALUE_0=" + repoDir,
+	}
 }
 
 func normalizeGitHubURL(value string) (string, error) {

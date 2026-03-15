@@ -278,6 +278,10 @@ func formatPrompt(cfg config.Config, sources []Source) string {
 	builder.WriteString("- Do not mention or infer any secrets, credentials, tokens, or private configuration details.\n")
 	builder.WriteString("- Explain what the component does, how it works, and how it fits into the Herb Hub platform.\n")
 	builder.WriteString("- Favor clarity over code-level minutiae, but include enough implementation detail to be useful.\n\n")
+	builder.WriteString("- Write for readers of a public engineering blog, not for maintainers reviewing code.\n")
+	builder.WriteString("- Do not critique the implementation, propose fixes, list issues, or present corrected code.\n")
+	builder.WriteString("- Do not include fenced code blocks, diff-style output, or tables of issues.\n")
+	builder.WriteString("- Keep the article polished and explanatory, with prose-first sections.\n\n")
 	builder.WriteString("Repository excerpts:\n\n")
 	for _, source := range sources {
 		builder.WriteString("Path: ")

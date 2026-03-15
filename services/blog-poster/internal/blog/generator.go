@@ -159,6 +159,12 @@ func (g *Generator) writePost(day time.Time, title, body string, opts writeOptio
 
 func buildFrontMatter(cfg config.BlogConfig, day time.Time, title string) string {
 	var builder strings.Builder
+	publishedAt := time.Date(day.Year(), day.Month(), day.Day(), 20, 0, 0, 0, time.UTC)
+	now := time.Now().UTC().Truncate(time.Second)
+	if day.Year() == now.Year() && day.YearDay() == now.YearDay() && publishedAt.After(now) {
+		publishedAt = now
+	}
+
 	builder.WriteString("---\n")
 	builder.WriteString("layout: ")
 	builder.WriteString(cfg.Layout)
@@ -167,7 +173,7 @@ func buildFrontMatter(cfg config.BlogConfig, day time.Time, title string) string
 	builder.WriteString(strconvQuote(title))
 	builder.WriteString("\n")
 	builder.WriteString("date: ")
-	builder.WriteString(time.Date(day.Year(), day.Month(), day.Day(), 20, 0, 0, 0, time.UTC).Format("2006-01-02 15:04:05 -0700"))
+	builder.WriteString(publishedAt.Format("2006-01-02 15:04:05 -0700"))
 	builder.WriteString("\n")
 	builder.WriteString("categories: ")
 	builder.WriteString(cfg.Categories)

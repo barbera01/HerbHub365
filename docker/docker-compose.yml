@@ -1,5 +1,29 @@
 
 services:
+  blog-poster:
+    build:
+      context: ../services/blog-poster
+      dockerfile: dockerfile
+    container_name: blog-poster
+    restart: unless-stopped
+    networks:
+      - herbhub
+    environment:
+      BLOG_POSTER_MODE: ${BLOG_POSTER_MODE:-daemon}
+      BLOG_GENERATE_SCHEDULE: ${BLOG_GENERATE_SCHEDULE:-5 0 * * *}
+      BLOG_TARGET_DATE: ${BLOG_TARGET_DATE:-yesterday}
+      RABBITMQ_URL: ${BLOG_POSTER_RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672/}
+      RABBITMQ_QUEUE: ${BLOG_POSTER_RABBITMQ_QUEUE:-sensor.snapshots}
+      LLM_BASE_URL: ${BLOG_POSTER_LLM_BASE_URL:-http://ollama.la.home-cloud.uk}
+      LLM_API_KEY: ${BLOG_POSTER_LLM_API_KEY:-}
+      LLM_MODEL: ${BLOG_POSTER_LLM_MODEL:-qwen2.5:latest}
+      HUB_DIR: /workspace/hub
+      BLOG_POSTS_DIR: /workspace/hub/_posts
+      DATA_DIR: /data
+    volumes:
+      - ../hub:/workspace/hub
+      - ../services/blog-poster/data:/data
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -33,7 +57,10 @@ services:
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.services.dashboard.loadbalancer.server.port=3000"
-
+    
+      - "traefik.tcp.routers.rabbitmq-amqp.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp"
+      - "traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672"
 
   schedular:
     image: soulteary/cronicle:0.9.63
@@ -80,8 +107,6 @@ services:
 networks:
   herbhub:
     external: true
-
-
 
 
 

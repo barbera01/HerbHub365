@@ -17,11 +17,19 @@ services:
       LLM_BASE_URL: ${BLOG_POSTER_LLM_BASE_URL:-http://ollama.la.home-cloud.uk}
       LLM_API_KEY: ${BLOG_POSTER_LLM_API_KEY:-}
       LLM_MODEL: ${BLOG_POSTER_LLM_MODEL:-qwen2.5:latest}
-      HUB_DIR: /workspace/hub
-      BLOG_POSTS_DIR: /workspace/hub/_posts
+      GIT_PUBLISH_ENABLED: ${BLOG_POSTER_GIT_PUBLISH_ENABLED:-false}
+      GIT_REPO_DIR: /repo
+      GIT_REMOTE_NAME: ${BLOG_POSTER_GIT_REMOTE_NAME:-origin}
+      GIT_PUSH_BRANCH: ${BLOG_POSTER_GIT_PUSH_BRANCH:-main}
+      GIT_PAT: ${BLOG_POSTER_GIT_PAT:-}
+      GIT_AUTHOR_NAME: ${BLOG_POSTER_GIT_AUTHOR_NAME:-Herb Hub Bot}
+      GIT_AUTHOR_EMAIL: ${BLOG_POSTER_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
+      HUB_DIR: /repo/hub
+      BLOG_POSTS_DIR: /repo/hub/_posts
+      BLOG_DRAFTS_DIR: /repo/hub/_drafts
       DATA_DIR: /data
     volumes:
-      - ../hub:/workspace/hub
+      - ..:/repo
       - ../services/blog-poster/data:/data
 
   rabbitmq:
@@ -41,6 +49,10 @@ services:
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
+      - "traefik.tcp.routers.rabbitmq-amqp.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp"
+      - "traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672"
+
   dashboard:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: dashboard
@@ -58,9 +70,6 @@ services:
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.services.dashboard.loadbalancer.server.port=3000"
     
-      - "traefik.tcp.routers.rabbitmq-amqp.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp"
-      - "traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672"
 
   schedular:
     image: soulteary/cronicle:0.9.63
@@ -96,6 +105,7 @@ services:
       - "80:80"
       - "443:443"
       - "8080:8080"
+      - "5672:5672"
     networks:
       herbhub:
     volumes:
@@ -107,6 +117,4 @@ services:
 networks:
   herbhub:
     external: true
-
-
 

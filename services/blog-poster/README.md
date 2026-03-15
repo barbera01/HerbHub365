@@ -51,6 +51,7 @@ Important settings:
 - `LLM_BASE_URL`: model endpoint base URL; the client now supports both OpenAI-compatible `/v1/chat/completions` and native Ollama `/api/chat`
 - `LLM_API_KEY`: optional bearer token if your model gateway requires one
 - `LLM_MODEL`: model name exposed by the gateway
+- `LLM_TEMPERATURE`, `LLM_MAX_TOKENS`, and `LLM_REQUEST_TIMEOUT`: generation tuning controls
 - `LLM_DEBUG`: log raw model responses for troubleshooting
 - `HUB_DIR` and `BLOG_POSTS_DIR`: where the Jekyll site is mounted
 - `BLOG_GENERATE_SCHEDULE`: cron expression for internal scheduling
@@ -115,4 +116,14 @@ To enable automatic push in Docker, provide a PAT in the environment before star
 export BLOG_POSTER_GIT_PUBLISH_ENABLED=true
 export BLOG_POSTER_GIT_PAT=github_pat_your_token_here
 docker compose up -d blog-poster
+```
+
+Useful Docker-side LLM overrides in `docker/.env`:
+
+```bash
+BLOG_POSTER_LLM_MODEL=qwen3.5:latest
+BLOG_POSTER_LLM_MAX_TOKENS=1600
+BLOG_POSTER_LLM_TEMPERATURE=0.6
+BLOG_POSTER_LLM_REQUEST_TIMEOUT=5m
+BLOG_POSTER_LLM_DEBUG=false
 ```

@@ -32,6 +32,7 @@ type RabbitMQConfig struct {
 }
 
 type LLMConfig struct {
+	Provider        string
 	BaseURL         string
 	APIKey          string
 	Model           string
@@ -97,6 +98,7 @@ func Load() Config {
 			Prefetch:    getIntEnv("RABBITMQ_PREFETCH", 25),
 		},
 		LLM: LLMConfig{
+			Provider:        getEnv("LLM_PROVIDER", "auto"),
 			BaseURL:         getEnv("LLM_BASE_URL", "http://ollama.la.home-cloud.uk"),
 			APIKey:          os.Getenv("LLM_API_KEY"),
 			Model:           getEnv("LLM_MODEL", "qwen2.5:latest"),

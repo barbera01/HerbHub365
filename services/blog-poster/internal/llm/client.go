@@ -76,20 +76,29 @@ func (c *Client) GenerateMarkdown(ctx context.Context, prompt string) (string, e
 }
 
 func (c *Client) GenerateMarkdownWithSystemPrompt(ctx context.Context, systemPrompt, prompt string) (string, error) {
-	content, err := c.generateOpenAICompatible(ctx, systemPrompt, prompt)
-	if err == nil {
+	switch strings.ToLower(strings.TrimSpace(c.config.Provider)) {
+	case "", "auto":
+		content, err := c.generateOpenAICompatible(ctx, systemPrompt, prompt)
+		if err == nil {
+			return content, nil
+		}
+		if !shouldTryOllamaFallback(err) {
+			return "", err
+		}
+
+		content, ollamaErr := c.generateOllamaNative(ctx, systemPrompt, prompt)
+		if ollamaErr != nil {
+			return "", fmt.Errorf("openai-compatible call failed: %v; ollama fallback failed: %w", err, ollamaErr)
+		}
+
 		return content, nil
+	case "ollama":
+		return c.generateOllamaNative(ctx, systemPrompt, prompt)
+	case "openai", "openai-compatible":
+		return c.generateOpenAICompatible(ctx, systemPrompt, prompt)
+	default:
+		return "", fmt.Errorf("unsupported LLM_PROVIDER %q", c.config.Provider)
 	}
-	if !shouldTryOllamaFallback(err) {
-		return "", err
-	}
-
-	content, ollamaErr := c.generateOllamaNative(ctx, systemPrompt, prompt)
-	if ollamaErr != nil {
-		return "", fmt.Errorf("openai-compatible call failed: %v; ollama fallback failed: %w", err, ollamaErr)
-	}
-
-	return content, nil
 }
 
 func (c *Client) generateOpenAICompatible(ctx context.Context, systemPrompt, prompt string) (string, error) {

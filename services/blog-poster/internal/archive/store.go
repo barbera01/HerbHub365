@@ -1,7 +1,7 @@
 package archive
 
 import (
-	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -39,7 +39,12 @@ func (s *Store) Append(snapshot model.Snapshot, body []byte) error {
 	}
 	defer file.Close()
 
-	if _, err := file.Write(append(body, '\n')); err != nil {
+	compactBody, err := compactJSON(body)
+	if err != nil {
+		return err
+	}
+
+	if _, err := file.Write(append(compactBody, '\n')); err != nil {
 		return fmt.Errorf("append archive file: %w", err)
 	}
 
@@ -59,16 +64,11 @@ func (s *Store) Load(day time.Time) ([]model.Snapshot, error) {
 
 	seen := make(map[string]struct{})
 	var snapshots []model.Snapshot
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Bytes()
-		if len(line) == 0 {
-			continue
-		}
-
+	decoder := json.NewDecoder(file)
+	for decoder.More() {
 		var snapshot model.Snapshot
-		if err := json.Unmarshal(line, &snapshot); err != nil {
-			return nil, fmt.Errorf("decode archive line: %w", err)
+		if err := decoder.Decode(&snapshot); err != nil {
+			return nil, fmt.Errorf("decode archived snapshot: %w", err)
 		}
 
 		key := snapshot.MessageID
@@ -80,9 +80,6 @@ func (s *Store) Load(day time.Time) ([]model.Snapshot, error) {
 		}
 		seen[key] = struct{}{}
 		snapshots = append(snapshots, snapshot)
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("scan archive file: %w", err)
 	}
 
 	sort.Slice(snapshots, func(i, j int) bool {
@@ -105,4 +102,18 @@ func snapshotDay(snapshot model.Snapshot) time.Time {
 		timestamp = time.Now().UTC()
 	}
 	return time.Date(timestamp.Year(), timestamp.Month(), timestamp.Day(), 0, 0, 0, 0, time.UTC)
+}
+
+func compactJSON(body []byte) ([]byte, error) {
+	trimmed := bytes.TrimSpace(body)
+	if len(trimmed) == 0 {
+		return nil, fmt.Errorf("empty snapshot body")
+	}
+
+	var compact bytes.Buffer
+	if err := json.Compact(&compact, trimmed); err != nil {
+		return nil, fmt.Errorf("compact snapshot json: %w", err)
+	}
+
+	return compact.Bytes(), nil
 }

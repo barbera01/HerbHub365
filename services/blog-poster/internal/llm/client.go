@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"HerbHub365/services/blog-poster/internal/config"
@@ -24,6 +25,7 @@ type chatRequest struct {
 	Messages    []chatMessage `json:"messages"`
 	Temperature float64       `json:"temperature,omitempty"`
 	MaxTokens   int           `json:"max_tokens,omitempty"`
+	Think       *bool         `json:"think,omitempty"`
 }
 
 type chatMessage struct {
@@ -47,6 +49,7 @@ type ollamaRequest struct {
 	Stream    bool          `json:"stream"`
 	Options   ollamaOptions `json:"options,omitempty"`
 	KeepAlive string        `json:"keep_alive,omitempty"`
+	Think     *bool         `json:"think,omitempty"`
 }
 
 type ollamaOptions struct {
@@ -94,6 +97,7 @@ func (c *Client) generateOpenAICompatible(ctx context.Context, prompt string) (s
 		},
 		Temperature: c.config.Temperature,
 		MaxTokens:   c.config.MaxTokens,
+		Think:       boolPtr(false),
 	})
 	if err != nil {
 		return "", err
@@ -134,13 +138,11 @@ func (c *Client) generateOpenAICompatible(ctx context.Context, prompt string) (s
 		return "", fmt.Errorf("llm returned no choices")
 	}
 
-	content := flattenContent(parsed.Choices[0].Message.Content)
-	if strings.TrimSpace(content) == "" {
-		content = strings.TrimSpace(parsed.Choices[0].Message.ReasoningContent)
-	}
-	if strings.TrimSpace(content) == "" {
-		content = strings.TrimSpace(parsed.Choices[0].Message.Reasoning)
-	}
+	content := extractMarkdownContent(
+		parsed.Choices[0].Message.Content,
+		parsed.Choices[0].Message.ReasoningContent,
+		parsed.Choices[0].Message.Reasoning,
+	)
 	if strings.TrimSpace(content) == "" {
 		return "", fmt.Errorf("llm returned empty content")
 	}
@@ -161,6 +163,7 @@ func (c *Client) generateOllamaNative(ctx context.Context, prompt string) (strin
 			NumPredict:  c.config.MaxTokens,
 		},
 		KeepAlive: "5m",
+		Think:     boolPtr(false),
 	})
 	if err != nil {
 		return "", err
@@ -198,10 +201,7 @@ func (c *Client) generateOllamaNative(ctx context.Context, prompt string) (strin
 		return "", fmt.Errorf("decode ollama response: %w", err)
 	}
 
-	content := strings.TrimSpace(parsed.Message.Content)
-	if content == "" {
-		content = strings.TrimSpace(parsed.Message.Thinking)
-	}
+	content := extractMarkdownContent(parsed.Message.Content, parsed.Message.Thinking)
 	if content == "" {
 		return "", fmt.Errorf("ollama returned empty content")
 	}
@@ -273,4 +273,98 @@ func truncateForLog(body []byte) string {
 		return text
 	}
 	return text[:max] + "..."
+}
+
+func extractMarkdownContent(primary any, fallbacks ...string) string {
+	content := strings.TrimSpace(flattenContent(primary))
+	if content != "" && !looksLikeThinking(content) {
+		return content
+	}
+
+	for _, fallback := range fallbacks {
+		fallback = strings.TrimSpace(fallback)
+		if fallback == "" {
+			continue
+		}
+		if !looksLikeThinking(fallback) {
+			return fallback
+		}
+		if extracted := extractDraftFromReasoning(fallback); extracted != "" {
+			return extracted
+		}
+	}
+
+	if content != "" {
+		if extracted := extractDraftFromReasoning(content); extracted != "" {
+			return extracted
+		}
+	}
+
+	return ""
+}
+
+func looksLikeThinking(value string) bool {
+	trimmed := strings.TrimSpace(strings.ToLower(value))
+	return strings.HasPrefix(trimmed, "thinking process:") || strings.Contains(trimmed, "analyze the request:") || strings.Contains(trimmed, "drafting - paragraph by paragraph:")
+}
+
+func extractDraftFromReasoning(value string) string {
+	lines := strings.Split(strings.ReplaceAll(value, "\r\n", "\n"), "\n")
+	headingPattern := regexp.MustCompile(`^\s*(?:[-*]\s*)?(?:draft:\s*)?#\s+(.+?)\s*$`)
+	titlePattern := regexp.MustCompile(`^\s*(?:[-*]\s*)?(?:\*+)?title(?:\*+)?:\s*(.+?)\s*$`)
+	draftPattern := regexp.MustCompile(`^\s*(?:[-*]\s*)?draft:\s*(.+?)\s*$`)
+
+	title := ""
+	paragraphs := make([]string, 0, 4)
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			continue
+		}
+
+		if matches := headingPattern.FindStringSubmatch(trimmed); len(matches) == 2 && title == "" {
+			title = strings.TrimSpace(matches[1])
+			continue
+		}
+
+		if matches := titlePattern.FindStringSubmatch(trimmed); len(matches) == 2 && title == "" {
+			candidate := strings.TrimSpace(matches[1])
+			candidate = strings.Trim(candidate, "\"'")
+			candidate = strings.TrimPrefix(candidate, "#")
+			candidate = strings.TrimSpace(candidate)
+			if candidate != "" && !strings.Contains(strings.ToLower(candidate), "needs to be") {
+				title = candidate
+			}
+			continue
+		}
+
+		if matches := draftPattern.FindStringSubmatch(trimmed); len(matches) == 2 {
+			paragraph := cleanDraftLine(matches[1])
+			if paragraph != "" {
+				paragraphs = append(paragraphs, paragraph)
+			}
+		}
+	}
+
+	if len(paragraphs) == 0 {
+		return ""
+	}
+
+	body := strings.Join(paragraphs, "\n\n")
+	if title != "" {
+		return "# " + title + "\n\n" + body
+	}
+	return body
+}
+
+func cleanDraftLine(value string) string {
+	trimmed := strings.TrimSpace(value)
+	trimmed = strings.TrimPrefix(trimmed, "*")
+	trimmed = strings.TrimSpace(trimmed)
+	return trimmed
+}
+
+func boolPtr(value bool) *bool {
+	return &value
 }

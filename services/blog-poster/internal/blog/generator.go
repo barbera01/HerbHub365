@@ -22,6 +22,7 @@ var ErrNoSnapshots = errors.New("no snapshots found for target date")
 
 type markdownGenerator interface {
 	GenerateMarkdown(ctx context.Context, prompt string) (string, error)
+	GenerateMarkdownWithSystemPrompt(ctx context.Context, systemPrompt, prompt string) (string, error)
 }
 
 type Generator struct {
@@ -32,7 +33,8 @@ type Generator struct {
 }
 
 type writeOptions struct {
-	draft bool
+	draft      bool
+	categories string
 }
 
 type measurement struct {
@@ -88,6 +90,20 @@ func (g *Generator) GenerateDraft(ctx context.Context, day time.Time, snapshots 
 		return "", ErrNoSnapshots
 	}
 	return g.generateFromSnapshots(ctx, day, snapshots, writeOptions{draft: true})
+}
+
+func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt, titleHint string, draft bool, categories string) (string, error) {
+	markdown, err := g.llm.GenerateMarkdownWithSystemPrompt(ctx, repoPostSystemPrompt(), prompt)
+	if err != nil {
+		return "", err
+	}
+
+	title, body := splitMarkdown(markdown, day)
+	if strings.TrimSpace(titleHint) != "" && title == fallbackTitle(day) {
+		title = strings.TrimSpace(titleHint)
+	}
+
+	return g.writePost(day, title, body, writeOptions{draft: draft, categories: categories})
 }
 
 func (g *Generator) generateFromSnapshots(ctx context.Context, day time.Time, snapshots []model.Snapshot, opts writeOptions) (string, error) {
@@ -149,7 +165,7 @@ func (g *Generator) writePost(day time.Time, title, body string, opts writeOptio
 		return "", err
 	}
 
-	content := buildFrontMatter(g.blogConfig, day, title) + strings.TrimSpace(body) + "\n"
+	content := buildFrontMatter(g.blogConfig, day, title, opts.categories) + strings.TrimSpace(body) + "\n"
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		return "", err
 	}
@@ -157,12 +173,15 @@ func (g *Generator) writePost(day time.Time, title, body string, opts writeOptio
 	return path, nil
 }
 
-func buildFrontMatter(cfg config.BlogConfig, day time.Time, title string) string {
+func buildFrontMatter(cfg config.BlogConfig, day time.Time, title, categories string) string {
 	var builder strings.Builder
 	publishedAt := time.Date(day.Year(), day.Month(), day.Day(), 20, 0, 0, 0, time.UTC)
 	now := time.Now().UTC().Truncate(time.Second)
 	if day.Year() == now.Year() && day.YearDay() == now.YearDay() && publishedAt.After(now) {
 		publishedAt = now
+	}
+	if strings.TrimSpace(categories) == "" {
+		categories = cfg.Categories
 	}
 
 	builder.WriteString("---\n")
@@ -176,7 +195,7 @@ func buildFrontMatter(cfg config.BlogConfig, day time.Time, title string) string
 	builder.WriteString(publishedAt.Format("2006-01-02 15:04:05 -0700"))
 	builder.WriteString("\n")
 	builder.WriteString("categories: ")
-	builder.WriteString(cfg.Categories)
+	builder.WriteString(categories)
 	builder.WriteString("\n")
 	if cfg.Author != "" {
 		builder.WriteString("author: ")
@@ -316,6 +335,10 @@ func splitMarkdown(markdown string, day time.Time) (string, string) {
 
 func fallbackTitle(day time.Time) string {
 	return fmt.Sprintf("Daily Herb Hub Update for %s", day.Format("January 2, 2006"))
+}
+
+func repoPostSystemPrompt() string {
+	return "You are writing a public Herb Hub 365 technical blog post. Use only the supplied repository excerpts as factual sources. Do not reveal secrets, credentials, tokens, or private configuration details. Write clear markdown beginning with a level-1 heading, then explain what the component does, how it works, and why it matters."
 }
 
 func slugify(value string, maxWords int) string {

@@ -31,10 +31,39 @@ services:
       HUB_DIR: /repo/hub
       BLOG_POSTS_DIR: /repo/hub/_posts
       BLOG_DRAFTS_DIR: /repo/hub/_drafts
+      BLOG_REPO_POST_PROMPT: ${BLOG_REPO_POST_PROMPT:-}
+      BLOG_REPO_POST_TITLE: ${BLOG_REPO_POST_TITLE:-}
+      BLOG_REPO_POST_PATHS: ${BLOG_REPO_POST_PATHS:-}
+      BLOG_REPO_POST_DRAFT: ${BLOG_REPO_POST_DRAFT:-true}
+      BLOG_REPO_POST_CATEGORIES: ${BLOG_REPO_POST_CATEGORIES:-Platform Update}
+      BLOG_REPO_POST_MAX_FILES: ${BLOG_REPO_POST_MAX_FILES:-12}
+      BLOG_REPO_POST_MAX_FILE_BYTES: ${BLOG_REPO_POST_MAX_FILE_BYTES:-12000}
+      BLOG_REPO_POST_MAX_TOTAL_BYTES: ${BLOG_REPO_POST_MAX_TOTAL_BYTES:-48000}
       DATA_DIR: /data
     volumes:
       - ..:/repo
       - ../services/blog-poster/data:/data
+
+  timelapse-builder:
+    build:
+      context: ..
+      dockerfile: services/timelapse-builder/dockerfile
+    container_name: timelapse-builder
+    environment:
+      TIMELAPSE_MODE: ${TIMELAPSE_MODE:-once}
+      TIMELAPSE_INTERVAL_SECONDS: ${TIMELAPSE_INTERVAL_SECONDS:-3600}
+      TIMELAPSE_FROM: ${TIMELAPSE_FROM:-}
+      TIMELAPSE_TO: ${TIMELAPSE_TO:-}
+      INPUT_DIR: /input
+      OUTPUT_DIR: /output
+      OUTPUT_NAME: ${TIMELAPSE_OUTPUT_NAME:-}
+      INPUT_FPS: ${TIMELAPSE_INPUT_FPS:-8}
+      OUTPUT_FPS: ${TIMELAPSE_OUTPUT_FPS:-30}
+      CRF: ${TIMELAPSE_CRF:-23}
+      MIN_BRIGHTNESS: ${TIMELAPSE_MIN_BRIGHTNESS:-0}
+    volumes:
+      - ${TIMELAPSE_INPUT_PATH:-/home/andy/Pictures/timelapse}:/input:ro
+      - ${TIMELAPSE_OUTPUT_PATH:-../services/timelapse-builder/output}:/output
 
   rabbitmq:
     image: rabbitmq:3-management

@@ -72,7 +72,11 @@ func NewClient(cfg config.LLMConfig) *Client {
 }
 
 func (c *Client) GenerateMarkdown(ctx context.Context, prompt string) (string, error) {
-	content, err := c.generateOpenAICompatible(ctx, prompt)
+	return c.GenerateMarkdownWithSystemPrompt(ctx, c.config.SystemPrompt, prompt)
+}
+
+func (c *Client) GenerateMarkdownWithSystemPrompt(ctx context.Context, systemPrompt, prompt string) (string, error) {
+	content, err := c.generateOpenAICompatible(ctx, systemPrompt, prompt)
 	if err == nil {
 		return content, nil
 	}
@@ -80,7 +84,7 @@ func (c *Client) GenerateMarkdown(ctx context.Context, prompt string) (string, e
 		return "", err
 	}
 
-	content, ollamaErr := c.generateOllamaNative(ctx, prompt)
+	content, ollamaErr := c.generateOllamaNative(ctx, systemPrompt, prompt)
 	if ollamaErr != nil {
 		return "", fmt.Errorf("openai-compatible call failed: %v; ollama fallback failed: %w", err, ollamaErr)
 	}
@@ -88,11 +92,11 @@ func (c *Client) GenerateMarkdown(ctx context.Context, prompt string) (string, e
 	return content, nil
 }
 
-func (c *Client) generateOpenAICompatible(ctx context.Context, prompt string) (string, error) {
+func (c *Client) generateOpenAICompatible(ctx context.Context, systemPrompt, prompt string) (string, error) {
 	body, err := json.Marshal(chatRequest{
 		Model: c.config.Model,
 		Messages: []chatMessage{
-			{Role: "system", Content: c.config.SystemPrompt},
+			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: prompt},
 		},
 		Temperature: c.config.Temperature,
@@ -150,11 +154,11 @@ func (c *Client) generateOpenAICompatible(ctx context.Context, prompt string) (s
 	return strings.TrimSpace(content), nil
 }
 
-func (c *Client) generateOllamaNative(ctx context.Context, prompt string) (string, error) {
+func (c *Client) generateOllamaNative(ctx context.Context, systemPrompt, prompt string) (string, error) {
 	body, err := json.Marshal(ollamaRequest{
 		Model: c.config.Model,
 		Messages: []chatMessage{
-			{Role: "system", Content: c.config.SystemPrompt},
+			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: prompt},
 		},
 		Stream: false,

@@ -49,6 +49,7 @@ Important settings:
 
 - `RABBITMQ_URL`: your AMQP connection string
 - `RABBITMQ_QUEUE`: defaults to `sensor.snapshots`
+- `LLM_PROVIDER`: `auto` (default), `ollama`, or `openai-compatible`
 - `LLM_BASE_URL`: model endpoint base URL; the client now supports both OpenAI-compatible `/v1/chat/completions` and native Ollama `/api/chat`
 - `LLM_API_KEY`: optional bearer token if your model gateway requires one
 - `LLM_MODEL`: model name exposed by the gateway
@@ -90,7 +91,7 @@ go run ./cmd/blog-poster draft
 
 This reads a single message from `sensor.snapshots`, asks the model for a post, then writes a file like `hub/_drafts/draft-2026-03-15-some-title.markdown`. The RabbitMQ message is requeued so you can test repeatedly without consuming it.
 
-If your model host is native Ollama rather than OpenAI-compatible, set `LLM_BASE_URL` to the Ollama host root such as `http://your-host:11434` or the routed base URL. The client will try `/v1/chat/completions` first and fall back to `/api/chat` automatically.
+If your model host is native Ollama rather than OpenAI-compatible, set `LLM_BASE_URL` to the Ollama host root such as `http://your-host:11434` or the routed base URL. By default the client tries `/v1/chat/completions` first and falls back to `/api/chat`. If your host is slow to load models or you want to skip the double-wait behavior, set `LLM_PROVIDER=ollama`.
 
 Build locally:
 
@@ -158,4 +159,5 @@ BLOG_POSTER_LLM_MAX_TOKENS=1600
 BLOG_POSTER_LLM_TEMPERATURE=0.6
 BLOG_POSTER_LLM_REQUEST_TIMEOUT=5m
 BLOG_POSTER_LLM_DEBUG=false
+BLOG_POSTER_LLM_PROVIDER=ollama
 ```

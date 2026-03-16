@@ -83,7 +83,7 @@ func runDaemon(ctx context.Context, cfg config.Config, store *archive.Store, gen
 			return
 		}
 
-		path, genErr := generator.Generate(jobCtx, targetDate)
+		result, genErr := generator.Generate(jobCtx, targetDate)
 		if genErr != nil {
 			if errors.Is(genErr, blog.ErrNoSnapshots) {
 				log.Printf("generate skipped for %s: %v", targetDate.Format("2006-01-02"), genErr)
@@ -93,12 +93,12 @@ func runDaemon(ctx context.Context, cfg config.Config, store *archive.Store, gen
 			return
 		}
 
-		if publishErr := publisher.PublishPost(jobCtx, path, targetDate); publishErr != nil {
+		if publishErr := publisher.PublishPost(jobCtx, result, targetDate); publishErr != nil {
 			log.Printf("publish failed for %s: %v", targetDate.Format("2006-01-02"), publishErr)
 			return
 		}
 
-		log.Printf("generated post %s", path)
+		log.Printf("generated post %s", result.Path)
 	})
 	if err != nil {
 		return fmt.Errorf("configure scheduler: %w", err)
@@ -130,16 +130,16 @@ func runGenerate(ctx context.Context, cfg config.Config, generator *blog.Generat
 	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
 	defer cancel()
 
-	path, err := generator.Generate(jobCtx, targetDate)
+	result, err := generator.Generate(jobCtx, targetDate)
 	if err != nil {
 		return err
 	}
 
-	if err := publisher.PublishPost(jobCtx, path, targetDate); err != nil {
+	if err := publisher.PublishPost(jobCtx, result, targetDate); err != nil {
 		return err
 	}
 
-	log.Printf("generated post %s", path)
+	log.Printf("generated post %s", result.Path)
 	return nil
 }
 
@@ -167,12 +167,12 @@ func runDraft(ctx context.Context, cfg config.Config, generator *blog.Generator)
 	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
 	defer cancel()
 
-	path, err := generator.GenerateDraft(jobCtx, targetDate, []model.Snapshot{*snapshot})
+	result, err := generator.GenerateDraft(jobCtx, targetDate, []model.Snapshot{*snapshot})
 	if err != nil {
 		return err
 	}
 
-	log.Printf("generated draft %s", path)
+	log.Printf("generated draft %s", result.Path)
 	return nil
 }
 
@@ -190,22 +190,22 @@ func runRepoPost(ctx context.Context, cfg config.Config, generator *blog.Generat
 		return err
 	}
 
-	path, err := generator.GenerateRepoPost(jobCtx, targetDate, request.Prompt, cfg.RepoPost.Title, cfg.RepoPost.Draft, cfg.RepoPost.Categories)
+	result, err := generator.GenerateRepoPost(jobCtx, targetDate, request.Prompt, cfg.RepoPost.Title, cfg.RepoPost.Draft, cfg.RepoPost.Categories)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("repo-post used sources: %s", strings.Join(request.SourcePaths, ", "))
 	if cfg.RepoPost.Draft {
-		log.Printf("generated repo post draft %s", path)
+		log.Printf("generated repo post draft %s", result.Path)
 		return nil
 	}
 
-	if err := publisher.PublishPost(jobCtx, path, targetDate); err != nil {
+	if err := publisher.PublishPost(jobCtx, result, targetDate); err != nil {
 		return err
 	}
 
-	log.Printf("generated repo post %s", path)
+	log.Printf("generated repo post %s", result.Path)
 	return nil
 }
 

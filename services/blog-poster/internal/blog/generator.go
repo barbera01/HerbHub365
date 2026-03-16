@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -31,6 +33,11 @@ type Generator struct {
 	llmConfig  config.LLMConfig
 	store      *archive.Store
 	llm        markdownGenerator
+}
+
+type PostResult struct {
+	Path       string
+	AssetPaths []string
 }
 
 type writeOptions struct {
@@ -75,31 +82,31 @@ func NewGenerator(blogCfg config.BlogConfig, llmCfg config.LLMConfig, store *arc
 	return &Generator{blogConfig: blogCfg, llmConfig: llmCfg, store: store, llm: llm}
 }
 
-func (g *Generator) Generate(ctx context.Context, day time.Time) (string, error) {
+func (g *Generator) Generate(ctx context.Context, day time.Time) (PostResult, error) {
 	snapshots, err := g.store.Load(day)
 	if err != nil {
-		return "", err
+		return PostResult{}, err
 	}
 	if len(snapshots) == 0 {
-		return "", ErrNoSnapshots
+		return PostResult{}, ErrNoSnapshots
 	}
 	return g.generateFromSnapshots(ctx, day, snapshots, writeOptions{})
 }
 
-func (g *Generator) GenerateDraft(ctx context.Context, day time.Time, snapshots []model.Snapshot) (string, error) {
+func (g *Generator) GenerateDraft(ctx context.Context, day time.Time, snapshots []model.Snapshot) (PostResult, error) {
 	if len(snapshots) == 0 {
-		return "", ErrNoSnapshots
+		return PostResult{}, ErrNoSnapshots
 	}
 	return g.generateFromSnapshots(ctx, day, snapshots, writeOptions{draft: true})
 }
 
-func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt, titleHint string, draft bool, categories string) (string, error) {
+func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt, titleHint string, draft bool, categories string) (PostResult, error) {
 	markdown, err := g.llm.GenerateMarkdownWithSystemPrompt(ctx, repoPostSystemPrompt(), prompt)
 	if err != nil {
-		return "", err
+		return PostResult{}, err
 	}
 	if err := validateRepoPostMarkdown(markdown); err != nil {
-		return "", err
+		return PostResult{}, err
 	}
 
 	title, body := splitMarkdown(markdown, day)
@@ -110,20 +117,20 @@ func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt,
 	return g.writePost(day, title, body, writeOptions{draft: draft, categories: categories})
 }
 
-func (g *Generator) generateFromSnapshots(ctx context.Context, day time.Time, snapshots []model.Snapshot, opts writeOptions) (string, error) {
+func (g *Generator) generateFromSnapshots(ctx context.Context, day time.Time, snapshots []model.Snapshot, opts writeOptions) (PostResult, error) {
 	summaryPayload, err := buildSummary(day, snapshots)
 	if err != nil {
-		return "", err
+		return PostResult{}, err
 	}
 
 	prompt, err := g.buildPrompt(summaryPayload)
 	if err != nil {
-		return "", err
+		return PostResult{}, err
 	}
 
 	markdown, err := g.llm.GenerateMarkdown(ctx, prompt)
 	if err != nil {
-		return "", err
+		return PostResult{}, err
 	}
 
 	title, body := splitMarkdown(markdown, day)
@@ -140,7 +147,7 @@ func (g *Generator) buildPrompt(summaryPayload []byte) (string, error) {
 	), nil
 }
 
-func (g *Generator) writePost(day time.Time, title, body string, opts writeOptions) (string, error) {
+func (g *Generator) writePost(day time.Time, title, body string, opts writeOptions) (PostResult, error) {
 	slug := slugify(title, g.blogConfig.SlugMaxWords)
 	if slug == "" {
 		slug = day.Format("2006-01-02")
@@ -159,22 +166,94 @@ func (g *Generator) writePost(day time.Time, title, body string, opts writeOptio
 	path := filepath.Join(baseDir, fileName)
 	if !g.blogConfig.Overwrite {
 		if _, err := os.Stat(path); err == nil {
-			return "", fmt.Errorf("post already exists: %s", path)
+			return PostResult{}, fmt.Errorf("post already exists: %s", path)
 		} else if !os.IsNotExist(err) {
-			return "", err
+			return PostResult{}, err
 		}
 	}
 
 	if err := os.MkdirAll(baseDir, 0o755); err != nil {
-		return "", err
+		return PostResult{}, err
 	}
 
-	content := buildFrontMatter(g.blogConfig, day, title, opts.categories) + strings.TrimSpace(body) + "\n"
+	assetPaths := []string{}
+	trimmedBody := strings.TrimSpace(body)
+	if g.blogConfig.IncludeDayImage {
+		imageMarkdown, assetPath, err := g.prepareDayImage(day, slug)
+		if err != nil {
+			return PostResult{}, err
+		}
+		if imageMarkdown != "" {
+			trimmedBody = imageMarkdown + "\n\n" + trimmedBody
+			assetPaths = append(assetPaths, assetPath)
+		}
+	}
+
+	content := buildFrontMatter(g.blogConfig, day, title, opts.categories) + trimmedBody + "\n"
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-		return "", err
+		return PostResult{}, err
 	}
 
-	return path, nil
+	return PostResult{Path: path, AssetPaths: assetPaths}, nil
+}
+
+func (g *Generator) prepareDayImage(day time.Time, slug string) (string, string, error) {
+	if strings.TrimSpace(g.blogConfig.ImageSourceDir) == "" {
+		return "", "", nil
+	}
+	dayDir := filepath.Join(g.blogConfig.ImageSourceDir, day.Format("2006-01-02"))
+	entries, err := os.ReadDir(dayDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", "", nil
+		}
+		return "", "", err
+	}
+	images := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		ext := strings.ToLower(filepath.Ext(entry.Name()))
+		switch ext {
+		case ".jpg", ".jpeg", ".png", ".webp":
+			images = append(images, filepath.Join(dayDir, entry.Name()))
+		}
+	}
+	if len(images) == 0 {
+		return "", "", nil
+	}
+	sort.Strings(images)
+	selected := images[rand.New(rand.NewSource(time.Now().UnixNano())).Intn(len(images))]
+	if err := os.MkdirAll(g.blogConfig.ImageOutputDir, 0o755); err != nil {
+		return "", "", err
+	}
+	ext := strings.ToLower(filepath.Ext(selected))
+	assetName := fmt.Sprintf("%s-%s%s", day.Format("2006-01-02"), slug, ext)
+	assetPath := filepath.Join(g.blogConfig.ImageOutputDir, assetName)
+	if err := copyFile(selected, assetPath); err != nil {
+		return "", "", err
+	}
+	publicPath := strings.TrimRight(g.blogConfig.ImagePublicPath, "/") + "/" + assetName
+	alt := fmt.Sprintf("Timelapse image for %s", day.Format("January 2, 2006"))
+	return fmt.Sprintf("![%s](%s)", alt, publicPath), assetPath, nil
+}
+
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = out.Close() }()
+	if _, err := io.Copy(out, in); err != nil {
+		return err
+	}
+	return out.Close()
 }
 
 func buildFrontMatter(cfg config.BlogConfig, day time.Time, title, categories string) string {

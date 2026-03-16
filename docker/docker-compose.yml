@@ -40,10 +40,15 @@ services:
       BLOG_REPO_POST_MAX_FILES: ${BLOG_REPO_POST_MAX_FILES:-12}
       BLOG_REPO_POST_MAX_FILE_BYTES: ${BLOG_REPO_POST_MAX_FILE_BYTES:-12000}
       BLOG_REPO_POST_MAX_TOTAL_BYTES: ${BLOG_REPO_POST_MAX_TOTAL_BYTES:-48000}
+      BLOG_INCLUDE_DAY_IMAGE: ${BLOG_INCLUDE_DAY_IMAGE:-false}
+      BLOG_IMAGE_SOURCE_DIR: /timelapse
+      BLOG_IMAGE_OUTPUT_DIR: /repo/hub/assets/images/blog
+      BLOG_IMAGE_PUBLIC_PATH: /assets/images/blog
       DATA_DIR: /data
     volumes:
       - ..:/repo
       - ../services/blog-poster/data:/data
+      - ${BLOG_POSTER_IMAGE_SOURCE_PATH:-/mnt/hh01-timelapse}:/timelapse:ro
 
   timelapse-builder:
     build:

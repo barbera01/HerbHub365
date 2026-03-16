@@ -47,15 +47,19 @@ type LLMConfig struct {
 }
 
 type BlogConfig struct {
-	HubDir       string
-	PostsDir     string
-	DraftsDir    string
-	DraftPrefix  string
-	Layout       string
-	Categories   string
-	Author       string
-	Overwrite    bool
-	SlugMaxWords int
+	HubDir          string
+	PostsDir        string
+	DraftsDir       string
+	DraftPrefix     string
+	Layout          string
+	Categories      string
+	Author          string
+	Overwrite       bool
+	SlugMaxWords    int
+	ImageSourceDir  string
+	ImageOutputDir  string
+	ImagePublicPath string
+	IncludeDayImage bool
 }
 
 type GitConfig struct {
@@ -112,15 +116,19 @@ func Load() Config {
 			PromptSiteURL:   getEnv("PROMPT_SITE_URL", "https://www.herbhub365.com"),
 		},
 		Blog: BlogConfig{
-			HubDir:       hubDir,
-			PostsDir:     postsDir,
-			DraftsDir:    getEnv("BLOG_DRAFTS_DIR", filepath.Join(hubDir, "_drafts")),
-			DraftPrefix:  getEnv("BLOG_DRAFT_PREFIX", "draft"),
-			Layout:       getEnv("BLOG_LAYOUT", "post"),
-			Categories:   getEnv("BLOG_CATEGORIES", "Herb Hub Update"),
-			Author:       os.Getenv("BLOG_AUTHOR"),
-			Overwrite:    getBoolEnv("BLOG_OVERWRITE", false),
-			SlugMaxWords: getIntEnv("BLOG_SLUG_MAX_WORDS", 8),
+			HubDir:          hubDir,
+			PostsDir:        postsDir,
+			DraftsDir:       getEnv("BLOG_DRAFTS_DIR", filepath.Join(hubDir, "_drafts")),
+			DraftPrefix:     getEnv("BLOG_DRAFT_PREFIX", "draft"),
+			Layout:          getEnv("BLOG_LAYOUT", "post"),
+			Categories:      getEnv("BLOG_CATEGORIES", "Herb Hub Update"),
+			Author:          os.Getenv("BLOG_AUTHOR"),
+			Overwrite:       getBoolEnv("BLOG_OVERWRITE", false),
+			SlugMaxWords:    getIntEnv("BLOG_SLUG_MAX_WORDS", 8),
+			ImageSourceDir:  getEnv("BLOG_IMAGE_SOURCE_DIR", "/timelapse"),
+			ImageOutputDir:  getEnv("BLOG_IMAGE_OUTPUT_DIR", filepath.Join(hubDir, "assets", "images", "blog")),
+			ImagePublicPath: getEnv("BLOG_IMAGE_PUBLIC_PATH", "/assets/images/blog"),
+			IncludeDayImage: getBoolEnv("BLOG_INCLUDE_DAY_IMAGE", false),
 		},
 		RepoPost: RepoPostConfig{
 			Prompt:        os.Getenv("BLOG_REPO_POST_PROMPT"),

@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -53,8 +54,10 @@ type ollamaRequest struct {
 }
 
 type ollamaOptions struct {
-	Temperature float64 `json:"temperature,omitempty"`
-	NumPredict  int     `json:"num_predict,omitempty"`
+	Temperature   float64 `json:"temperature,omitempty"`
+	NumPredict    int     `json:"num_predict,omitempty"`
+	TopP          float64 `json:"top_p,omitempty"`
+	RepeatPenalty float64 `json:"repeat_penalty,omitempty"`
 }
 
 type ollamaResponse struct {
@@ -62,6 +65,8 @@ type ollamaResponse struct {
 		Content  string `json:"content"`
 		Thinking string `json:"thinking"`
 	} `json:"message"`
+	Done  bool   `json:"done"`
+	Error string `json:"error"`
 }
 
 func NewClient(cfg config.LLMConfig) *Client {
@@ -86,14 +91,14 @@ func (c *Client) GenerateMarkdownWithSystemPrompt(ctx context.Context, systemPro
 			return "", err
 		}
 
-		content, ollamaErr := c.generateOllamaNative(ctx, systemPrompt, prompt)
+		content, ollamaErr := c.generateOllamaStreaming(ctx, systemPrompt, prompt)
 		if ollamaErr != nil {
 			return "", fmt.Errorf("openai-compatible call failed: %v; ollama fallback failed: %w", err, ollamaErr)
 		}
 
 		return content, nil
 	case "ollama":
-		return c.generateOllamaNative(ctx, systemPrompt, prompt)
+		return c.generateOllamaStreaming(ctx, systemPrompt, prompt)
 	case "openai", "openai-compatible":
 		return c.generateOpenAICompatible(ctx, systemPrompt, prompt)
 	default:
@@ -163,19 +168,63 @@ func (c *Client) generateOpenAICompatible(ctx context.Context, systemPrompt, pro
 	return strings.TrimSpace(content), nil
 }
 
-func (c *Client) generateOllamaNative(ctx context.Context, systemPrompt, prompt string) (string, error) {
+func (c *Client) WarmModel(ctx context.Context) error {
+	provider := strings.ToLower(strings.TrimSpace(c.config.Provider))
+	if provider == "openai" || provider == "openai-compatible" {
+		return nil
+	}
+	body, err := json.Marshal(ollamaRequest{
+		Model: c.config.Model,
+		Messages: []chatMessage{
+			{Role: "system", Content: "Warm the model and return a short response."},
+			{Role: "user", Content: "hi"},
+		},
+		Stream: false,
+		Options: ollamaOptions{
+			NumPredict: 1,
+		},
+		KeepAlive: "10m",
+		Think:     boolPtr(false),
+	})
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, ollamaChatURL(c.config.BaseURL), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.config.APIKey != "" {
+		req.Header.Set("Authorization", "Bearer "+c.config.APIKey)
+	}
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("warm model: %w", err)
+	}
+	defer resp.Body.Close()
+	_, _ = io.Copy(io.Discard, resp.Body)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("warm model returned %d", resp.StatusCode)
+	}
+	log.Printf("model %s warmed up", c.config.Model)
+	return nil
+}
+
+func (c *Client) generateOllamaStreaming(ctx context.Context, systemPrompt, prompt string) (string, error) {
 	body, err := json.Marshal(ollamaRequest{
 		Model: c.config.Model,
 		Messages: []chatMessage{
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: prompt},
 		},
-		Stream: false,
+		Stream: true,
 		Options: ollamaOptions{
-			Temperature: c.config.Temperature,
-			NumPredict:  c.config.MaxTokens,
+			Temperature:   c.config.Temperature,
+			NumPredict:    c.config.MaxTokens,
+			TopP:          c.config.TopP,
+			RepeatPenalty: c.config.RepeatPenalty,
 		},
-		KeepAlive: "5m",
+		KeepAlive: "10m",
 		Think:     boolPtr(false),
 	})
 	if err != nil {
@@ -197,24 +246,40 @@ func (c *Client) generateOllamaNative(ctx context.Context, systemPrompt, prompt 
 	}
 	defer resp.Body.Close()
 
-	responseBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	if c.config.Debug {
-		log.Printf("llm ollama response: %s", truncateForLog(responseBody))
-	}
-
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		responseBody, _ := io.ReadAll(resp.Body)
 		return "", fmt.Errorf("ollama returned %d: %s", resp.StatusCode, strings.TrimSpace(string(responseBody)))
 	}
-
-	var parsed ollamaResponse
-	if err := json.Unmarshal(responseBody, &parsed); err != nil {
-		return "", fmt.Errorf("decode ollama response: %w", err)
+	var rawBuilder strings.Builder
+	var contentBuilder strings.Builder
+	var thinkingBuilder strings.Builder
+	scanner := bufio.NewScanner(resp.Body)
+	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		if c.config.Debug {
+			rawBuilder.Write(line)
+		}
+		var chunk ollamaResponse
+		if err := json.Unmarshal(line, &chunk); err != nil {
+			return "", fmt.Errorf("decode ollama stream chunk: %w", err)
+		}
+		if chunk.Error != "" {
+			return "", fmt.Errorf("ollama stream error: %s", chunk.Error)
+		}
+		contentBuilder.WriteString(chunk.Message.Content)
+		thinkingBuilder.WriteString(chunk.Message.Thinking)
+		if chunk.Done {
+			break
+		}
 	}
-
-	content := extractMarkdownContent(parsed.Message.Content, parsed.Message.Thinking)
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("read ollama stream: %w", err)
+	}
+	if c.config.Debug && rawBuilder.Len() > 0 {
+		log.Printf("llm ollama response: %s", truncateForLog([]byte(rawBuilder.String())))
+	}
+	content := extractMarkdownContent(contentBuilder.String(), thinkingBuilder.String())
 	if content == "" {
 		return "", fmt.Errorf("ollama returned empty content")
 	}

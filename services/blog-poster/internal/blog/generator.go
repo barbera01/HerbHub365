@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -22,6 +23,8 @@ import (
 
 var ErrNoSnapshots = errors.New("no snapshots found for target date")
 var errInvalidRepoPost = errors.New("repo-post model output did not match blog format")
+
+const maxGenerateAttempts = 3
 
 type markdownGenerator interface {
 	GenerateMarkdown(ctx context.Context, prompt string) (string, error)
@@ -101,11 +104,8 @@ func (g *Generator) GenerateDraft(ctx context.Context, day time.Time, snapshots 
 }
 
 func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt, titleHint string, draft bool, categories string) (PostResult, error) {
-	markdown, err := g.llm.GenerateMarkdownWithSystemPrompt(ctx, repoPostSystemPrompt(), prompt)
+	markdown, err := g.generateWithRetry(ctx, repoPostSystemPrompt(), prompt, validateRepoPostMarkdown)
 	if err != nil {
-		return PostResult{}, err
-	}
-	if err := validateRepoPostMarkdown(markdown); err != nil {
 		return PostResult{}, err
 	}
 
@@ -128,13 +128,66 @@ func (g *Generator) generateFromSnapshots(ctx context.Context, day time.Time, sn
 		return PostResult{}, err
 	}
 
-	markdown, err := g.llm.GenerateMarkdown(ctx, prompt)
+	markdown, err := g.generateWithRetry(ctx, g.llmConfig.SystemPrompt, prompt, validateDailyPostMarkdown)
 	if err != nil {
 		return PostResult{}, err
 	}
+	refined, err := g.refinePost(ctx, markdown)
+	if err != nil {
+		log.Printf("refinement pass failed, using raw draft: %v", err)
+		refined = markdown
+	}
 
-	title, body := splitMarkdown(markdown, day)
+	title, body := splitMarkdown(refined, day)
 	return g.writePost(day, title, body, opts)
+}
+
+func (g *Generator) generateWithRetry(ctx context.Context, systemPrompt, prompt string, validate func(string) error) (string, error) {
+	var lastErr error
+	for attempt := 1; attempt <= maxGenerateAttempts; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return "", err
+		}
+		markdown, err := g.llm.GenerateMarkdownWithSystemPrompt(ctx, systemPrompt, prompt)
+		if err != nil {
+			lastErr = err
+			log.Printf("generate attempt %d/%d failed: %v", attempt, maxGenerateAttempts, err)
+			continue
+		}
+		if err := validate(markdown); err != nil {
+			lastErr = err
+			log.Printf("generate attempt %d/%d failed validation: %v", attempt, maxGenerateAttempts, err)
+			continue
+		}
+		if attempt > 1 {
+			log.Printf("generate succeeded on attempt %d/%d", attempt, maxGenerateAttempts)
+		}
+		return markdown, nil
+	}
+	if lastErr == nil {
+		lastErr = errors.New("unknown generation failure")
+	}
+	return "", fmt.Errorf("all %d generate attempts failed: %w", maxGenerateAttempts, lastErr)
+}
+
+func refineSystemPrompt() string {
+	return "You are a copy editor for Herb Hub 365 blog posts. Return ONLY cleaned markdown, nothing else. Keep the level-1 heading title, tighten it if wordy, and aim for 3 to 5 short paragraphs of prose after the title. Remove bullet lists unless they genuinely help readability. Remove any preamble, thinking traces, meta-commentary, and fenced code blocks. Do not invent data not present in the draft. Keep the tone warm, observational, and concise. Fix grammar and awkward phrasing."
+}
+
+func refineUserPrompt(draft string) string {
+	return "Clean up this draft blog post:\n\n" + draft
+}
+
+func (g *Generator) refinePost(ctx context.Context, draft string) (string, error) {
+	refined, err := g.llm.GenerateMarkdownWithSystemPrompt(ctx, refineSystemPrompt(), refineUserPrompt(draft))
+	if err != nil {
+		return "", err
+	}
+	refined = strings.TrimSpace(refined)
+	if err := validateDailyPostMarkdown(refined); err != nil {
+		return "", err
+	}
+	return refined, nil
 }
 
 func (g *Generator) buildPrompt(summaryPayload []byte) (string, error) {
@@ -447,6 +500,33 @@ func validateRepoPostMarkdown(markdown string) error {
 	}
 	if !strings.HasPrefix(trimmed, "#") {
 		return fmt.Errorf("%w: missing markdown title", errInvalidRepoPost)
+	}
+	return nil
+}
+
+func validateDailyPostMarkdown(markdown string) error {
+	trimmed := strings.TrimSpace(markdown)
+	if trimmed == "" {
+		return fmt.Errorf("daily post output is empty")
+	}
+	if !strings.HasPrefix(trimmed, "#") {
+		return fmt.Errorf("daily post is missing markdown title")
+	}
+	lowered := strings.ToLower(trimmed)
+	badSnippets := []string{"thinking process:", "analyze the request:"}
+	for _, snippet := range badSnippets {
+		if strings.Contains(lowered, snippet) {
+			return fmt.Errorf("daily post leaked model meta-commentary")
+		}
+	}
+	nonEmptyLines := 0
+	for _, line := range strings.Split(trimmed, "\n") {
+		if strings.TrimSpace(line) != "" {
+			nonEmptyLines++
+		}
+	}
+	if nonEmptyLines < 4 {
+		return fmt.Errorf("daily post is too short")
 	}
 	return nil
 }

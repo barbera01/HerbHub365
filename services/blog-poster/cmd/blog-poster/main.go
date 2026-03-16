@@ -43,7 +43,7 @@ func main() {
 			log.Fatal(err)
 		}
 	case "generate", "once":
-		if err := runGenerate(ctx, cfg, generator, publisher); err != nil {
+		if err := runGenerate(ctx, cfg, client, generator, publisher); err != nil {
 			log.Fatal(err)
 		}
 	case "repo-post":
@@ -51,7 +51,7 @@ func main() {
 			log.Fatal(err)
 		}
 	case "daemon":
-		if err := runDaemon(ctx, cfg, store, generator, publisher); err != nil && !errors.Is(err, context.Canceled) {
+		if err := runDaemon(ctx, cfg, client, store, generator, publisher); err != nil && !errors.Is(err, context.Canceled) {
 			log.Fatal(err)
 		}
 	default:
@@ -66,7 +66,7 @@ func resolveMode(defaultMode string) string {
 	return strings.ToLower(strings.TrimSpace(defaultMode))
 }
 
-func runDaemon(ctx context.Context, cfg config.Config, store *archive.Store, generator *blog.Generator, publisher *gitpublish.Publisher) error {
+func runDaemon(ctx context.Context, cfg config.Config, client *llm.Client, store *archive.Store, generator *blog.Generator, publisher *gitpublish.Publisher) error {
 	errCh := make(chan error, 1)
 	go func() {
 		errCh <- runCollectorLoop(ctx, cfg, store)
@@ -81,6 +81,10 @@ func runDaemon(ctx context.Context, cfg config.Config, store *archive.Store, gen
 		if resolveErr != nil {
 			log.Printf("generate skipped: %v", resolveErr)
 			return
+		}
+
+		if warmErr := client.WarmModel(jobCtx); warmErr != nil {
+			log.Printf("model warm-up failed (continuing): %v", warmErr)
 		}
 
 		result, genErr := generator.Generate(jobCtx, targetDate)
@@ -108,7 +112,7 @@ func runDaemon(ctx context.Context, cfg config.Config, store *archive.Store, gen
 	defer scheduler.Stop()
 
 	if cfg.RunGenerateOnStart {
-		if err := runGenerate(ctx, cfg, generator, publisher); err != nil && !errors.Is(err, blog.ErrNoSnapshots) {
+		if err := runGenerate(ctx, cfg, client, generator, publisher); err != nil && !errors.Is(err, blog.ErrNoSnapshots) {
 			return err
 		}
 	}
@@ -121,7 +125,7 @@ func runDaemon(ctx context.Context, cfg config.Config, store *archive.Store, gen
 	}
 }
 
-func runGenerate(ctx context.Context, cfg config.Config, generator *blog.Generator, publisher *gitpublish.Publisher) error {
+func runGenerate(ctx context.Context, cfg config.Config, client *llm.Client, generator *blog.Generator, publisher *gitpublish.Publisher) error {
 	targetDate, err := cfg.ResolveTargetDate(time.Now())
 	if err != nil {
 		return err
@@ -129,6 +133,9 @@ func runGenerate(ctx context.Context, cfg config.Config, generator *blog.Generat
 
 	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
 	defer cancel()
+	if warmErr := client.WarmModel(jobCtx); warmErr != nil {
+		log.Printf("model warm-up failed (continuing): %v", warmErr)
+	}
 
 	result, err := generator.Generate(jobCtx, targetDate)
 	if err != nil {

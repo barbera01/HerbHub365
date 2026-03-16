@@ -37,6 +37,8 @@ type LLMConfig struct {
 	APIKey          string
 	Model           string
 	Temperature     float64
+	TopP            float64
+	RepeatPenalty   float64
 	MaxTokens       int
 	RequestTimeout  time.Duration
 	Debug           bool
@@ -107,6 +109,8 @@ func Load() Config {
 			APIKey:          os.Getenv("LLM_API_KEY"),
 			Model:           getEnv("LLM_MODEL", "qwen2.5:latest"),
 			Temperature:     getFloatEnv("LLM_TEMPERATURE", 0.6),
+			TopP:            getFloatEnv("LLM_TOP_P", 0.9),
+			RepeatPenalty:   getFloatEnv("LLM_REPEAT_PENALTY", 1.1),
 			MaxTokens:       getIntEnv("LLM_MAX_TOKENS", 900),
 			RequestTimeout:  getDurationEnv("LLM_REQUEST_TIMEOUT", 90*time.Second),
 			Debug:           getBoolEnv("LLM_DEBUG", false),

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"HerbHub365/services/blog-poster/internal/blog"
 	"HerbHub365/services/blog-poster/internal/config"
 )
 
@@ -21,7 +22,7 @@ func NewPublisher(cfg config.GitConfig) *Publisher {
 	return &Publisher{config: cfg}
 }
 
-func (p *Publisher) PublishPost(ctx context.Context, postPath string, day time.Time) error {
+func (p *Publisher) PublishPost(ctx context.Context, result blog.PostResult, day time.Time) error {
 	if !p.config.PublishEnabled {
 		return nil
 	}
@@ -31,7 +32,7 @@ func (p *Publisher) PublishPost(ctx context.Context, postPath string, day time.T
 		return fmt.Errorf("resolve repo dir: %w", err)
 	}
 
-	absolutePostPath, err := filepath.Abs(postPath)
+	absolutePostPath, err := filepath.Abs(result.Path)
 	if err != nil {
 		return fmt.Errorf("resolve post path: %w", err)
 	}
@@ -46,11 +47,13 @@ func (p *Publisher) PublishPost(ctx context.Context, postPath string, day time.T
 
 	gitEnv := p.gitEnv(repoDir)
 
-	if err := p.run(ctx, gitEnv, "add generated post", "git", "-C", repoDir, "add", "--", relPath); err != nil {
+	pathsToAdd := append([]string{relPath}, repoRelativePaths(repoDir, result.AssetPaths)...)
+	addArgs := append([]string{"-C", repoDir, "add", "--"}, pathsToAdd...)
+	if err := p.run(ctx, gitEnv, "add generated post", "git", addArgs...); err != nil {
 		return err
 	}
 
-	hasChanges, err := p.hasStagedChanges(ctx, repoDir, relPath)
+	hasChanges, err := p.hasStagedChanges(ctx, repoDir, pathsToAdd...)
 	if err != nil {
 		return err
 	}
@@ -63,7 +66,7 @@ func (p *Publisher) PublishPost(ctx context.Context, postPath string, day time.T
 		"git", "-C", repoDir,
 		"-c", "user.name="+p.config.AuthorName,
 		"-c", "user.email="+p.config.AuthorEmail,
-		"commit", "-m", commitMessage, "--", relPath,
+		"commit", "-m", commitMessage,
 	); err != nil {
 		return err
 	}
@@ -80,8 +83,10 @@ func (p *Publisher) PublishPost(ctx context.Context, postPath string, day time.T
 	return nil
 }
 
-func (p *Publisher) hasStagedChanges(ctx context.Context, repoDir, relPath string) (bool, error) {
-	cmd := exec.CommandContext(ctx, "git", "-C", repoDir, "diff", "--cached", "--quiet", "--", relPath)
+func (p *Publisher) hasStagedChanges(ctx context.Context, repoDir string, relPaths ...string) (bool, error) {
+	args := []string{"-C", repoDir, "diff", "--cached", "--quiet", "--"}
+	args = append(args, relPaths...)
+	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Env = append(cmd.Environ(), p.gitEnv(repoDir)...)
 	if err := cmd.Run(); err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
@@ -90,6 +95,25 @@ func (p *Publisher) hasStagedChanges(ctx context.Context, repoDir, relPath strin
 		return false, fmt.Errorf("check staged changes: %w", err)
 	}
 	return false, nil
+}
+
+func repoRelativePaths(repoDir string, paths []string) []string {
+	result := make([]string, 0, len(paths))
+	for _, path := range paths {
+		if strings.TrimSpace(path) == "" {
+			continue
+		}
+		absolutePath, err := filepath.Abs(path)
+		if err != nil {
+			continue
+		}
+		relPath, err := filepath.Rel(repoDir, absolutePath)
+		if err != nil || strings.HasPrefix(relPath, "..") {
+			continue
+		}
+		result = append(result, relPath)
+	}
+	return result
 }
 
 func (p *Publisher) pushTarget(ctx context.Context, repoDir string) (string, []string, error) {

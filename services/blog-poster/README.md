@@ -60,6 +60,10 @@ Important settings:
 - `BLOG_TARGET_DATE`: `today`, `yesterday`, or a `YYYY-MM-DD` date
 - `BLOG_DRAFTS_DIR`: output directory for test drafts, defaults to `hub/_drafts`
 - `BLOG_DRAFT_PREFIX`: filename prefix for draft runs
+- `BLOG_INCLUDE_DAY_IMAGE`: when `true`, pick a random image from the target date folder and include it near the top of the post
+- `BLOG_IMAGE_SOURCE_DIR`: mounted directory containing dated image folders such as `2026-03-15/`
+- `BLOG_IMAGE_OUTPUT_DIR`: where copied images are written inside the Jekyll site, defaults to `hub/assets/images/blog`
+- `BLOG_IMAGE_PUBLIC_PATH`: public URL prefix for copied blog images, defaults to `/assets/images/blog`
 - `BLOG_REPO_POST_PROMPT`: ad hoc technical post request for `repo-post` mode
 - `BLOG_REPO_POST_TITLE`: optional preferred title for `repo-post`
 - `BLOG_REPO_POST_PATHS`: comma-separated repo paths to inspect; required for `repo-post`
@@ -111,6 +115,7 @@ The Docker service is defined in `docker/docker-compose.yml` and mounts:
 
 - `..` to `/repo`
 - `../services/blog-poster/data` to `/data`
+- `${BLOG_POSTER_IMAGE_SOURCE_PATH:-/mnt/hh01-timelapse}` to `/timelapse`
 
 If you want an external scheduler instead of the internal cron, override the command:
 
@@ -150,6 +155,15 @@ export BLOG_POSTER_GIT_PUBLISH_ENABLED=true
 export BLOG_POSTER_GIT_PAT=github_pat_your_token_here
 docker compose up -d blog-poster
 ```
+
+To include a random image from the day's timelapse folder in normal generated posts, also set:
+
+```bash
+export BLOG_INCLUDE_DAY_IMAGE=true
+export BLOG_POSTER_IMAGE_SOURCE_PATH=/mnt/hh01-timelapse
+```
+
+For a post dated `2026-03-15`, the generator looks for images under `/mnt/hh01-timelapse/2026-03-15/`, copies one random image into `hub/assets/images/blog/`, embeds it near the top of the markdown, and publishes the copied asset alongside the post.
 
 Useful Docker-side LLM overrides in `docker/.env`:
 

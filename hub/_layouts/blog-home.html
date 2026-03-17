@@ -1,0 +1,82 @@
+---
+layout: default
+---
+
+<div class="home-shell">
+  <section class="hero-band">
+    <div class="hero-copy">
+      <p class="eyebrow">Herb Hub 365 Journal</p>
+      <h1>Greenhouse notes and platform architecture in one place.</h1>
+      <p class="hero-text">Follow the living side of Herb Hub through herb growing updates, or dive into the systems that power the platform behind the scenes.</p>
+    </div>
+    <div class="hero-mark">
+      <img src="{{ '/assets/images/logo.png' | relative_url }}" alt="Herb Hub 365 logo">
+    </div>
+  </section>
+
+  <section class="category-grid">
+    <article class="category-card herb-card">
+      <p class="card-kicker">Grow</p>
+      <h2><a href="{{ '/herbs/' | relative_url }}">Herbs</a></h2>
+      <p>Sensor-driven greenhouse updates, plant observations, watering notes, and day-to-day growing progress.</p>
+      <ul class="post-list compact-list">
+        {% assign herb_count = 0 %}
+        {% for post in site.posts %}
+          {% if post.categories contains 'Herbs' or post.categories contains 'Herb' %}
+            {% assign herb_count = herb_count | plus: 1 %}
+            {% if herb_count <= 3 %}
+              <li>
+                <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+                <h3><a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+              </li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if herb_count == 0 %}
+          <li><p>No herb posts yet.</p></li>
+        {% endif %}
+      </ul>
+    </article>
+
+    <article class="category-card platform-card">
+      <p class="card-kicker">Build</p>
+      <h2><a href="{{ '/platform-architecture/' | relative_url }}">Platform Architecture</a></h2>
+      <p>Technical explainers about services, automations, data flows, and the software and hardware that run Herb Hub.</p>
+      <ul class="post-list compact-list">
+        {% assign platform_count = 0 %}
+        {% for post in site.posts %}
+          {% if post.categories contains 'Platform Architecture' or post.categories contains 'Platform' or post.categories contains 'Architecture' %}
+            {% assign platform_count = platform_count | plus: 1 %}
+            {% if platform_count <= 3 %}
+              <li>
+                <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+                <h3><a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+              </li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if platform_count == 0 %}
+          <li><p>No platform posts yet.</p></li>
+        {% endif %}
+      </ul>
+    </article>
+  </section>
+
+  <section class="recent-posts">
+    <div class="section-heading">
+      <p class="eyebrow">Latest</p>
+      <h2>Recent posts</h2>
+    </div>
+    <ul class="post-list">
+      {% for post in site.posts limit: 8 %}
+        <li>
+          <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+          <h3><a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+          {% if post.categories %}
+            <p class="post-taxonomy">{{ post.categories | join: " / " }}</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>

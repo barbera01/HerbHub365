@@ -46,6 +46,7 @@ type PostResult struct {
 type writeOptions struct {
 	draft      bool
 	categories string
+	slugLabel  string
 }
 
 type measurement struct {
@@ -85,22 +86,24 @@ func NewGenerator(blogCfg config.BlogConfig, llmCfg config.LLMConfig, store *arc
 	return &Generator{blogConfig: blogCfg, llmConfig: llmCfg, store: store, llm: llm}
 }
 
-func (g *Generator) Generate(ctx context.Context, day time.Time) (PostResult, error) {
-	snapshots, err := g.store.Load(day)
+func (g *Generator) Generate(ctx context.Context, plan GeneratePlan) (PostResult, error) {
+	snapshots, err := g.store.Load(plan.Day)
 	if err != nil {
 		return PostResult{}, err
 	}
+	snapshots = filterSnapshotsByWindow(snapshots, plan.WindowStart, plan.WindowEnd)
 	if len(snapshots) == 0 {
 		return PostResult{}, ErrNoSnapshots
 	}
-	return g.generateFromSnapshots(ctx, day, snapshots, writeOptions{})
+	return g.generateFromSnapshots(ctx, plan, snapshots, writeOptions{slugLabel: plan.SlugLabel})
 }
 
 func (g *Generator) GenerateDraft(ctx context.Context, day time.Time, snapshots []model.Snapshot) (PostResult, error) {
 	if len(snapshots) == 0 {
 		return PostResult{}, ErrNoSnapshots
 	}
-	return g.generateFromSnapshots(ctx, day, snapshots, writeOptions{draft: true})
+	plan := GeneratePlan{Day: day, Period: PeriodDaily, WindowStart: dayStart(day.UTC()), WindowEnd: dayStart(day.UTC()).Add(24 * time.Hour), PromptLabel: "full-day summary"}
+	return g.generateFromSnapshots(ctx, plan, snapshots, writeOptions{draft: true})
 }
 
 func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt, titleHint string, draft bool, categories string) (PostResult, error) {
@@ -117,13 +120,13 @@ func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt,
 	return g.writePost(day, title, body, writeOptions{draft: draft, categories: categories})
 }
 
-func (g *Generator) generateFromSnapshots(ctx context.Context, day time.Time, snapshots []model.Snapshot, opts writeOptions) (PostResult, error) {
-	summaryPayload, err := buildSummary(day, snapshots)
+func (g *Generator) generateFromSnapshots(ctx context.Context, plan GeneratePlan, snapshots []model.Snapshot, opts writeOptions) (PostResult, error) {
+	summaryPayload, err := buildSummary(plan, snapshots)
 	if err != nil {
 		return PostResult{}, err
 	}
 
-	prompt, err := g.buildPrompt(summaryPayload)
+	prompt, err := g.buildPrompt(plan, summaryPayload)
 	if err != nil {
 		return PostResult{}, err
 	}
@@ -138,8 +141,8 @@ func (g *Generator) generateFromSnapshots(ctx context.Context, day time.Time, sn
 		refined = markdown
 	}
 
-	title, body := splitMarkdown(refined, day)
-	return g.writePost(day, title, body, opts)
+	title, body := splitMarkdown(refined, plan.Day)
+	return g.writePost(plan.Day, title, body, opts)
 }
 
 func (g *Generator) generateWithRetry(ctx context.Context, systemPrompt, prompt string, validate func(string) error) (string, error) {
@@ -190,12 +193,15 @@ func (g *Generator) refinePost(ctx context.Context, draft string) (string, error
 	return refined, nil
 }
 
-func (g *Generator) buildPrompt(summaryPayload []byte) (string, error) {
+func (g *Generator) buildPrompt(plan GeneratePlan, summaryPayload []byte) (string, error) {
 	return fmt.Sprintf(
-		"Write today's blog post for %s (%s). The site URL is %s.\n\nUse the JSON summary below as the only factual source. Mention noteworthy changes in moisture, water level, temperature, light, or warnings when present. Keep it readable for a public blog and do not use bullet lists unless clearly helpful.\n\n%s",
+		"Write a %s blog post for %s (%s). The site URL is %s. Focus only on the data captured between %s and %s UTC. Use the JSON summary below as the only factual source. Mention noteworthy changes in moisture, water level, temperature, light, or warnings when present. Keep it readable for a public blog and do not use bullet lists unless clearly helpful.\n\n%s",
+		plan.PromptLabel,
 		g.llmConfig.PromptPlantName,
 		g.llmConfig.PromptSiteName,
 		g.llmConfig.PromptSiteURL,
+		plan.WindowStart.Format(time.RFC3339),
+		plan.WindowEnd.Format(time.RFC3339),
 		string(summaryPayload),
 	), nil
 }
@@ -208,6 +214,9 @@ func (g *Generator) writePost(day time.Time, title, body string, opts writeOptio
 
 	baseDir := g.blogConfig.PostsDir
 	fileName := fmt.Sprintf("%s-%s.markdown", day.Format("2006-01-02"), slug)
+	if opts.slugLabel != "" {
+		fileName = fmt.Sprintf("%s-%s-%s.markdown", day.Format("2006-01-02"), opts.slugLabel, slug)
+	}
 	if opts.draft {
 		baseDir = g.blogConfig.DraftsDir
 		prefix := strings.TrimSpace(g.blogConfig.DraftPrefix)
@@ -342,9 +351,9 @@ func buildFrontMatter(cfg config.BlogConfig, day time.Time, title, categories st
 	return builder.String()
 }
 
-func buildSummary(day time.Time, snapshots []model.Snapshot) ([]byte, error) {
+func buildSummary(plan GeneratePlan, snapshots []model.Snapshot) ([]byte, error) {
 	summaryData := summary{
-		Date:          day.Format("2006-01-02"),
+		Date:          plan.Day.Format("2006-01-02"),
 		SnapshotCount: len(snapshots),
 		Environment:   make(map[string]measurement),
 		Water:         make(map[string]measurement),
@@ -434,6 +443,23 @@ func buildSummary(day time.Time, snapshots []model.Snapshot) ([]byte, error) {
 	summaryData.Samples = sampleSnapshots(snapshots)
 
 	return json.MarshalIndent(summaryData, "", "  ")
+}
+
+func filterSnapshotsByWindow(snapshots []model.Snapshot, start, end time.Time) []model.Snapshot {
+	filtered := make([]model.Snapshot, 0, len(snapshots))
+	for _, snapshot := range snapshots {
+		timestamp := snapshot.Timestamp.UTC()
+		if timestamp.IsZero() && snapshot.CollectedAt != nil {
+			timestamp = snapshot.CollectedAt.UTC()
+		}
+		if timestamp.IsZero() {
+			continue
+		}
+		if !timestamp.Before(start) && timestamp.Before(end) {
+			filtered = append(filtered, snapshot)
+		}
+	}
+	return filtered
 }
 
 func sampleSnapshots(snapshots []model.Snapshot) []model.Snapshot {

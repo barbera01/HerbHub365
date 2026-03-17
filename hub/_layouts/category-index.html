@@ -1,0 +1,44 @@
+---
+layout: default
+---
+
+<div class="category-shell">
+  <header class="category-header">
+    <p class="eyebrow">Category</p>
+    <h1>{{ page.title }}</h1>
+    {% if page.description %}
+      <p class="category-description">{{ page.description }}</p>
+    {% endif %}
+  </header>
+
+  <ul class="post-list category-list">
+    {% assign match_count = 0 %}
+    {% for post in site.posts %}
+      {% assign matches = false %}
+      {% for category_name in page.category_filters %}
+        {% if post.categories contains category_name %}
+          {% assign matches = true %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
+      {% if matches %}
+        {% assign match_count = match_count | plus: 1 %}
+        <li>
+          <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+          <h2><a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h2>
+          {% if post.categories %}
+            <p class="post-taxonomy">{{ post.categories | join: " / " }}</p>
+          {% endif %}
+          {% if post.excerpt %}
+            <p>{{ post.excerpt | strip_html | truncate: 180 }}</p>
+          {% endif %}
+        </li>
+      {% endif %}
+    {% endfor %}
+    {% if match_count == 0 %}
+      <li>
+        <p>No posts have been published in this category yet.</p>
+      </li>
+    {% endif %}
+  </ul>
+</div>

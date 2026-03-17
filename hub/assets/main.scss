@@ -1,0 +1,161 @@
+---
+---
+
+@import "minima";
+
+:root {
+  --sage-ink: #1f3527;
+  --sage-soft: #597461;
+  --leaf: #6c8c47;
+  --moss: #dfe8d7;
+  --mist: #f7f4ea;
+  --clay: #b9734f;
+  --line: #d8ddcf;
+  --shadow: rgba(31, 53, 39, 0.08);
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(108, 140, 71, 0.14), transparent 28%),
+    linear-gradient(180deg, #fbfaf5 0%, var(--mist) 100%);
+  color: var(--sage-ink);
+}
+
+.site-header {
+  border-top: 6px solid var(--leaf);
+  border-bottom: 1px solid var(--line);
+  background: rgba(251, 250, 245, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.site-title,
+.post-link,
+.page-link {
+  color: var(--sage-ink);
+}
+
+.page-content {
+  padding-top: 36px;
+}
+
+.home-shell,
+.category-shell {
+  display: grid;
+  gap: 32px;
+}
+
+.hero-band,
+.category-card,
+.recent-posts,
+.category-header,
+.category-list li {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: 0 18px 45px var(--shadow);
+}
+
+.hero-band {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.9fr);
+  padding: 32px;
+}
+
+.hero-copy h1,
+.category-header h1,
+.section-heading h2,
+.category-card h2 {
+  letter-spacing: -0.03em;
+}
+
+.hero-copy h1 {
+  font-size: clamp(2.1rem, 4vw, 3.6rem);
+  line-height: 1.02;
+  margin-bottom: 12px;
+}
+
+.hero-text,
+.category-description,
+.category-card p {
+  color: var(--sage-soft);
+  font-size: 1.05rem;
+}
+
+.hero-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, rgba(108, 140, 71, 0.14), rgba(185, 115, 79, 0.14));
+  border-radius: 18px;
+  min-height: 220px;
+}
+
+.hero-mark img {
+  max-width: 200px;
+}
+
+.eyebrow,
+.card-kicker,
+.post-taxonomy {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.78rem;
+  color: var(--leaf);
+}
+
+.category-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.category-card,
+.recent-posts,
+.category-header {
+  padding: 26px;
+}
+
+.herb-card {
+  background: linear-gradient(180deg, rgba(223, 232, 215, 0.9), rgba(255, 255, 255, 0.88));
+}
+
+.platform-card {
+  background: linear-gradient(180deg, rgba(244, 230, 218, 0.92), rgba(255, 255, 255, 0.88));
+}
+
+.compact-list li,
+.category-list li {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.compact-list li:last-child,
+.category-list li:last-child,
+.post-list > li:last-child {
+  border-bottom: 0;
+}
+
+.post-meta {
+  color: var(--sage-soft);
+}
+
+.post-list h2,
+.post-list h3 {
+  margin: 6px 0;
+}
+
+@media screen and (max-width: 800px) {
+  .hero-band,
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-band,
+  .category-card,
+  .recent-posts,
+  .category-header {
+    padding: 22px;
+    border-radius: 20px;
+  }
+}

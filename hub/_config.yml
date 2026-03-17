@@ -20,11 +20,15 @@
 
 title: Herb Hub 365
 email: gardner@herbhub365.com
+description: Greenhouse notes, herb growing updates, and platform architecture posts from Herb Hub 365.
 
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://www.herbhub365.com" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jekyllrb
 github_username: barbera01
+header_pages:
+  - herbs.markdown
+  - platform-architecture.markdown
 
 # Build settings
 theme: minima

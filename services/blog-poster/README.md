@@ -57,6 +57,8 @@ Important settings:
 - `LLM_DEBUG`: log raw model responses for troubleshooting
 - `HUB_DIR` and `BLOG_POSTS_DIR`: where the Jekyll site is mounted
 - `BLOG_GENERATE_SCHEDULE`: cron expression for internal scheduling
+- `BLOG_GENERATE_PERIOD_MODE`: `auto` (default), `daily`, `am`, or `pm`
+- `BLOG_GENERATE_SPLIT_HOUR`: UTC hour that separates AM from PM data, defaults to `12`
 - `BLOG_TARGET_DATE`: `today`, `yesterday`, or a `YYYY-MM-DD` date
 - `BLOG_DRAFTS_DIR`: output directory for test drafts, defaults to `hub/_drafts`
 - `BLOG_DRAFT_PREFIX`: filename prefix for draft runs
@@ -102,6 +104,16 @@ Build locally:
 ```bash
 go build ./...
 ```
+
+To run twice a day against today's archive and automatically choose AM vs PM behavior, set:
+
+```bash
+BLOG_TARGET_DATE=today
+BLOG_GENERATE_SCHEDULE="0 8,18 * * *"
+BLOG_GENERATE_PERIOD_MODE=auto
+```
+
+With `auto` mode, a morning run writes an AM-only post, and an afternoon run checks whether a post already exists for that date. If one exists, it writes a PM-only follow-up. If not, it falls back to a full-day summary using all data collected so far.
 
 Build the container:
 

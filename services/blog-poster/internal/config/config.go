@@ -14,6 +14,7 @@ type Config struct {
 	DataDir            string
 	GenerateSchedule   string
 	GenerateTimeout    time.Duration
+	Generation         GenerationConfig
 	RunGenerateOnStart bool
 	ReconnectDelay     time.Duration
 	TargetDate         string
@@ -29,6 +30,11 @@ type RabbitMQConfig struct {
 	QueueName   string
 	ConsumerTag string
 	Prefetch    int
+}
+
+type GenerationConfig struct {
+	PeriodMode string
+	SplitHour  int
 }
 
 type LLMConfig struct {
@@ -90,10 +96,14 @@ func Load() Config {
 	postsDir := getEnv("BLOG_POSTS_DIR", filepath.Join(hubDir, "_posts"))
 
 	return Config{
-		Mode:               getEnv("BLOG_POSTER_MODE", "daemon"),
-		DataDir:            getEnv("DATA_DIR", "/data"),
-		GenerateSchedule:   getEnv("BLOG_GENERATE_SCHEDULE", "5 0 * * *"),
-		GenerateTimeout:    getDurationEnv("BLOG_GENERATE_TIMEOUT", 2*time.Minute),
+		Mode:             getEnv("BLOG_POSTER_MODE", "daemon"),
+		DataDir:          getEnv("DATA_DIR", "/data"),
+		GenerateSchedule: getEnv("BLOG_GENERATE_SCHEDULE", "5 0 * * *"),
+		GenerateTimeout:  getDurationEnv("BLOG_GENERATE_TIMEOUT", 2*time.Minute),
+		Generation: GenerationConfig{
+			PeriodMode: getEnv("BLOG_GENERATE_PERIOD_MODE", "auto"),
+			SplitHour:  getIntEnv("BLOG_GENERATE_SPLIT_HOUR", 12),
+		},
 		RunGenerateOnStart: getBoolEnv("BLOG_RUN_GENERATE_ON_START", false),
 		ReconnectDelay:     getDurationEnv("RABBITMQ_RECONNECT_DELAY", 10*time.Second),
 		TargetDate:         getEnv("BLOG_TARGET_DATE", "yesterday"),

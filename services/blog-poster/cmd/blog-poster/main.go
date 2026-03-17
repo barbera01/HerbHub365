@@ -77,7 +77,7 @@ func runDaemon(ctx context.Context, cfg config.Config, client *llm.Client, store
 		jobCtx, cancel := context.WithTimeout(context.Background(), cfg.GenerateTimeout)
 		defer cancel()
 
-		targetDate, resolveErr := cfg.ResolveTargetDate(time.Now())
+		plan, resolveErr := blog.ResolveGeneratePlan(cfg, time.Now())
 		if resolveErr != nil {
 			log.Printf("generate skipped: %v", resolveErr)
 			return
@@ -87,22 +87,22 @@ func runDaemon(ctx context.Context, cfg config.Config, client *llm.Client, store
 			log.Printf("model warm-up failed (continuing): %v", warmErr)
 		}
 
-		result, genErr := generator.Generate(jobCtx, targetDate)
+		result, genErr := generator.Generate(jobCtx, plan)
 		if genErr != nil {
 			if errors.Is(genErr, blog.ErrNoSnapshots) {
-				log.Printf("generate skipped for %s: %v", targetDate.Format("2006-01-02"), genErr)
+				log.Printf("generate skipped for %s (%s): %v", plan.Day.Format("2006-01-02"), plan.Period, genErr)
 				return
 			}
-			log.Printf("generate failed for %s: %v", targetDate.Format("2006-01-02"), genErr)
+			log.Printf("generate failed for %s (%s): %v", plan.Day.Format("2006-01-02"), plan.Period, genErr)
 			return
 		}
 
-		if publishErr := publisher.PublishPost(jobCtx, result, targetDate); publishErr != nil {
-			log.Printf("publish failed for %s: %v", targetDate.Format("2006-01-02"), publishErr)
+		if publishErr := publisher.PublishPost(jobCtx, result, plan.Day); publishErr != nil {
+			log.Printf("publish failed for %s (%s): %v", plan.Day.Format("2006-01-02"), plan.Period, publishErr)
 			return
 		}
 
-		log.Printf("generated post %s", result.Path)
+		log.Printf("generated %s post %s", plan.Period, result.Path)
 	})
 	if err != nil {
 		return fmt.Errorf("configure scheduler: %w", err)
@@ -126,7 +126,7 @@ func runDaemon(ctx context.Context, cfg config.Config, client *llm.Client, store
 }
 
 func runGenerate(ctx context.Context, cfg config.Config, client *llm.Client, generator *blog.Generator, publisher *gitpublish.Publisher) error {
-	targetDate, err := cfg.ResolveTargetDate(time.Now())
+	plan, err := blog.ResolveGeneratePlan(cfg, time.Now())
 	if err != nil {
 		return err
 	}
@@ -137,16 +137,16 @@ func runGenerate(ctx context.Context, cfg config.Config, client *llm.Client, gen
 		log.Printf("model warm-up failed (continuing): %v", warmErr)
 	}
 
-	result, err := generator.Generate(jobCtx, targetDate)
+	result, err := generator.Generate(jobCtx, plan)
 	if err != nil {
 		return err
 	}
 
-	if err := publisher.PublishPost(jobCtx, result, targetDate); err != nil {
+	if err := publisher.PublishPost(jobCtx, result, plan.Day); err != nil {
 		return err
 	}
 
-	log.Printf("generated post %s", result.Path)
+	log.Printf("generated %s post %s", plan.Period, result.Path)
 	return nil
 }
 

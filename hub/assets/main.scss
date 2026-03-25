@@ -1628,10 +1628,10 @@ a:hover { color: var(--canopy); }
   border: 1px solid rgba(220,38,38,0.20);
 }
 
-/* Sensor 3-column row */
+/* Sensor 2-column row (temp + moisture only; light is env-only) */
 .herb-sensor-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   padding-left: 8px;
 }

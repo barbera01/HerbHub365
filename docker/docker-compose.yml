@@ -49,6 +49,13 @@ services:
       BLOG_IMAGE_OUTPUT_DIR: /repo/hub/assets/images/blog
       BLOG_IMAGE_PUBLIC_PATH: /assets/images/blog
       DATA_DIR: /data
+      SENSOR_DATA_ENABLED: ${SENSOR_DATA_ENABLED:-true}
+      SENSOR_DATA_FILE: ${SENSOR_DATA_FILE:-/repo/hub/_data/live_sensors.yml}
+      SENSOR_RESERVOIR_TEMP_KEY: ${SENSOR_RESERVOIR_TEMP_KEY:-water}
+      SENSOR_MOISTURE_MONITOR_BELOW: ${SENSOR_MOISTURE_MONITOR_BELOW:-65}
+      SENSOR_MOISTURE_ALERT_BELOW: ${SENSOR_MOISTURE_ALERT_BELOW:-30}
+      SENSOR_HERB_NAMES: ${SENSOR_HERB_NAMES:-basil:Basil,chilli:Chilli,oregano:Oregano}
+      SENSOR_HERB_ICONS: ${SENSOR_HERB_ICONS:-basil:basil,chilli:chilli,oregano:oregano}
     volumes:
       - ..:/repo
       - ../services/blog-poster/data:/data

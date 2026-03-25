@@ -1,0 +1,40 @@
+# ──────────────────────────────────────────────────────────────────────
+# live_sensors.yml  —  Herb Hub 365 live sensor data
+#
+# This file drives the "Live Sensors" panel on the homepage (blog-home.html).
+# Update these values whenever you want to refresh the displayed readings.
+# In a future phase these could be written automatically by a sensor script
+# or CI job that commits this file on each polling cycle.
+#
+# Accessed in templates via: site.data.live_sensors
+# ──────────────────────────────────────────────────────────────────────
+
+updated_at: "07:42 — Mar 25, 2026"
+
+# ── Greenhouse environment ──────────────────────────────────────────────
+env:
+  temp:           "24.0°C"
+  humidity:       "34%"
+  light:          "936 lux"
+  reservoir_temp: "18.8°C"
+
+# ── Per-herb readings ───────────────────────────────────────────────────
+# status: healthy | monitor | alert
+herbs:
+  - name:     Basil
+    icon:     basil
+    temp:     "21.7°C"
+    moisture: "91%"
+    status:   healthy
+
+  - name:     Chilli
+    icon:     chilli
+    temp:     "23.1°C"
+    moisture: "58%"
+    status:   monitor
+
+  - name:     Oregano
+    icon:     oregano
+    temp:     "22.8°C"
+    moisture: "50%"
+    status:   healthy

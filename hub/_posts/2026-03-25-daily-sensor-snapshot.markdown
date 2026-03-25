@@ -19,7 +19,6 @@ herbs:
     icon:     basil
     temp:     "21.7°C"
     moisture: "91%"
-    light:    "936 lux"
     status:   healthy
     note:     "Moisture holding strong. Ready to harvest a few sprigs this afternoon."
 
@@ -27,7 +26,6 @@ herbs:
     icon:     chilli
     temp:     "23.1°C"
     moisture: "58%"
-    light:    "710 lux"
     status:   monitor
     note:     "Sitting on the drier side — keep an eye, may need a top-up by evening."
 
@@ -35,7 +33,6 @@ herbs:
     icon:     oregano
     temp:     "22.8°C"
     moisture: "50%"
-    light:    "880 lux"
     status:   healthy
     note:     "Comfortable at 50% — oregano prefers it on the drier side. All good."
 ---

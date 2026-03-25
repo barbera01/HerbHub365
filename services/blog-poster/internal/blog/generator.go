@@ -19,6 +19,7 @@ import (
 	"HerbHub365/services/blog-poster/internal/archive"
 	"HerbHub365/services/blog-poster/internal/config"
 	"HerbHub365/services/blog-poster/internal/model"
+	"HerbHub365/services/blog-poster/internal/sensordata"
 )
 
 var ErrNoSnapshots = errors.New("no snapshots found for target date")
@@ -32,10 +33,11 @@ type markdownGenerator interface {
 }
 
 type Generator struct {
-	blogConfig config.BlogConfig
-	llmConfig  config.LLMConfig
-	store      *archive.Store
-	llm        markdownGenerator
+	blogConfig   config.BlogConfig
+	llmConfig    config.LLMConfig
+	store        *archive.Store
+	llm          markdownGenerator
+	sensorWriter *sensordata.Writer
 }
 
 type PostResult struct {
@@ -47,6 +49,10 @@ type writeOptions struct {
 	draft      bool
 	categories string
 	slugLabel  string
+}
+
+func NewGenerator(blogCfg config.BlogConfig, llmCfg config.LLMConfig, store *archive.Store, llm markdownGenerator, sensorWriter *sensordata.Writer) *Generator {
+	return &Generator{blogConfig: blogCfg, llmConfig: llmCfg, store: store, llm: llm, sensorWriter: sensorWriter}
 }
 
 type measurement struct {
@@ -80,10 +86,6 @@ type runningStats struct {
 	start float64
 	end   float64
 	set   bool
-}
-
-func NewGenerator(blogCfg config.BlogConfig, llmCfg config.LLMConfig, store *archive.Store, llm markdownGenerator) *Generator {
-	return &Generator{blogConfig: blogCfg, llmConfig: llmCfg, store: store, llm: llm}
 }
 
 func (g *Generator) Generate(ctx context.Context, plan GeneratePlan) (PostResult, error) {
@@ -142,7 +144,20 @@ func (g *Generator) generateFromSnapshots(ctx context.Context, plan GeneratePlan
 	}
 
 	title, body := splitMarkdown(refined, plan.Day)
-	return g.writePost(plan.Day, title, body, opts)
+	result, err := g.writePost(plan.Day, title, body, opts)
+	if err != nil {
+		return PostResult{}, err
+	}
+
+	if g.sensorWriter != nil {
+		if dataPath, writeErr := g.sensorWriter.Write(snapshots); writeErr != nil {
+			log.Printf("live_sensors update failed (non-fatal): %v", writeErr)
+		} else if dataPath != "" {
+			result.AssetPaths = append(result.AssetPaths, dataPath)
+		}
+	}
+
+	return result, nil
 }
 
 func (g *Generator) generateWithRetry(ctx context.Context, systemPrompt, prompt string, validate func(string) error) (string, error) {

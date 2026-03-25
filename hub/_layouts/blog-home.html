@@ -52,6 +52,7 @@ layout: default
   </section>
 
   <!-- ── Live Sensors ──────────────────────────────────────── -->
+  {%- assign ls = site.data.live_sensors -%}
   <section class="live-sensors-section" role="region" aria-labelledby="live-sensors-heading">
 
     <!-- Section header -->
@@ -85,7 +86,7 @@ layout: default
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg>
           </div>
           <div class="snapshot-metric-body">
-            <span class="snapshot-metric-value">24.0°C</span>
+            <span class="snapshot-metric-value">{{ ls.env.temp | default: "–" }}</span>
             <span class="snapshot-metric-label">Ambient Temp</span>
           </div>
         </div>
@@ -94,7 +95,7 @@ layout: default
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 .75-7.414 5.25 5.25 0 0 0-10.233-2.33 3 3 0 0 0-3.758 3.848A4.486 4.486 0 0 0 2.25 15Z"/></svg>
           </div>
           <div class="snapshot-metric-body">
-            <span class="snapshot-metric-value">34%</span>
+            <span class="snapshot-metric-value">{{ ls.env.humidity | default: "–" }}</span>
             <span class="snapshot-metric-label">Air Humidity</span>
           </div>
         </div>
@@ -103,7 +104,7 @@ layout: default
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
           </div>
           <div class="snapshot-metric-body">
-            <span class="snapshot-metric-value">936 lux</span>
+            <span class="snapshot-metric-value">{{ ls.env.light | default: "–" }}</span>
             <span class="snapshot-metric-label">Light Level</span>
           </div>
         </div>
@@ -112,7 +113,7 @@ layout: default
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.594-6 8.912-6 11.25a6 6 0 0 0 12 0C18 11.912 16.444 8.594 12 3Z"/></svg>
           </div>
           <div class="snapshot-metric-body">
-            <span class="snapshot-metric-value">18.8°C</span>
+            <span class="snapshot-metric-value">{{ ls.env.reservoir_temp | default: "–" }}</span>
             <span class="snapshot-metric-label">Reservoir</span>
           </div>
         </div>
@@ -130,18 +131,27 @@ layout: default
       </p>
       <div class="snapshot-herbs-grid">
 
-          <!-- Basil -->
-        <div class="snapshot-herb-card snapshot-herb-card--healthy" role="article" aria-label="Basil sensor data">
+        {% for herb in ls.herbs %}
+        {%- assign herb_status = herb.status | default: 'healthy' -%}
+        <div class="snapshot-herb-card snapshot-herb-card--{{ herb_status }}" role="article" aria-label="{{ herb.name }} sensor data">
           <div class="herb-card-header">
             <div class="herb-card-identity">
-              <div class="herb-icon herb-icon--basil" aria-hidden="true">
+              <div class="herb-icon herb-icon--{{ herb.icon | default: 'basil' }}" aria-hidden="true">
                 <svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg"><path d="M20 4 C30 12 36 26 34 38 C32 50 26 58 20 62 C14 58 8 50 6 38 C4 26 10 12 20 4Z"/><line x1="20" y1="4" x2="20" y2="62" stroke-width="1" opacity="0.4"/><line x1="20" y1="20" x2="13" y2="28" stroke-width="0.8" opacity="0.3"/><line x1="20" y1="20" x2="27" y2="28" stroke-width="0.8" opacity="0.3"/><line x1="20" y1="32" x2="12" y2="40" stroke-width="0.8" opacity="0.3"/><line x1="20" y1="32" x2="28" y2="40" stroke-width="0.8" opacity="0.3"/></svg>
               </div>
               <div>
-                <h3 class="herb-card-name">Basil</h3>
-                <span class="herb-status-badge herb-status-badge--healthy">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="10" height="10" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                  Healthy
+                <h3 class="herb-card-name">{{ herb.name }}</h3>
+                <span class="herb-status-badge herb-status-badge--{{ herb_status }}">
+                  {% if herb_status == 'alert' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="10" height="10" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+                    Alert
+                  {% elsif herb_status == 'monitor' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="10" height="10" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                    Monitor
+                  {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="10" height="10" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                    Healthy
+                  {% endif %}
                 </span>
               </div>
             </div>
@@ -149,88 +159,23 @@ layout: default
           <div class="herb-sensor-row">
             <div class="herb-sensor-item">
               <div class="herb-sensor-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg></div>
-              <span class="herb-sensor-value">21.7°C</span>
+              <span class="herb-sensor-value">{{ herb.temp | default: "–" }}</span>
               <span class="herb-sensor-label">Temp</span>
             </div>
             <div class="herb-sensor-item">
               <div class="herb-sensor-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.594-6 8.912-6 11.25a6 6 0 0 0 12 0C18 11.912 16.444 8.594 12 3Z"/></svg></div>
-              <span class="herb-sensor-value">91%</span>
+              <span class="herb-sensor-value">{{ herb.moisture | default: "–" }}</span>
               <span class="herb-sensor-label">Moisture</span>
             </div>
           </div>
-          <div class="herb-moisture-bar" role="progressbar" aria-label="Basil moisture 91%" aria-valuenow="91" aria-valuemin="0" aria-valuemax="100">
-            <div class="herb-moisture-bar-track"><div class="herb-moisture-bar-fill" style="width:91%"></div></div>
-            <span class="herb-moisture-bar-label">91% soil moisture</span>
+          {% if herb.moisture %}
+          <div class="herb-moisture-bar" role="progressbar" aria-label="{{ herb.name }} moisture {{ herb.moisture }}" aria-valuenow="{{ herb.moisture | remove: '%' }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="herb-moisture-bar-track"><div class="herb-moisture-bar-fill" style="width:{{ herb.moisture | remove: '%' }}%"></div></div>
+            <span class="herb-moisture-bar-label">{{ herb.moisture }} soil moisture</span>
           </div>
+          {% endif %}
         </div>
-
-        <!-- Chilli -->
-        <div class="snapshot-herb-card snapshot-herb-card--monitor" role="article" aria-label="Chilli sensor data">
-          <div class="herb-card-header">
-            <div class="herb-card-identity">
-              <div class="herb-icon herb-icon--chilli" aria-hidden="true">
-                <svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg"><path d="M20 4 C30 12 36 26 34 38 C32 50 26 58 20 62 C14 58 8 50 6 38 C4 26 10 12 20 4Z"/><line x1="20" y1="4" x2="20" y2="62" stroke-width="1" opacity="0.4"/><line x1="20" y1="20" x2="13" y2="28" stroke-width="0.8" opacity="0.3"/><line x1="20" y1="20" x2="27" y2="28" stroke-width="0.8" opacity="0.3"/><line x1="20" y1="32" x2="12" y2="40" stroke-width="0.8" opacity="0.3"/><line x1="20" y1="32" x2="28" y2="40" stroke-width="0.8" opacity="0.3"/></svg>
-              </div>
-              <div>
-                <h3 class="herb-card-name">Chilli</h3>
-                <span class="herb-status-badge herb-status-badge--monitor">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="10" height="10" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-                  Monitor
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="herb-sensor-row">
-            <div class="herb-sensor-item">
-              <div class="herb-sensor-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg></div>
-              <span class="herb-sensor-value">23.1°C</span>
-              <span class="herb-sensor-label">Temp</span>
-            </div>
-            <div class="herb-sensor-item">
-              <div class="herb-sensor-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.594-6 8.912-6 11.25a6 6 0 0 0 12 0C18 11.912 16.444 8.594 12 3Z"/></svg></div>
-              <span class="herb-sensor-value">58%</span>
-              <span class="herb-sensor-label">Moisture</span>
-            </div>
-          </div>
-          <div class="herb-moisture-bar" role="progressbar" aria-label="Chilli moisture 58%" aria-valuenow="58" aria-valuemin="0" aria-valuemax="100">
-            <div class="herb-moisture-bar-track"><div class="herb-moisture-bar-fill" style="width:58%"></div></div>
-            <span class="herb-moisture-bar-label">58% soil moisture</span>
-          </div>
-        </div>
-
-        <!-- Oregano -->
-        <div class="snapshot-herb-card snapshot-herb-card--healthy" role="article" aria-label="Oregano sensor data">
-          <div class="herb-card-header">
-            <div class="herb-card-identity">
-              <div class="herb-icon herb-icon--oregano" aria-hidden="true">
-                <svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg"><path d="M20 4 C30 12 36 26 34 38 C32 50 26 58 20 62 C14 58 8 50 6 38 C4 26 10 12 20 4Z"/><line x1="20" y1="4" x2="20" y2="62" stroke-width="1" opacity="0.4"/><line x1="20" y1="20" x2="13" y2="28" stroke-width="0.8" opacity="0.3"/><line x1="20" y1="20" x2="27" y2="28" stroke-width="0.8" opacity="0.3"/><line x1="20" y1="32" x2="12" y2="40" stroke-width="0.8" opacity="0.3"/><line x1="20" y1="32" x2="28" y2="40" stroke-width="0.8" opacity="0.3"/></svg>
-              </div>
-              <div>
-                <h3 class="herb-card-name">Oregano</h3>
-                <span class="herb-status-badge herb-status-badge--healthy">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="10" height="10" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                  Healthy
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="herb-sensor-row">
-            <div class="herb-sensor-item">
-              <div class="herb-sensor-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/></svg></div>
-              <span class="herb-sensor-value">22.8°C</span>
-              <span class="herb-sensor-label">Temp</span>
-            </div>
-            <div class="herb-sensor-item">
-              <div class="herb-sensor-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.594-6 8.912-6 11.25a6 6 0 0 0 12 0C18 11.912 16.444 8.594 12 3Z"/></svg></div>
-              <span class="herb-sensor-value">50%</span>
-              <span class="herb-sensor-label">Moisture</span>
-            </div>
-          </div>
-          <div class="herb-moisture-bar" role="progressbar" aria-label="Oregano moisture 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
-            <div class="herb-moisture-bar-track"><div class="herb-moisture-bar-fill" style="width:50%"></div></div>
-            <span class="herb-moisture-bar-label">50% soil moisture</span>
-          </div>
-        </div>
+        {% endfor %}
 
       </div><!-- /snapshot-herbs-grid -->
     </div>
@@ -242,6 +187,7 @@ layout: default
         <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.651a3.75 3.75 0 0 1 0-5.303m5.304 0a3.75 3.75 0 0 1 0 5.303m-7.425 2.122a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.809 3.808 9.981 0 13.789M12 12h.008v.008H12V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
       </svg>
       Readings from the Herb Hub 365 sensor array &mdash; updated continuously.
+      {% if ls.updated_at %}<span class="snapshot-footer-ts">Last updated: {{ ls.updated_at }}</span>{% endif %}
     </div>
 
   </section>

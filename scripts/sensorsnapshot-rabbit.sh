@@ -21,7 +21,8 @@ RABBITMQ_DURABLE="${RABBITMQ_DURABLE:-true}"
 RABBITMQ_AUTO_DELETE="${RABBITMQ_AUTO_DELETE:-false}"
 RABBITMQ_DELIVERY_MODE="${RABBITMQ_DELIVERY_MODE:-2}"
 KEEP_SNAPSHOT_JSON="${KEEP_SNAPSHOT_JSON:-false}"
-SNAPSHOT_OUTPUT_PATH="${SNAPSHOT_OUTPUT_PATH:-$PWD/snapshot.json}"
+# Default to SCRIPT_DIR so cron's unpredictable $PWD doesn't matter
+SNAPSHOT_OUTPUT_PATH="${SNAPSHOT_OUTPUT_PATH:-$SCRIPT_DIR/snapshot.json}"
 
 if [ ! -x "$SNAPSHOT_SCRIPT" ]; then
     echo "Snapshot script not found or not executable: $SNAPSHOT_SCRIPT" >&2
@@ -39,10 +40,15 @@ cleanup() {
 }
 trap cleanup EXIT
 
-(
-    cd "$tmpdir"
-    bash "$SNAPSHOT_SCRIPT"
-)
+# Run the snapshot script in the temp dir.
+# stdout (human-readable status) goes to stderr so cron mail shows it;
+# errors from the script itself already go to stderr.
+# Capture the exit code explicitly so set -e doesn't swallow the context.
+echo "--- running sensorsnapshot.sh ---" >&2
+if ! (cd "$tmpdir" && bash "$SNAPSHOT_SCRIPT") >&2; then
+    echo "sensorsnapshot.sh exited with an error — aborting publish." >&2
+    exit 1
+fi
 
 snapshot_file="$tmpdir/snapshot.json"
 
@@ -53,7 +59,7 @@ fi
 
 if [ "$KEEP_SNAPSHOT_JSON" = "true" ]; then
     cp "$snapshot_file" "$SNAPSHOT_OUTPUT_PATH"
-    echo "Saved snapshot copy to $SNAPSHOT_OUTPUT_PATH"
+    echo "Saved snapshot copy to $SNAPSHOT_OUTPUT_PATH" >&2
 fi
 
 python3 - "$snapshot_file" <<'PY'
@@ -64,6 +70,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from typing import Optional
 
 
 def env_bool(name: str, default: bool) -> bool:
@@ -73,7 +80,7 @@ def env_bool(name: str, default: bool) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
-def request(method: str, url: str, headers: dict[str, str], payload: dict | None) -> dict:
+def request(method: str, url: str, headers: dict, payload: Optional[dict]) -> dict:
     data = None if payload is None else json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
@@ -103,7 +110,11 @@ delivery_mode = int(os.environ.get("RABBITMQ_DELIVERY_MODE", "2"))
 with open(snapshot_path, "r", encoding="utf-8") as handle:
     payload_text = handle.read()
 
-json.loads(payload_text)
+# Validate the JSON before attempting to publish; emit a clean error if invalid.
+try:
+    json.loads(payload_text)
+except json.JSONDecodeError as exc:
+    raise SystemExit(f"snapshot.json is not valid JSON and cannot be published: {exc}")
 
 auth = base64.b64encode(f"{user}:{password}".encode("utf-8")).decode("ascii")
 headers = {

@@ -1,0 +1,264 @@
+<!--
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  sensor-snapshot.html — Reusable sensor data layout partial     │
+  │                                                                 │
+  │  USAGE in a post's front matter:                                │
+  │                                                                 │
+  │    layout: post                                                  │
+  │    sensor_snapshot: true                                        │
+  │                                                                 │
+  │    # Environment set                                            │
+  │    env_temp:     "22.4°C"                                       │
+  │    env_humidity: "38%"                                          │
+  │    env_light:    "621 lux"                                      │
+  │    env_reservoir_temp: "18.8°C"                                 │
+  │    env_time:    "07:42"                                         │
+  │                                                                 │
+  │    # Herb sets  (repeat block per herb)                         │
+  │    herbs:                                                       │
+  │      - name: Basil                                              │
+  │        icon: basil          # basil | chilli | oregano | mint   │
+  │        temp:      "21.7°C"                                      │
+  │        moisture:  "91%"                                         │
+  │        light:    "936 lux"                                      │
+  │        status:   "healthy"  # healthy | monitor | alert        │
+  │        note:     "Ready to harvest tomorrow."                   │
+  │      - name: Chilli                                             │
+  │        icon: chilli                                             │
+  │        temp:     "23.1°C"                                       │
+  │        moisture: "58%"                                          │
+  │        light:    "710 lux"                                      │
+  │        status:   "monitor"                                      │
+  │        note:     "Slightly dry — monitor closely."              │
+  │                                                                 │
+  │  Or include directly in a layout with Liquid variables set.    │
+  └─────────────────────────────────────────────────────────────────┘
+-->
+
+{% if page.sensor_snapshot or include.inline %}
+<section class="sensor-snapshot" aria-labelledby="snapshot-heading">
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <div class="snapshot-header">
+    <!-- Heroicons: cpu-chip -->
+    <svg class="snapshot-logo-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z"/>
+    </svg>
+    <div>
+      <p class="snapshot-eyebrow">Herb Hub 365 — Sensor Snapshot</p>
+      <h2 id="snapshot-heading" class="snapshot-title">
+        {% if page.sensor_label %}{{ page.sensor_label }}{% else %}Daily Sensor Reading{% endif %}
+      </h2>
+    </div>
+    <div class="snapshot-timestamp" aria-label="Snapshot time">
+      <!-- Heroicons: clock -->
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" width="14" height="14">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+      </svg>
+      {% if page.env_time %}{{ page.env_time }}{% else %}–{% endif %}
+      &nbsp;&middot;&nbsp;
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%b %-d, %Y" }}</time>
+    </div>
+  </div>
+
+  <!-- ── Environment Set ─────────────────────────────────────── -->
+  <div class="snapshot-env-block">
+    <p class="snapshot-block-label">
+      <!-- Heroicons: globe-alt -->
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" width="14" height="14">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"/>
+      </svg>
+      Greenhouse Environment
+    </p>
+
+    <div class="snapshot-env-grid">
+
+      <!-- Ambient Temp -->
+      <div class="snapshot-metric env-metric">
+        <div class="snapshot-metric-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/>
+          </svg>
+        </div>
+        <div class="snapshot-metric-body">
+          <span class="snapshot-metric-value">{% if page.env_temp %}{{ page.env_temp }}{% else %}–{% endif %}</span>
+          <span class="snapshot-metric-label">Ambient Temp</span>
+        </div>
+      </div>
+
+      <!-- Humidity -->
+      <div class="snapshot-metric env-metric">
+        <div class="snapshot-metric-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 .75-7.414 5.25 5.25 0 0 0-10.233-2.33 3 3 0 0 0-3.758 3.848A4.486 4.486 0 0 0 2.25 15Z"/>
+          </svg>
+        </div>
+        <div class="snapshot-metric-body">
+          <span class="snapshot-metric-value">{% if page.env_humidity %}{{ page.env_humidity }}{% else %}–{% endif %}</span>
+          <span class="snapshot-metric-label">Air Humidity</span>
+        </div>
+      </div>
+
+      <!-- Light Level -->
+      <div class="snapshot-metric env-metric">
+        <div class="snapshot-metric-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/>
+          </svg>
+        </div>
+        <div class="snapshot-metric-body">
+          <span class="snapshot-metric-value">{% if page.env_light %}{{ page.env_light }}{% else %}–{% endif %}</span>
+          <span class="snapshot-metric-label">Light Level</span>
+        </div>
+      </div>
+
+      <!-- Reservoir Temp -->
+      <div class="snapshot-metric env-metric">
+        <div class="snapshot-metric-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.594-6 8.912-6 11.25a6 6 0 0 0 12 0C18 11.912 16.444 8.594 12 3Z"/>
+          </svg>
+        </div>
+        <div class="snapshot-metric-body">
+          <span class="snapshot-metric-value">{% if page.env_reservoir_temp %}{{ page.env_reservoir_temp }}{% else %}–{% endif %}</span>
+          <span class="snapshot-metric-label">Reservoir Temp</span>
+        </div>
+      </div>
+
+    </div><!-- /snapshot-env-grid -->
+  </div><!-- /snapshot-env-block -->
+
+  <!-- ── Herb Cards ──────────────────────────────────────────── -->
+  {% if page.herbs %}
+  <div class="snapshot-herbs-block">
+    <p class="snapshot-block-label">
+      <!-- Heroicons: sparkles -->
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" width="14" height="14">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
+      </svg>
+      Herb Readings
+    </p>
+
+    <div class="snapshot-herbs-grid">
+      {% for herb in page.herbs %}
+      <div class="snapshot-herb-card snapshot-herb-card--{{ herb.status | default: 'healthy' }}" role="article" aria-label="{{ herb.name }} sensor data">
+
+        <!-- Herb header -->
+        <div class="herb-card-header">
+          <div class="herb-card-identity">
+            <!-- Herb leaf SVG icon (decorative, colour-coded per herb) -->
+            <div class="herb-icon herb-icon--{{ herb.icon | default: 'basil' }}" aria-hidden="true">
+              <svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 4 C30 12 36 26 34 38 C32 50 26 58 20 62 C14 58 8 50 6 38 C4 26 10 12 20 4Z"/>
+                <line x1="20" y1="4" x2="20" y2="62" stroke-width="1" opacity="0.4"/>
+                <line x1="20" y1="20" x2="13" y2="28" stroke-width="0.8" opacity="0.3"/>
+                <line x1="20" y1="20" x2="27" y2="28" stroke-width="0.8" opacity="0.3"/>
+                <line x1="20" y1="32" x2="12" y2="40" stroke-width="0.8" opacity="0.3"/>
+                <line x1="20" y1="32" x2="28" y2="40" stroke-width="0.8" opacity="0.3"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="herb-card-name">{{ herb.name }}</h3>
+              <span class="herb-status-badge herb-status-badge--{{ herb.status | default: 'healthy' }}">
+                {% if herb.status == 'alert' %}
+                  <!-- Heroicons: exclamation-triangle -->
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="10" height="10" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+                  </svg>
+                  Alert
+                {% elsif herb.status == 'monitor' %}
+                  <!-- Heroicons: eye -->
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="10" height="10" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                  </svg>
+                  Monitor
+                {% else %}
+                  <!-- Heroicons: check-circle -->
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="10" height="10" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                  </svg>
+                  Healthy
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sensor row -->
+        <div class="herb-sensor-row">
+
+          <!-- Temperature -->
+          <div class="herb-sensor-item">
+            <div class="herb-sensor-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/>
+              </svg>
+            </div>
+            <span class="herb-sensor-value">{% if herb.temp %}{{ herb.temp }}{% else %}–{% endif %}</span>
+            <span class="herb-sensor-label">Temp</span>
+          </div>
+
+          <!-- Moisture -->
+          <div class="herb-sensor-item">
+            <div class="herb-sensor-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.594-6 8.912-6 11.25a6 6 0 0 0 12 0C18 11.912 16.444 8.594 12 3Z"/>
+              </svg>
+            </div>
+            <span class="herb-sensor-value">{% if herb.moisture %}{{ herb.moisture }}{% else %}–{% endif %}</span>
+            <span class="herb-sensor-label">Moisture</span>
+          </div>
+
+          <!-- Light -->
+          <div class="herb-sensor-item">
+            <div class="herb-sensor-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/>
+              </svg>
+            </div>
+            <span class="herb-sensor-value">{% if herb.light %}{{ herb.light }}{% else %}–{% endif %}</span>
+            <span class="herb-sensor-label">Light</span>
+          </div>
+
+        </div><!-- /herb-sensor-row -->
+
+        <!-- Moisture bar -->
+        {% if herb.moisture %}
+        {% assign moisture_num = herb.moisture | remove: "%" | plus: 0 %}
+        <div class="herb-moisture-bar" role="progressbar" aria-label="{{ herb.name }} moisture {{ herb.moisture }}" aria-valuenow="{{ moisture_num }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="herb-moisture-bar-track">
+            <div class="herb-moisture-bar-fill" style="width: {{ herb.moisture | remove: '%' }}%"></div>
+          </div>
+          <span class="herb-moisture-bar-label">{{ herb.moisture }} soil moisture</span>
+        </div>
+        {% endif %}
+
+        <!-- Note -->
+        {% if herb.note %}
+        <p class="herb-note">
+          <!-- Heroicons: chat-bubble-left-ellipsis -->
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="12" height="12" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/>
+          </svg>
+          {{ herb.note }}
+        </p>
+        {% endif %}
+
+      </div><!-- /snapshot-herb-card -->
+      {% endfor %}
+    </div><!-- /snapshot-herbs-grid -->
+  </div>
+  {% endif %}
+
+  <!-- ── Footer note ─────────────────────────────────────────── -->
+  <div class="snapshot-footer">
+    <!-- Heroicons: signal -->
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="13" height="13" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.651a3.75 3.75 0 0 1 0-5.303m5.304 0a3.75 3.75 0 0 1 0 5.303m-7.425 2.122a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.809 3.808 9.981 0 13.789M12 12h.008v.008H12V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+    </svg>
+    Data captured by Herb Hub 365 sensor array &mdash; automated daily snapshot.
+  </div>
+
+</section>
+{% endif %}

@@ -899,6 +899,22 @@ a:hover { color: var(--canopy); }
   }
 }
 
+.post-sensor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  background: rgba(74,124,89,0.18);
+  color: var(--mint);
+  border: 1px solid rgba(74,124,89,0.30);
+  vertical-align: middle;
+}
+
 /* ── Post / Article Page ─────────────────────────────────── */
 .post-shell {
   max-width: 780px;
@@ -1278,6 +1294,528 @@ a:hover { color: var(--canopy); }
   .botanical-content { padding: 0 12px; }
 
   .hero-cta-row { flex-direction: column; align-items: flex-start; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SENSOR SNAPSHOT — shared styles for blog-home live panel
+   AND the reusable sensor-snapshot.html include
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Live Sensors Section (blog-home) ────────────────────── */
+.live-sensors-section {
+  margin: 0 auto 48px;
+  max-width: 1200px;
+  background: rgba(255,255,255,0.80);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 40px var(--shadow-green);
+  overflow: hidden;
+}
+
+.live-sensors-header {
+  padding: 28px 32px 20px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(26,61,43,0.06) 0%, transparent 60%);
+}
+
+.live-sensors-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.live-sensors-title-row h2 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.live-sensors-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--leaf);
+  flex-shrink: 0;
+}
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(34,197,94,0.12);
+  color: #16a34a;
+  border: 1px solid rgba(34,197,94,0.25);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: livePulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  50%       { opacity: 0.7; box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+}
+
+.live-sensors-sub {
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+/* ── Sensor Snapshot (post include + blog-home) ──────────── */
+.sensor-snapshot {
+  margin: 32px 0;
+  background: rgba(255,255,255,0.80);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 40px var(--shadow-green);
+  overflow: hidden;
+}
+
+/* Header */
+.snapshot-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 28px 32px 20px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(26,61,43,0.06) 0%, transparent 60%);
+  flex-wrap: wrap;
+}
+
+.snapshot-logo-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--leaf);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.snapshot-eyebrow {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--leaf);
+  margin: 0 0 4px;
+}
+
+.snapshot-title {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.snapshot-timestamp {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  font-weight: 600;
+  margin-left: auto;
+  white-space: nowrap;
+  padding-top: 4px;
+}
+
+/* Block label (sub-section titles) */
+.snapshot-block-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0 0 16px;
+}
+
+/* ── Environment Block ───────────────────────────────────── */
+.snapshot-env-block,
+.live-env-row {
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.snapshot-env-grid,
+.live-env-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.snapshot-metric {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(212,232,217,0.30);
+  border: 1px solid rgba(74,124,89,0.12);
+  transition: background 0.2s ease;
+}
+.snapshot-metric:hover { background: rgba(212,232,217,0.50); }
+
+.snapshot-metric-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(74,124,89,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--leaf);
+}
+.snapshot-metric-icon svg { width: 16px; height: 16px; }
+
+.snapshot-metric-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.snapshot-metric-value {
+  font-family: 'Lora', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--forest);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.snapshot-metric-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* ── Herb Cards Block ────────────────────────────────────── */
+.snapshot-herbs-block,
+.live-herbs-block {
+  padding: 24px 32px;
+}
+
+.snapshot-herbs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+/* Single herb card */
+.snapshot-herb-card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: rgba(255,255,255,0.70);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+.snapshot-herb-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px var(--shadow-deep);
+}
+
+/* Status-coloured left accent stripe */
+.snapshot-herb-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 4px 0 0 4px;
+}
+.snapshot-herb-card--healthy::before { background: var(--leaf); }
+.snapshot-herb-card--monitor::before { background: var(--gold); }
+.snapshot-herb-card--alert::before   { background: var(--clay); }
+
+/* Herb header */
+.herb-card-header { padding-left: 8px; }
+
+.herb-card-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Herb leaf icon */
+.herb-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.herb-icon svg {
+  width: 20px;
+  height: 30px;
+}
+
+/* Herb-specific icon colours */
+.herb-icon--basil   { background: rgba(45,90,61,0.14); }
+.herb-icon--basil svg path, .herb-icon--basil svg line { stroke: var(--canopy); fill: none; }
+.herb-icon--basil svg path { fill: rgba(45,90,61,0.18); stroke: var(--canopy); }
+
+.herb-icon--chilli  { background: rgba(192,113,74,0.14); }
+.herb-icon--chilli svg path { fill: rgba(192,113,74,0.18); stroke: var(--clay); }
+.herb-icon--chilli svg line { stroke: var(--clay); fill: none; }
+
+.herb-icon--oregano { background: rgba(107,158,120,0.14); }
+.herb-icon--oregano svg path { fill: rgba(107,158,120,0.18); stroke: var(--sage); }
+.herb-icon--oregano svg line { stroke: var(--sage); fill: none; }
+
+.herb-icon--mint    { background: rgba(157,196,165,0.20); }
+.herb-icon--mint svg path { fill: rgba(157,196,165,0.25); stroke: var(--mint); }
+.herb-icon--mint svg line { stroke: var(--mint); fill: none; }
+
+.herb-card-name {
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--forest);
+  margin: 0 0 4px;
+}
+
+/* Status badge */
+.herb-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+.herb-status-badge--healthy {
+  background: rgba(34,197,94,0.12);
+  color: #15803d;
+  border: 1px solid rgba(34,197,94,0.22);
+}
+.herb-status-badge--monitor {
+  background: rgba(245,158,11,0.12);
+  color: #b45309;
+  border: 1px solid rgba(245,158,11,0.22);
+}
+.herb-status-badge--alert {
+  background: rgba(220,38,38,0.10);
+  color: #b91c1c;
+  border: 1px solid rgba(220,38,38,0.20);
+}
+
+/* Sensor 3-column row */
+.herb-sensor-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-left: 8px;
+}
+
+.herb-sensor-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(212,232,217,0.22);
+  border: 1px solid rgba(74,124,89,0.10);
+  text-align: center;
+}
+
+.herb-sensor-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--sage);
+}
+.herb-sensor-icon svg { width: 16px; height: 16px; }
+
+.herb-sensor-value {
+  font-family: 'Lora', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--forest);
+  line-height: 1;
+}
+
+.herb-sensor-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Moisture progress bar */
+.herb-moisture-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 8px;
+}
+
+.herb-moisture-bar-track {
+  height: 6px;
+  background: rgba(74,124,89,0.12);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.herb-moisture-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--leaf), var(--mint));
+  border-radius: 100px;
+  transition: width 0.6s ease;
+}
+
+/* Colour-shift on status */
+.snapshot-herb-card--monitor .herb-moisture-bar-fill {
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+}
+.snapshot-herb-card--alert .herb-moisture-bar-fill {
+  background: linear-gradient(90deg, var(--clay), var(--terracotta));
+}
+
+.herb-moisture-bar-label {
+  font-size: 0.65rem;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+/* Herb note */
+.herb-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  background: var(--foam);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 0;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+}
+.herb-note svg { flex-shrink: 0; margin-top: 2px; color: var(--sage); }
+
+/* ── Snapshot footer ─────────────────────────────────────── */
+.snapshot-footer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 32px;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  font-weight: 500;
+  background: rgba(238,245,240,0.50);
+}
+.snapshot-footer svg { color: var(--sage); flex-shrink: 0; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media screen and (max-width: 900px) {
+  .snapshot-env-grid,
+  .live-env-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .snapshot-header,
+  .snapshot-env-block,
+  .live-env-row,
+  .snapshot-herbs-block,
+  .live-herbs-block,
+  .live-sensors-header,
+  .snapshot-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .snapshot-timestamp { display: none; }
+
+  .snapshot-env-grid,
+  .live-env-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .snapshot-herbs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .snapshot-metric-value { font-size: 1.05rem; }
+}
+
+/* ── Dark Mode — sensor snapshot ─────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .sensor-snapshot,
+  .live-sensors-section {
+    background: rgba(20,38,26,0.85);
+    border-color: var(--border);
+  }
+
+  .snapshot-header,
+  .live-sensors-header {
+    background: linear-gradient(135deg, rgba(26,61,43,0.20) 0%, transparent 60%);
+  }
+
+  .snapshot-metric {
+    background: rgba(26,50,33,0.60);
+    border-color: var(--border);
+  }
+  .snapshot-metric:hover { background: rgba(26,50,33,0.85); }
+
+  .snapshot-herb-card {
+    background: rgba(20,38,26,0.75);
+    border-color: var(--border);
+  }
+
+  .herb-sensor-item {
+    background: rgba(26,50,33,0.55);
+    border-color: var(--border);
+  }
+
+  .herb-moisture-bar-track { background: rgba(74,124,89,0.18); }
+
+  .snapshot-footer { background: rgba(15,31,21,0.60); }
+
+  .snapshot-metric-value,
+  .herb-sensor-value,
+  .herb-card-name,
+  .snapshot-title { color: #e8f0ea; }
+
+  .herb-note { background: rgba(26,43,31,0.80); border-color: var(--border); }
+
+  .live-badge {
+    background: rgba(34,197,94,0.15);
+    border-color: rgba(34,197,94,0.30);
+  }
 }
 
 /* ── Dark Mode ────────────────────────────────────────────── */

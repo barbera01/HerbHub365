@@ -20,6 +20,16 @@ layout: default
       <p class="post-meta">
         <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
         {% if page.author %} &middot; {{ page.author | escape }}{% endif %}
+        {% if page.sensor_snapshot %}
+          &nbsp;&middot;&nbsp;
+          <span class="post-sensor-badge" aria-label="Contains sensor data">
+            <!-- Heroicons: cpu-chip -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="11" height="11" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z"/>
+            </svg>
+            Sensor Snapshot
+          </span>
+        {% endif %}
       </p>
     </div>
   </header>

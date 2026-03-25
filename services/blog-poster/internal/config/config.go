@@ -23,6 +23,7 @@ type Config struct {
 	Blog               BlogConfig
 	RepoPost           RepoPostConfig
 	Git                GitConfig
+	SensorData         SensorDataConfig
 }
 
 type RabbitMQConfig struct {
@@ -89,6 +90,67 @@ type RepoPostConfig struct {
 	MaxFiles      int
 	MaxFileBytes  int
 	MaxTotalBytes int
+}
+
+// SensorDataConfig controls writing of hub/_data/live_sensors.yml after each
+// successful blog post publish.
+type SensorDataConfig struct {
+	// Enabled gates the feature entirely (SENSOR_DATA_ENABLED, default true).
+	Enabled bool
+	// DataFilePath is the absolute path to the YAML file to write
+	// (SENSOR_DATA_FILE, default $HUB_DIR/_data/live_sensors.yml).
+	DataFilePath string
+	// ReservoirTempKey is the key in the snapshot Temperatures map that holds
+	// the water reservoir temperature (SENSOR_RESERVOIR_TEMP_KEY, default "water").
+	ReservoirTempKey string
+	// MonitorBelow is the soil moisture % threshold below which a herb is
+	// flagged as "monitor" (SENSOR_MOISTURE_MONITOR_BELOW, default 65).
+	MonitorBelow float64
+	// AlertBelow is the soil moisture % threshold below which a herb is
+	// flagged as "alert" (SENSOR_MOISTURE_ALERT_BELOW, default 30).
+	AlertBelow float64
+	// herbNames maps sensor key → display name (from SENSOR_HERB_NAMES CSV "key:Name,...").
+	herbNames map[string]string
+	// herbIcons maps sensor key → icon name (from SENSOR_HERB_ICONS CSV "key:icon,...").
+	herbIcons map[string]string
+}
+
+// HerbDisplayName returns the display name for a sensor key.
+// Falls back to title-casing the key when no mapping exists.
+func (c SensorDataConfig) HerbDisplayName(key string) string {
+	if name, ok := c.herbNames[strings.ToLower(key)]; ok {
+		return name
+	}
+	// Title-case the raw key as a fallback.
+	parts := strings.FieldsFunc(key, func(r rune) bool { return r == '_' || r == '-' })
+	for i, p := range parts {
+		if len(p) > 0 {
+			parts[i] = strings.ToUpper(p[:1]) + p[1:]
+		}
+	}
+	return strings.Join(parts, " ")
+}
+
+// HerbIcon returns the icon name for a sensor key.
+// Falls back to substring matching against known herb names, then the raw key.
+func (c SensorDataConfig) HerbIcon(key string) string {
+	lower := strings.ToLower(key)
+	if icon, ok := c.herbIcons[lower]; ok {
+		return icon
+	}
+	// Substring fallback for common herbs.
+	knownIcons := map[string]string{
+		"basil": "basil", "chilli": "chilli", "chili": "chilli",
+		"oregano": "oregano", "mint": "mint", "thyme": "thyme",
+		"rosemary": "rosemary", "parsley": "parsley",
+		"cilantro": "cilantro", "dill": "dill",
+	}
+	for fragment, icon := range knownIcons {
+		if strings.Contains(lower, fragment) {
+			return icon
+		}
+	}
+	return lower
 }
 
 func Load() Config {
@@ -162,6 +224,15 @@ func Load() Config {
 			PAT:            os.Getenv("GIT_PAT"),
 			AuthorName:     getEnv("GIT_AUTHOR_NAME", "Herb Hub Bot"),
 			AuthorEmail:    getEnv("GIT_AUTHOR_EMAIL", "bot@herbhub365.com"),
+		},
+		SensorData: SensorDataConfig{
+			Enabled:          getBoolEnv("SENSOR_DATA_ENABLED", true),
+			DataFilePath:     getEnv("SENSOR_DATA_FILE", filepath.Join(hubDir, "_data", "live_sensors.yml")),
+			ReservoirTempKey: getEnv("SENSOR_RESERVOIR_TEMP_KEY", "water"),
+			MonitorBelow:     getFloatEnv("SENSOR_MOISTURE_MONITOR_BELOW", 65),
+			AlertBelow:       getFloatEnv("SENSOR_MOISTURE_ALERT_BELOW", 30),
+			herbNames:        parseKVCSV(os.Getenv("SENSOR_HERB_NAMES")),
+			herbIcons:        parseKVCSV(os.Getenv("SENSOR_HERB_ICONS")),
 		},
 	}
 }
@@ -258,6 +329,29 @@ func getCSVEnv(key string) []string {
 		trimmed := strings.TrimSpace(part)
 		if trimmed != "" {
 			result = append(result, trimmed)
+		}
+	}
+	return result
+}
+
+// parseKVCSV parses a "key:value,key:value" string into a lowercased-key map.
+// Used for SENSOR_HERB_NAMES and SENSOR_HERB_ICONS.
+// Example: "basil:Basil,chilli:Chilli Pepper,water_res:Reservoir"
+func parseKVCSV(value string) map[string]string {
+	result := make(map[string]string)
+	for _, pair := range strings.Split(value, ",") {
+		pair = strings.TrimSpace(pair)
+		if pair == "" {
+			continue
+		}
+		parts := strings.SplitN(pair, ":", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		k := strings.ToLower(strings.TrimSpace(parts[0]))
+		v := strings.TrimSpace(parts[1])
+		if k != "" && v != "" {
+			result[k] = v
 		}
 	}
 	return result

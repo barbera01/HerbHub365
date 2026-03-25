@@ -19,6 +19,7 @@ import (
 	"HerbHub365/services/blog-poster/internal/model"
 	"HerbHub365/services/blog-poster/internal/rabbitmq"
 	"HerbHub365/services/blog-poster/internal/repopost"
+	"HerbHub365/services/blog-poster/internal/sensordata"
 	"github.com/robfig/cron/v3"
 )
 
@@ -30,7 +31,8 @@ func main() {
 	mode := resolveMode(cfg.Mode)
 	store := archive.NewStore(cfg.DataDir)
 	client := llm.NewClient(cfg.LLM)
-	generator := blog.NewGenerator(cfg.Blog, cfg.LLM, store, client)
+	sensorWriter := sensordata.NewWriter(cfg.SensorData)
+	generator := blog.NewGenerator(cfg.Blog, cfg.LLM, store, client, sensorWriter)
 	publisher := gitpublish.NewPublisher(cfg.Git)
 
 	switch mode {

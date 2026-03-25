@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Ensure i2c tools (i2cset/i2cget) are on PATH when run from cron
+export PATH="/usr/sbin:/usr/local/sbin:$PATH"
+
 I2C_BUS=1
 ADS_ADDR=0x48
 BME280_ADDR=0x76
@@ -39,10 +42,18 @@ declare -A WET_CAL=(
 )
 read_ads() {
     chan=$1
-    i2cset -y $I2C_BUS $ADS_ADDR 0x01 ${CH_CFG_HIGH[$chan]} $CFG_LOW i >/dev/null
+    if ! i2cset -y $I2C_BUS $ADS_ADDR 0x01 ${CH_CFG_HIGH[$chan]} $CFG_LOW i >/dev/null 2>&1; then
+        echo "0.0000"
+        return
+    fi
     sleep 0.01
-    raw=$(i2cget -y $I2C_BUS $ADS_ADDR 0x00 w)
+    raw=$(i2cget -y $I2C_BUS $ADS_ADDR 0x00 w 2>/dev/null) || { echo "0.0000"; return; }
     raw=${raw#0x}
+    # Guard: raw must be exactly 4 hex digits
+    if [[ ! "$raw" =~ ^[0-9a-fA-F]{4}$ ]]; then
+        echo "0.0000"
+        return
+    fi
     swapped="${raw:2:2}${raw:0:2}"
     val=$((16#$swapped))
     if [ $val -gt 32767 ]; then
@@ -52,11 +63,15 @@ read_ads() {
 }
 read_temp() {
     file=$1/w1_slave
-    if ! grep -q YES "$file"; then
-        echo "nan"
+    if ! grep -q YES "$file" 2>/dev/null; then
+        echo "null"
         return
     fi
     t=$(grep -o "t=-*[0-9]*" "$file" | cut -d= -f2)
+    if [ -z "$t" ]; then
+        echo "null"
+        return
+    fi
     echo "scale=3; $t/1000" | bc -l
 }
 read_bh1750() {
@@ -180,23 +195,26 @@ write_json_snapshot() {
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     
     # Get all sensor data
-    bme_temp=""
-    bme_humidity=""
-    bme_pressure=""
+    bme_temp="null"
+    bme_humidity="null"
+    bme_pressure="null"
     bme_output=$(read_bme280 2>/dev/null)
     if [ -n "$bme_output" ]; then
-        bme_temp=$(echo "$bme_output" | grep "Temperature" | awk '{print $2}' | tr -d 'C')
-        bme_humidity=$(echo "$bme_output" | grep "Humidity" | awk '{print $2}' | tr -d '%')
-        bme_pressure=$(echo "$bme_output" | grep "Pressure" | awk '{print $2}' | tr -d 'hPa')
+        _t=$(echo "$bme_output" | grep "Temperature" | awk '{print $2}' | tr -d 'C')
+        _h=$(echo "$bme_output" | grep "Humidity"    | awk '{print $2}' | tr -d '%')
+        _p=$(echo "$bme_output" | grep "Pressure"    | awk '{print $2}' | tr -d 'hPa')
+        [ -n "$_t" ] && bme_temp="$_t"
+        [ -n "$_h" ] && bme_humidity="$_h"
+        [ -n "$_p" ] && bme_pressure="$_p"
     fi
     
     light=$(read_bh1750 2>/dev/null)
-    [ "$light" = "error" ] && light="null"
+    ( [ "$light" = "error" ] || [ -z "$light" ] ) && light="null"
     
     water_level=$(read_hcsr04t 2>/dev/null)
     if [ "$water_level" != "error" ] && [ -n "$water_level" ]; then
-        water_percent=$(calc_water_percent $water_level)
-        water_volume=$(calc_water_volume $water_percent)
+        water_percent=$(calc_water_percent "$water_level")
+        water_volume=$(calc_water_volume "$water_percent")
     else
         water_level="null"
         water_percent="null"
@@ -223,9 +241,10 @@ EOF
     # Add temperature sensors
     first=true
     for dev in /sys/bus/w1/devices/28-*; do
-        id=$(basename $dev)
-        name=${TEMP_MAP[$id]}
-        temp=$(read_temp $dev)
+        id=$(basename "$dev")
+        name=${TEMP_MAP[$id]:-unknown}
+        temp=$(read_temp "$dev")
+        [ -z "$temp" ] && temp="null"
         
         if [ "$first" = true ]; then
             first=false
@@ -236,6 +255,7 @@ EOF
         echo -n "    \"$name\": $temp" >> snapshot.json
     done
     cat >> snapshot.json << EOF
+
   },
   "soil_moisture": {
 EOF
@@ -243,8 +263,10 @@ EOF
     first=true
     for chan in A0 A1 A2; do
         plant=${MOISTURE_MAP[$chan]}
-        v=$(read_ads $chan)
-        moisture=$(calc_moisture $plant $v)
+        v=$(read_ads "$chan")
+        [ -z "$v" ] && v="0.0000"
+        moisture=$(calc_moisture "$plant" "$v")
+        [ -z "$moisture" ] && moisture="null"
         
         if [ "$first" = true ]; then
             first=false
@@ -300,17 +322,20 @@ fi
 echo ""
 echo "Temperatures (°C)"
 for dev in /sys/bus/w1/devices/28-*; do
-    id=$(basename $dev)
-    name=${TEMP_MAP[$id]}
-    temp=$(read_temp $dev)
+    [ -e "$dev" ] || { echo "  (no 1-wire temperature sensors found)"; break; }
+    id=$(basename "$dev")
+    name=${TEMP_MAP[$id]:-unknown}
+    temp=$(read_temp "$dev")
     printf "%-10s : %s °C\n" "$name" "$temp"
 done
 echo ""
 echo "Soil Moisture"
 for chan in A0 A1 A2; do
     plant=${MOISTURE_MAP[$chan]}
-    v=$(read_ads $chan)
-    moisture=$(calc_moisture $plant $v)
+    v=$(read_ads "$chan")
+    [ -z "$v" ] && v="0.0000"
+    moisture=$(calc_moisture "$plant" "$v")
+    [ -z "$moisture" ] && moisture="0.0"
     printf "%-10s : %.3f V  (%s%%)\n" "$plant" "$v" "$moisture"
 done
 echo ""

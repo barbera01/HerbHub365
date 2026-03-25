@@ -3,9 +3,9 @@ layout: post
 title: "Morning Light and Warmth at Herb Hub 365"
 date: 2026-03-16 20:00:00 +0000
 categories: Herb Hub Update
+image: /assets/images/blog/2026-03-16-morning-light-and-warmth-at-herb-hub-365.jpg
+image_alt: "Timelapse snapshot from the Herb Hub 365 greenhouse on March 16, 2026"
 ---
-
-![Timelapse image for March 16, 2026](/assets/images/blog/2026-03-16-morning-light-and-warmth-at-herb-hub-365.jpg)
 
 Good morning from the greenhouse on March 16, 2026. The sensors have been active this morning, capturing a nice shift in the environment as we move through the day. It’s always good to see the numbers climbing slightly higher with the sun coming out.
 

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+  {%- include head.html -%}
+
+  <body>
+
+    <!-- ── Botanical Navigation ──────────────────────────── -->
+    <nav class="botanical-nav" id="botanical-nav" role="navigation" aria-label="Main navigation">
+      <a class="nav-brand" href="{{ '/' | relative_url }}" aria-label="{{ site.title }} home">
+        <span class="nav-brand-mark">
+          <img src="{{ '/assets/images/logo.png' | relative_url }}" alt="{{ site.title }} logo" width="28" height="28">
+        </span>
+        <span>Herb Hub <span style="color: var(--leaf);">365</span></span>
+      </a>
+
+      <ul class="nav-links" role="list">
+        <li>
+          <a href="{{ '/' | relative_url }}"
+             {% if page.url == '/' %}class="active" aria-current="page"{% endif %}
+             aria-label="Home">
+            <!-- Heroicons: home -->
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+            </svg>
+            <span class="nav-link-text">Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ '/herbs/' | relative_url }}"
+             {% if page.url contains '/herbs' %}class="active" aria-current="page"{% endif %}
+             aria-label="Herbs journal">
+            <!-- Heroicons: sparkles (used for herbs/grow) -->
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
+            </svg>
+            <span class="nav-link-text">Herbs</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ '/platform-architecture/' | relative_url }}"
+             {% if page.url contains '/platform' %}class="active" aria-current="page"{% endif %}
+             aria-label="Platform architecture">
+            <!-- Heroicons: cpu-chip -->
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z"/>
+            </svg>
+            <span class="nav-link-text">Platform</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ '/about/' | relative_url }}"
+             {% if page.url contains '/about' %}class="active" aria-current="page"{% endif %}
+             aria-label="About">
+            <!-- Heroicons: information-circle -->
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+            </svg>
+            <span class="nav-link-text">About</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- ── Background botanical leaves ──────────────────── -->
+    <svg class="botanical-bg-leaf botanical-bg-leaf-1" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <path fill="#2d5a3d" d="M100 20 C140 40 180 80 170 140 C160 200 120 250 100 280 C80 250 40 200 30 140 C20 80 60 40 100 20Z"/>
+      <path fill="#1a3d2b" opacity="0.6" d="M100 20 C100 80 100 180 100 280"/>
+    </svg>
+    <svg class="botanical-bg-leaf botanical-bg-leaf-2" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <path fill="#4a7c59" d="M100 20 C140 40 180 80 170 140 C160 200 120 250 100 280 C80 250 40 200 30 140 C20 80 60 40 100 20Z" transform="rotate(20 100 150)"/>
+    </svg>
+
+    <!-- ── Page Content ──────────────────────────────────── -->
+    <main class="page-content botanical-page" aria-label="Content">
+      <div class="wrapper">
+        {{ content }}
+      </div>
+    </main>
+
+    <!-- ── Botanical Footer ──────────────────────────────── -->
+    <footer class="botanical-footer" role="contentinfo">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="footer-brand-name">Herb Hub 365</span>
+          <p class="footer-tagline">Growing herbs with sensors, AI vision, and a love for horticulture. Greenhouse notes, platform architecture, and the science behind the garden.</p>
+          <p class="footer-meta">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>
+            </svg>
+            Greenhouse, 2026
+          </p>
+        </div>
+
+        <nav class="footer-nav" aria-label="Footer navigation: Sections">
+          <h4>Sections</h4>
+          <ul role="list">
+            <li><a href="{{ '/' | relative_url }}">Home</a></li>
+            <li><a href="{{ '/herbs/' | relative_url }}">Herbs Journal</a></li>
+            <li><a href="{{ '/platform-architecture/' | relative_url }}">Platform Architecture</a></li>
+            <li><a href="{{ '/about/' | relative_url }}">About</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer-nav" aria-label="Footer navigation: Recent posts">
+          <h4>Recent Posts</h4>
+          <ul role="list">
+            {% for post in site.posts limit: 4 %}
+              <li><a href="{{ post.url | relative_url }}">{{ post.title | escape | truncate: 42 }}</a></li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </div>
+
+      <div class="footer-bottom">
+        <span>&copy; {{ 'now' | date: "%Y" }} {{ site.title | escape }}. Grown with care.</span>
+        <span>{{ site.description | truncate: 60 }}</span>
+      </div>
+    </footer>
+
+    <!-- ── Scroll-aware nav enhancement ─────────────────── -->
+    <script>
+      (function() {
+        var nav = document.getElementById('botanical-nav');
+        if (!nav) return;
+        var onScroll = function() {
+          if (window.scrollY > 40) {
+            nav.classList.add('scrolled');
+          } else {
+            nav.classList.remove('scrolled');
+          }
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+      })();
+    </script>
+
+  </body>
+
+</html>

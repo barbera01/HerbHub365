@@ -2,27 +2,105 @@
 layout: default
 ---
 
-<div class="home-shell">
-  <section class="hero-band">
-    <div class="hero-copy">
-      <p class="eyebrow">Herb Hub 365 Journal</p>
-      <h1>Greenhouse notes and platform architecture in one place.</h1>
-      <p class="hero-text">Follow the living side of Herb Hub through herb growing updates, or dive into the systems that power the platform behind the scenes.</p>
-    </div>
-    <div class="hero-mark">
-      <img src="{{ '/assets/images/logo.png' | relative_url }}" alt="Herb Hub 365 logo">
+<div class="botanical-content">
+
+  <!-- ── Hero ─────────────────────────────────────────── -->
+  <section class="botanical-hero" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow" aria-label="Site section">Herb Hub 365 — Live Greenhouse Journal</p>
+        <h1 id="hero-title">Where horticulture meets AI-powered growing.</h1>
+        <p class="hero-text">Sensor-driven herb updates, computer vision plant monitoring, and the technical architecture powering every leaf and log.</p>
+        <div class="hero-cta-row">
+          <a class="btn-primary" href="{{ '/herbs/' | relative_url }}">
+            <!-- Heroicons: sparkles -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
+            </svg>
+            Explore the Herbs
+          </a>
+          <a class="btn-ghost" href="{{ '/platform-architecture/' | relative_url }}">
+            <!-- Heroicons: arrow-right -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/>
+            </svg>
+            Platform Architecture
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-video-wrap">
+          <video
+            class="hero-video"
+            src="{{ '/assets/video/timelapse.mp4' | relative_url }}"
+            autoplay
+            muted
+            loop
+            playsinline
+            aria-hidden="true"
+            preload="metadata"
+          ></video>
+          <div class="hero-video-overlay"></div>
+          <!-- Logo badge over video -->
+          <div class="hero-logo-badge">
+            <img src="{{ '/assets/images/logo.png' | relative_url }}" alt="{{ site.title }} logo" width="52" height="52">
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="category-grid">
+  <!-- ── Live Sensor Stats ──────────────────────────── -->
+  <div class="sensor-strip" role="region" aria-label="Live greenhouse readings">
+    <div class="sensor-stat">
+      <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/>
+      </svg>
+      <span class="stat-value">21.7°C</span>
+      <span class="stat-label">Basil Temp</span>
+    </div>
+    <div class="sensor-stat">
+      <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4.444 5.594-6 8.912-6 11.25a6 6 0 0 0 12 0C18 11.912 16.444 8.594 12 3Z"/>
+      </svg>
+      <span class="stat-value">91%</span>
+      <span class="stat-label">Basil Moisture</span>
+    </div>
+    <div class="sensor-stat">
+      <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/>
+      </svg>
+      <span class="stat-value">936 lux</span>
+      <span class="stat-label">Light Level</span>
+    </div>
+    <div class="sensor-stat">
+      <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 .75-7.414 5.25 5.25 0 0 0-10.233-2.33 3 3 0 0 0-3.758 3.848A4.486 4.486 0 0 0 2.25 15Z"/>
+      </svg>
+      <span class="stat-value">34%</span>
+      <span class="stat-label">Humidity</span>
+    </div>
+  </div>
+
+  <!-- ── Category Cards ──────────────────────────────── -->
+  <section class="category-grid" aria-labelledby="categories-title">
+    <h2 id="categories-title" class="sr-only">Journal Categories</h2>
+
     <article class="category-card herb-card">
+      <!-- Decorative leaf SVG -->
+      <svg class="card-leaf" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#2d5a3d" d="M60 10 C90 30 110 70 105 110 C100 150 75 175 60 190 C45 175 20 150 15 110 C10 70 30 30 60 10Z"/>
+        <line x1="60" y1="10" x2="60" y2="190" stroke="#1a3d2b" stroke-width="2" opacity="0.5"/>
+      </svg>
+
       <p class="card-kicker">Grow</p>
-      <h2><a href="{{ '/herbs/' | relative_url }}">Herbs</a></h2>
-      <p>Sensor-driven greenhouse updates, plant observations, watering notes, and day-to-day growing progress.</p>
-      <ul class="post-list compact-list">
+      <h2><a href="{{ '/herbs/' | relative_url }}" aria-label="Herbs journal — explore all herb posts">Herbs</a></h2>
+      <p>Sensor-driven greenhouse updates, plant observations, watering notes, and day-to-day growing progress monitored by AI vision.</p>
+      <ul class="post-list compact-list" aria-label="Recent herb posts">
         {% assign herb_count = 0 %}
         {% for post in site.posts %}
-          {% if post.categories contains 'Herbs' or post.categories contains 'Herb' %}
+          {% if post.categories contains 'Herbs' or post.categories contains 'Herb' or post.categories contains 'Herb Hub Update' %}
             {% assign herb_count = herb_count | plus: 1 %}
             {% if herb_count <= 3 %}
               <li>
@@ -33,16 +111,21 @@ layout: default
           {% endif %}
         {% endfor %}
         {% if herb_count == 0 %}
-          <li><p>No herb posts yet.</p></li>
+          <li><p style="color:var(--ink-muted); font-size:0.9rem;">Greenhouse is warming up — posts coming soon.</p></li>
         {% endif %}
       </ul>
     </article>
 
     <article class="category-card platform-card">
+      <!-- Decorative leaf SVG -->
+      <svg class="card-leaf" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#c0714a" d="M60 10 C90 30 110 70 105 110 C100 150 75 175 60 190 C45 175 20 150 15 110 C10 70 30 30 60 10Z" transform="rotate(-15 60 100)"/>
+      </svg>
+
       <p class="card-kicker">Build</p>
-      <h2><a href="{{ '/platform-architecture/' | relative_url }}">Platform Architecture</a></h2>
-      <p>Technical explainers about services, automations, data flows, and the software and hardware that run Herb Hub.</p>
-      <ul class="post-list compact-list">
+      <h2><a href="{{ '/platform-architecture/' | relative_url }}" aria-label="Platform architecture — technical deep-dives">Platform Architecture</a></h2>
+      <p>Technical explainers about AI vision models, sensor pipelines, data flows, and the software and hardware running Herb Hub.</p>
+      <ul class="post-list compact-list" aria-label="Recent platform posts">
         {% assign platform_count = 0 %}
         {% for post in site.posts %}
           {% if post.categories contains 'Platform Architecture' or post.categories contains 'Platform' or post.categories contains 'Architecture' %}
@@ -56,27 +139,48 @@ layout: default
           {% endif %}
         {% endfor %}
         {% if platform_count == 0 %}
-          <li><p>No platform posts yet.</p></li>
+          <li><p style="color:var(--ink-muted); font-size:0.9rem;">Architecture posts loading — check back soon.</p></li>
         {% endif %}
       </ul>
     </article>
   </section>
 
-  <section class="recent-posts">
+  <!-- ── Recent Posts ──────────────────────────────────── -->
+  <section class="recent-posts-section" aria-labelledby="recent-title">
     <div class="section-heading">
-      <p class="eyebrow">Latest</p>
-      <h2>Recent posts</h2>
+      <p class="section-label">Latest from the greenhouse</p>
+      <h2 id="recent-title">Recent Posts</h2>
+      <p>The freshest updates from sensors, plants, and systems.</p>
     </div>
-    <ul class="post-list">
-      {% for post in site.posts limit: 8 %}
-        <li>
-          <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-          <h3><a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
-          {% if post.categories %}
-            <p class="post-taxonomy">{{ post.categories | join: " / " }}</p>
+
+    <div class="recent-post-grid" role="list">
+      {% for post in site.posts limit: 6 %}
+        <article class="post-card" role="listitem">
+          {% if post.image %}
+            <a href="{{ post.url | relative_url }}" class="post-card-image-link" aria-label="{{ post.title | escape }} — view post">
+              <div class="post-card-image">
+                <img src="{{ post.image | relative_url }}" alt="{{ post.image_alt | default: post.title | escape }}" loading="lazy">
+              </div>
+            </a>
           {% endif %}
-        </li>
+          <span class="post-card-date">{{ post.date | date: "%b %-d, %Y" }}</span>
+          <h3><a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+          {% if post.excerpt %}
+            <p style="font-size:0.88rem; color:var(--ink-soft); line-height:1.55; margin:0;">{{ post.excerpt | strip_html | truncate: 110 }}</p>
+          {% endif %}
+          {% if post.categories %}
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
+              {% for cat in post.categories %}
+                <span class="post-card-tag">{{ cat }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </article>
       {% endfor %}
-    </ul>
+    </div>
   </section>
+
 </div>
+
+<!-- Visually hidden utility class for screen readers -->
+<style>.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }</style>

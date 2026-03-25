@@ -3,6 +3,7 @@ layout: default
 ---
 
 <div class="category-shell">
+
   <header class="category-header">
     <p class="eyebrow">Category</p>
     <h1>{{ page.title }}</h1>
@@ -11,7 +12,7 @@ layout: default
     {% endif %}
   </header>
 
-  <ul class="post-list category-list">
+  <ul class="category-list post-list" aria-label="Posts in {{ page.title }}">
     {% assign match_count = 0 %}
     {% for post in site.posts %}
       {% assign matches = false %}
@@ -30,15 +31,16 @@ layout: default
             <p class="post-taxonomy">{{ post.categories | join: " / " }}</p>
           {% endif %}
           {% if post.excerpt %}
-            <p>{{ post.excerpt | strip_html | truncate: 180 }}</p>
+            <p>{{ post.excerpt | strip_html | truncate: 200 }}</p>
           {% endif %}
         </li>
       {% endif %}
     {% endfor %}
     {% if match_count == 0 %}
       <li>
-        <p>No posts have been published in this category yet.</p>
+        <p style="color:var(--ink-muted); font-size:0.95rem; padding:8px 0;">No posts have been published in this category yet — the greenhouse is growing.</p>
       </li>
     {% endif %}
   </ul>
+
 </div>

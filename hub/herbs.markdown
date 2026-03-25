@@ -6,4 +6,5 @@ description: Greenhouse updates, herb growing notes, and plant-focused posts fro
 category_filters:
   - Herbs
   - Herb
+  - Herb Hub Update
 ---

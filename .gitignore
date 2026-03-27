@@ -120,3 +120,8 @@ logs/
 
 # Timelapse builder output
 /services/timelapse-builder/output/
+
+# ====================
+# OpenCode (local tooling)
+# ====================
+.opencode/skills/

@@ -103,6 +103,31 @@ services:
       - "traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp"
       - "traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672"
 
+  watering:
+    build:
+      context: ../services/watering
+      dockerfile: dockerfile
+    container_name: watering
+    restart: unless-stopped
+    networks:
+      - herbhub
+    environment:
+      SOIL_MOISTURE_THRESHOLD: ${WATERING_SOIL_MOISTURE_THRESHOLD:-40.0}
+      RABBITMQ_URL: ${WATERING_RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
+      METRICS_URL: ${WATERING_METRICS_URL:-http://hh-02:9100/metrics}
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8787/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 5s
+      retries: 3
+    depends_on:
+      - rabbitmq
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
   dashboard:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: dashboard

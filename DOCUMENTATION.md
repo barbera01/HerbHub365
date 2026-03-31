@@ -25,31 +25,19 @@
 
 ## Services
 
-### `services/vision/app/main.go`
+### `services/watering/water_manager.go`
 
 1. **Purpose:**
-   - This Go program interacts with a RabbitMQ service to process messages and execute commands related to capturing images using a Raspberry Pi camera.
+   - This Go program monitors soil moisture levels via Prometheus metrics and publishes watering commands to RabbitMQ when plants need water.
 
 2. **Dependencies:**
-   - Requires access to a RabbitMQ service at `https://rabbit.herbhub365.com`.
-   - Uses specific RabbitMQ credentials (username and password).
+   - Requires access to a Prometheus server for metrics collection.
+   - Requires access to a RabbitMQ service for message publishing.
 
 3. **Troubleshooting:**
-   - Ensure connectivity to the RabbitMQ service.
-   - Verify the correctness of RabbitMQ credentials.
-   - Check for errors related to message processing and command execution.
-
-### `services/data-collector/main.go`
-
-1. **Purpose:**
-   - This program collects data from environmental sensors like temperature and moisture sensors.
-
-2. **Dependencies:**
-   - Depends on sensor packages like `envtemp`, `moisture`, and `soiltemp`.
-
-3. **Troubleshooting:**
-   - Ensure sensors are properly connected and functioning.
-   - Check for any errors related to sensor data collection.
+   - Ensure connectivity to both Prometheus and RabbitMQ services.
+   - Verify the correctness of service credentials.
+   - Check for errors related to metric collection and message publishing.
 
 ### `services/admin/app/main.go`
 

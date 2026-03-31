@@ -29,41 +29,28 @@ These scripts automate the setup process for creating an Azure App Registration,
    - Ensure the Resource Group and Storage Account creation commands execute without errors.
    - Check if the specified location and SKU are valid.
 
-## [services/vision/app/main.go](./services/vision/app/main.go)
+## [services/watering/water_manager.go](./services/watering/water_manager.go)
 
 ### Purpose:
-This Go application interacts with a RabbitMQ server to process messages related to time-lapse requests.
+This Go application monitors soil moisture levels via Prometheus metrics and publishes watering commands to RabbitMQ when plants need water.
 
 ### Dependencies:
-- RabbitMQ server running and accessible.
+- Prometheus server for metrics collection.
+- RabbitMQ server for message queuing.
 - Go environment.
 
 ### Troubleshooting Steps:
-1. **RabbitMQ Connection:**
+1. **Prometheus Connection:**
+   - Verify the Prometheus URL is correct and accessible.
+   - Check that soil moisture metrics are being collected.
+
+2. **RabbitMQ Connection:**
    - Verify the RabbitMQ URL, username, and password are correct.
    - Check the RabbitMQ server status and connectivity.
 
-2. **Message Processing:**
-   - Ensure the application can fetch messages from the queue.
-   - Verify the payload format and decoding process.
-
-3. **Image Capture:**
-   - Check the `rpicam-still` command execution.
-   - Verify the output directory and file naming.
-
-## [services/data-collector/main.go](./services/data-collector/main.go)
-
-### Purpose:
-This Go application collects data from environmental sensors like temperature and moisture sensors.
-
-### Dependencies:
-- Environmental sensors modules (envtemp, moisture, soiltemp).
-- Go environment.
-
-### Troubleshooting Steps:
-1. **Sensor Readings:**
-   - Verify the sensor modules are functioning correctly.
-   - Check the sensor data collection process.
+3. **Message Publishing:**
+   - Ensure the application can publish messages to the watering exchange.
+   - Verify the routing key format matches plant names.
 
 ## [support-tools/busstop/main.go](./support-tools/busstop/main.go)
 

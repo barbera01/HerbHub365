@@ -358,6 +358,7 @@ func extractMarkdownContent(primary any, fallbacks ...string) string {
 	content = stripThinkTags(content)
 	content = stripPreambleBeforeTitle(content)
 	content = stripFencedCodeBlocks(content)
+	content = ensureMarkdownTitle(content)
 	if content != "" && !looksLikeThinking(content) {
 		return content
 	}
@@ -476,6 +477,27 @@ func stripPreambleBeforeTitle(content string) string {
 func stripFencedCodeBlocks(content string) string {
 	re := regexp.MustCompile("(?m)^```[a-zA-Z]*\\n?")
 	return strings.TrimSpace(re.ReplaceAllString(content, ""))
+}
+
+// ensureMarkdownTitle guarantees the output starts with a level-1 heading.
+// If the model omitted a heading entirely, the first non-empty line is
+// promoted to one so downstream validation does not reject the post.
+func ensureMarkdownTitle(content string) string {
+	trimmed := strings.TrimSpace(content)
+	if trimmed == "" || strings.HasPrefix(trimmed, "# ") {
+		return trimmed
+	}
+	// Find the first non-empty line and promote it
+	lines := strings.SplitN(trimmed, "\n", 2)
+	first := strings.TrimSpace(lines[0])
+	// Strip any existing lower-level heading markers (##, ###, etc.)
+	for strings.HasPrefix(first, "#") {
+		first = strings.TrimSpace(strings.TrimPrefix(first, "#"))
+	}
+	if len(lines) == 2 {
+		return "# " + first + "\n" + lines[1]
+	}
+	return "# " + first
 }
 
 func boolPtr(value bool) *bool {

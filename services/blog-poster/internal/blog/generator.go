@@ -20,6 +20,7 @@ import (
 	"HerbHub365/services/blog-poster/internal/config"
 	"HerbHub365/services/blog-poster/internal/model"
 	"HerbHub365/services/blog-poster/internal/sensordata"
+	"gopkg.in/yaml.v3"
 )
 
 var ErrNoSnapshots = errors.New("no snapshots found for target date")
@@ -49,6 +50,8 @@ type writeOptions struct {
 	draft      bool
 	categories string
 	slugLabel  string
+	layout     string
+	extras     map[string]any
 }
 
 func NewGenerator(blogCfg config.BlogConfig, llmCfg config.LLMConfig, store *archive.Store, llm markdownGenerator, sensorWriter *sensordata.Writer) *Generator {
@@ -120,6 +123,23 @@ func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt,
 	}
 
 	return g.writePost(day, title, body, writeOptions{draft: draft, categories: categories})
+}
+
+func (g *Generator) GeneratePrometheusPost(day time.Time, title, body string, draft bool, categories, layout string, assetPaths, publicChartPaths []string) (PostResult, error) {
+	result, err := g.writePost(day, title, body, writeOptions{
+		draft:      draft,
+		categories: categories,
+		layout:     layout,
+		extras: map[string]any{
+			"prometheus_charts":        true,
+			"prometheus_chart_exports": publicChartPaths,
+		},
+	})
+	if err != nil {
+		return PostResult{}, err
+	}
+	result.AssetPaths = append(result.AssetPaths, assetPaths...)
+	return result, nil
 }
 
 func (g *Generator) generateFromSnapshots(ctx context.Context, plan GeneratePlan, snapshots []model.Snapshot, opts writeOptions) (PostResult, error) {
@@ -266,7 +286,7 @@ func (g *Generator) writePost(day time.Time, title, body string, opts writeOptio
 		}
 	}
 
-	content := buildFrontMatter(g.blogConfig, day, title, opts.categories) + trimmedBody + "\n"
+	content := buildFrontMatter(g.blogConfig, day, title, opts.categories, opts.layout, opts.extras) + trimmedBody + "\n"
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		return PostResult{}, err
 	}
@@ -333,7 +353,7 @@ func copyFile(src, dst string) error {
 	return out.Close()
 }
 
-func buildFrontMatter(cfg config.BlogConfig, day time.Time, title, categories string) string {
+func buildFrontMatter(cfg config.BlogConfig, day time.Time, title, categories, layout string, extras map[string]any) string {
 	var builder strings.Builder
 	publishedAt := time.Date(day.Year(), day.Month(), day.Day(), 20, 0, 0, 0, time.UTC)
 	now := time.Now().UTC().Truncate(time.Second)
@@ -343,10 +363,13 @@ func buildFrontMatter(cfg config.BlogConfig, day time.Time, title, categories st
 	if strings.TrimSpace(categories) == "" {
 		categories = cfg.Categories
 	}
+	if strings.TrimSpace(layout) == "" {
+		layout = cfg.Layout
+	}
 
 	builder.WriteString("---\n")
 	builder.WriteString("layout: ")
-	builder.WriteString(cfg.Layout)
+	builder.WriteString(layout)
 	builder.WriteString("\n")
 	builder.WriteString("title: ")
 	builder.WriteString(strconvQuote(title))
@@ -361,6 +384,12 @@ func buildFrontMatter(cfg config.BlogConfig, day time.Time, title, categories st
 		builder.WriteString("author: ")
 		builder.WriteString(strconvQuote(cfg.Author))
 		builder.WriteString("\n")
+	}
+	if len(extras) > 0 {
+		extraYAML, err := yaml.Marshal(extras)
+		if err == nil {
+			builder.WriteString(string(extraYAML))
+		}
 	}
 	builder.WriteString("---\n\n")
 	return builder.String()

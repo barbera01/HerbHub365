@@ -1,0 +1,308 @@
+<section class="prometheus-charts" aria-labelledby="prometheus-charts-heading">
+  <div class="prometheus-charts-header">
+    <p class="eyebrow">Metrics</p>
+    <h2 id="prometheus-charts-heading">Prometheus Charts</h2>
+    <p>Rendered from exported Prometheus JSON snapshots committed with this post.</p>
+  </div>
+
+  <div class="prometheus-chart-grid" id="prometheus-chart-grid"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script>
+    (function () {
+      var exportPaths = {{ page.prometheus_chart_exports | jsonify }};
+      if (!Array.isArray(exportPaths) || exportPaths.length === 0) return;
+      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var grid = document.getElementById('prometheus-chart-grid');
+      if (!grid) return;
+
+      function parseValues(series) {
+        var values = [];
+        if (!series || !Array.isArray(series.values)) return values;
+        for (var i = 0; i < series.values.length; i++) {
+          var pair = series.values[i];
+          if (!Array.isArray(pair) || pair.length < 2) continue;
+          var timestampMs = Number(pair[0]) * 1000;
+          var value = Number(pair[1]);
+          if (!isFinite(timestampMs) || !isFinite(value)) continue;
+          values.push([timestampMs, value]);
+        }
+        return values;
+      }
+
+      function seriesName(metric, fallback) {
+        if (!metric || typeof metric !== 'object') return fallback;
+        var labels = [];
+        for (var key in metric) {
+          if (!Object.prototype.hasOwnProperty.call(metric, key)) continue;
+          if (key === '__name__') continue;
+          labels.push(key + '=' + metric[key]);
+        }
+        return labels.length ? labels.join(', ') : fallback;
+      }
+
+      function metricKind(payload) {
+        var text = [payload && payload.id, payload && payload.title, payload && payload.query]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        if (text.indexOf('humidity') >= 0) return 'humidity';
+        if (text.indexOf('pressure') >= 0 || text.indexOf('hpa') >= 0) return 'pressure';
+        if (text.indexOf('light') >= 0 || text.indexOf('lux') >= 0) return 'light';
+        if (text.indexOf('soil') >= 0) return 'soil';
+        if (text.indexOf('water') >= 0 || text.indexOf('reservoir') >= 0) return 'water';
+        if (text.indexOf('temp') >= 0 || text.indexOf('temperature') >= 0) return 'temperature';
+        return 'metric';
+      }
+
+      function metricLabel(kind) {
+        var map = {
+          temperature: 'Temperature',
+          humidity: 'Humidity',
+          pressure: 'Pressure',
+          light: 'Light',
+          soil: 'Soil',
+          water: 'Water',
+          metric: 'Metric'
+        };
+        return map[kind] || 'Metric';
+      }
+
+      function metricIconSVG(kind) {
+        var icons = {
+          temperature: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 14.25V5.25a2.25 2.25 0 0 0-4.5 0v9a3.75 3.75 0 1 0 4.5 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6"/></svg>',
+          humidity: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c3.5 4.4 6.75 7.2 6.75 10.5A6.75 6.75 0 1 1 5.25 13.5C5.25 10.2 8.5 7.4 12 3Z"/></svg>',
+          pressure: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path stroke-linecap="round" d="M12 12l3-3"/></svg>',
+          light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21m6.364-14.636-1.591 1.591M7.227 16.773l-1.591 1.591M21 12h-2.25M5.25 12H3m15.364 4.773-1.591-1.591M7.227 7.227 5.636 5.636"/><circle cx="12" cy="12" r="3.25"/></svg>',
+          soil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 14.25h15M6.75 14.25v4.5m4.5-4.5v4.5m4.5-4.5v4.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9.75c0-1.657 1.343-3 3-3h1.5"/></svg>',
+          water: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c3.5 4.4 6.75 7.2 6.75 10.5A6.75 6.75 0 1 1 5.25 13.5C5.25 10.2 8.5 7.4 12 3Z"/><path stroke-linecap="round" d="M9 15.75c.75.75 1.875 1.125 3 1.125s2.25-.375 3-1.125"/></svg>',
+          metric: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 19.5h16.5M6.75 16.5v-6m5.25 6v-9m5.25 9v-3"/></svg>'
+        };
+        return icons[kind] || icons.metric;
+      }
+
+      function computeStats(payload) {
+        var response = payload && payload.prometheus_response;
+        var result = response && response.data && Array.isArray(response.data.result)
+          ? response.data.result
+          : [];
+        var min = null;
+        var max = null;
+        var latestTs = null;
+        var latestValues = [];
+
+        for (var i = 0; i < result.length; i++) {
+          var points = parseValues(result[i]);
+          for (var p = 0; p < points.length; p++) {
+            var ts = points[p][0];
+            var value = points[p][1];
+            if (!isFinite(value)) continue;
+            min = min === null ? value : Math.min(min, value);
+            max = max === null ? value : Math.max(max, value);
+            if (latestTs === null || ts > latestTs) {
+              latestTs = ts;
+              latestValues = [value];
+            } else if (ts === latestTs) {
+              latestValues.push(value);
+            }
+          }
+        }
+
+        var current = null;
+        if (latestValues.length > 0) {
+          var sum = 0;
+          for (var j = 0; j < latestValues.length; j++) sum += latestValues[j];
+          current = sum / latestValues.length;
+        }
+
+        return { current: current, min: min, max: max };
+      }
+
+      function formatMetricValue(value, unit) {
+        if (value == null || Number.isNaN(value)) return '–';
+        var abs = Math.abs(value);
+        var decimals = abs >= 100 ? 0 : abs >= 10 ? 1 : 2;
+        var n = new Intl.NumberFormat(undefined, { maximumFractionDigits: decimals }).format(value);
+        return unit ? n + ' ' + unit : n;
+      }
+
+      function buildOption(payload) {
+        var response = payload && payload.prometheus_response;
+        var chartTitle = (payload && payload.title) || 'Prometheus Chart';
+        var chartType = (payload && payload.chart_type) || 'line';
+        var unit = (payload && payload.unit) || '';
+        var result = response && response.data && Array.isArray(response.data.result)
+          ? response.data.result
+          : [];
+
+        var palette = ['#22c55e', '#16a34a', '#0ea5e9', '#14b8a6', '#f59e0b', '#84cc16', '#10b981'];
+        var series = [];
+        for (var i = 0; i < result.length; i++) {
+          var item = result[i] || {};
+          series.push({
+            name: seriesName(item.metric, 'series-' + (i + 1)),
+            type: chartType,
+            showSymbol: false,
+            smooth: true,
+            lineStyle: { width: 2 },
+            areaStyle: chartType === 'line' ? { opacity: 0.12 } : undefined,
+            data: parseValues(item)
+          });
+        }
+
+        if (series.length === 0) {
+          return {
+            title: {
+              text: chartTitle,
+              left: 0,
+              textStyle: { fontFamily: 'Lora, serif', fontSize: 17, color: '#1a3d2b' }
+            },
+            graphic: {
+              type: 'text',
+              left: 'center',
+              top: 'middle',
+              style: {
+                text: 'No data for selected range',
+                fill: '#4b5f52',
+                fontSize: 14,
+                fontFamily: 'Inter, system-ui, sans-serif'
+              }
+            }
+          };
+        }
+
+        return {
+          animation: !reduceMotion,
+          animationDuration: reduceMotion ? 0 : 450,
+          animationDurationUpdate: reduceMotion ? 0 : 300,
+          color: palette,
+          title: {
+            text: chartTitle,
+            left: 0,
+            textStyle: { fontFamily: 'Lora, serif', fontSize: 17, color: '#1a3d2b' }
+          },
+          tooltip: {
+            trigger: 'axis',
+            backgroundColor: 'rgba(9, 16, 12, 0.92)',
+            borderColor: 'rgba(113, 187, 120, 0.45)',
+            textStyle: { color: '#eaf6ed' },
+            valueFormatter: function (value) {
+              if (value == null || Number.isNaN(value)) return '–';
+              return unit ? value + ' ' + unit : String(value);
+            }
+          },
+          legend: {
+            top: 30,
+            type: 'scroll',
+            textStyle: { color: '#35503f', fontSize: 12 }
+          },
+          toolbox: {
+            right: 4,
+            itemSize: 14,
+            iconStyle: { borderColor: '#2f6f42' },
+            feature: {
+              saveAsImage: { title: 'Save' },
+              restore: { title: 'Reset' }
+            }
+          },
+          dataZoom: [
+            { type: 'inside', throttle: 80 },
+            {
+              type: 'slider',
+              height: 16,
+              bottom: 8,
+              borderColor: 'rgba(40, 78, 54, 0.2)',
+              fillerColor: 'rgba(34, 197, 94, 0.18)',
+              handleStyle: { color: '#2f6f42' }
+            }
+          ],
+          grid: { left: 46, right: 18, top: 72, bottom: 42 },
+          xAxis: {
+            type: 'time',
+            axisLabel: { color: '#3d5445' },
+            splitLine: { lineStyle: { color: 'rgba(38, 60, 47, 0.1)' } }
+          },
+          yAxis: {
+            type: 'value',
+            axisLabel: { color: '#3d5445' },
+            splitLine: { lineStyle: { color: 'rgba(38, 60, 47, 0.12)' } }
+          },
+          series: series
+        };
+      }
+
+      function formatIso(value) {
+        if (!value) return 'Unknown';
+        var d = new Date(value);
+        if (Number.isNaN(d.getTime())) return String(value);
+        return d.toLocaleString();
+      }
+
+      function buildCard(path) {
+        var card = document.createElement('article');
+        card.className = 'prometheus-chart-card';
+        card.innerHTML = '<div class="prometheus-chart-status">Loading chart…</div>';
+        grid.appendChild(card);
+
+        fetch(path)
+          .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(function (payload) {
+            var title = (payload && payload.title) || 'Prometheus Chart';
+            var query = (payload && payload.query) || 'n/a';
+            var unit = (payload && payload.unit) || '';
+            var kind = metricKind(payload);
+            var stats = computeStats(payload);
+            var rangeText = formatIso(payload && payload.start) + ' → ' + formatIso(payload && payload.end);
+
+            card.innerHTML = '';
+            var header = document.createElement('header');
+            header.className = 'prometheus-chart-head';
+            var badge = document.createElement('span');
+            badge.className = 'prometheus-chart-badge prometheus-chart-badge--' + kind;
+            badge.innerHTML = metricIconSVG(kind) + '<span>' + metricLabel(kind) + '</span>';
+            var h3 = document.createElement('h3');
+            h3.textContent = title;
+            var meta = document.createElement('p');
+            meta.className = 'prometheus-chart-meta';
+            meta.textContent = rangeText;
+            var kpis = document.createElement('div');
+            kpis.className = 'prometheus-kpis';
+            kpis.innerHTML =
+              '<div class="prometheus-kpi"><span class="prometheus-kpi-label">Current</span><strong>' + formatMetricValue(stats.current, unit) + '</strong></div>' +
+              '<div class="prometheus-kpi"><span class="prometheus-kpi-label">24h Min</span><strong>' + formatMetricValue(stats.min, unit) + '</strong></div>' +
+              '<div class="prometheus-kpi"><span class="prometheus-kpi-label">24h Max</span><strong>' + formatMetricValue(stats.max, unit) + '</strong></div>';
+            header.appendChild(badge);
+            header.appendChild(h3);
+            header.appendChild(meta);
+            header.appendChild(kpis);
+            card.appendChild(header);
+
+            var canvas = document.createElement('div');
+            canvas.className = 'prometheus-chart-canvas';
+            card.appendChild(canvas);
+
+            var details = document.createElement('details');
+            details.className = 'prometheus-chart-details';
+            details.innerHTML = '<summary>Query details</summary><code></code>';
+            details.querySelector('code').textContent = query;
+            card.appendChild(details);
+
+            var chart = echarts.init(canvas);
+            chart.setOption(buildOption(payload));
+            window.addEventListener('resize', function () { chart.resize(); });
+          })
+          .catch(function (err) {
+            card.innerHTML = '<div class="prometheus-chart-status prometheus-chart-status--error">Unable to load chart export: ' + String(err) + '</div>';
+          });
+      }
+
+      for (var i = 0; i < exportPaths.length; i++) {
+        buildCard(exportPaths[i]);
+      }
+    })();
+  </script>
+</section>

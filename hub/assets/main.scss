@@ -922,6 +922,17 @@ a:hover { color: var(--canopy); }
   padding: 0 24px 80px;
 }
 
+/* Wider canvas for chart-heavy metrics posts */
+.post-shell--metrics {
+  max-width: 1240px;
+}
+
+/* Keep prose readable while charts can use the full width */
+.post-shell--metrics .post-content {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
 .post-header {
   padding: 48px;
   margin-bottom: 40px;
@@ -1020,6 +1031,185 @@ a:hover { color: var(--canopy); }
   font-size: 1.05rem;
   line-height: 1.80;
   color: var(--ink);
+}
+
+/* ── Prometheus Charts ───────────────────────────────────── */
+.prometheus-charts {
+  margin: 0 0 28px;
+  padding: 22px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(1200px 320px at 0% 0%, rgba(34, 197, 94, 0.08), transparent 60%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.88), rgba(247, 253, 249, 0.92));
+  box-shadow: 0 16px 36px rgba(21, 39, 27, 0.08);
+}
+
+.prometheus-charts-header h2 {
+  margin-bottom: 8px;
+}
+
+.prometheus-charts-header p {
+  margin-bottom: 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.prometheus-chart-grid {
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+
+.prometheus-chart-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(165deg, #ffffff, #f7fcf8);
+  min-height: 360px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(26, 46, 31, 0.09);
+  transition: transform 180ms ease-out, box-shadow 220ms ease-out, border-color 180ms ease-out;
+}
+
+.prometheus-chart-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(57, 115, 76, 0.35);
+  box-shadow: 0 14px 30px rgba(26, 46, 31, 0.14);
+}
+
+.prometheus-chart-head {
+  padding: 14px 16px 0;
+}
+
+.prometheus-chart-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.prometheus-chart-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+.prometheus-chart-badge--temperature { background: rgba(239, 68, 68, 0.12); color: #9b2c2c; border-color: rgba(239, 68, 68, 0.24); }
+.prometheus-chart-badge--humidity { background: rgba(56, 189, 248, 0.14); color: #115e82; border-color: rgba(56, 189, 248, 0.28); }
+.prometheus-chart-badge--pressure { background: rgba(59, 130, 246, 0.12); color: #1e3a8a; border-color: rgba(59, 130, 246, 0.26); }
+.prometheus-chart-badge--light { background: rgba(245, 158, 11, 0.14); color: #8a4b0f; border-color: rgba(245, 158, 11, 0.28); }
+.prometheus-chart-badge--soil { background: rgba(132, 204, 22, 0.16); color: #3f6212; border-color: rgba(132, 204, 22, 0.34); }
+.prometheus-chart-badge--water { background: rgba(20, 184, 166, 0.14); color: #0f766e; border-color: rgba(20, 184, 166, 0.3); }
+.prometheus-chart-badge--metric { background: rgba(107, 114, 128, 0.14); color: #374151; border-color: rgba(107, 114, 128, 0.24); }
+
+.prometheus-chart-head h3 {
+  margin: 0;
+  color: #163626;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.prometheus-chart-meta {
+  margin: 6px 0 0;
+  color: #4c6255;
+  font-size: 0.78rem;
+}
+
+.prometheus-kpis {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.prometheus-kpi {
+  border: 1px solid rgba(43, 84, 58, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 7px 9px;
+}
+
+.prometheus-kpi-label {
+  display: block;
+  color: #557061;
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.prometheus-kpi strong {
+  display: block;
+  margin-top: 2px;
+  color: #173926;
+  font-size: 0.88rem;
+}
+
+.prometheus-chart-canvas {
+  width: 100%;
+  height: 320px;
+}
+
+.prometheus-chart-details {
+  border-top: 1px dashed rgba(39, 73, 53, 0.18);
+  padding: 8px 14px 12px;
+}
+
+.prometheus-chart-details summary {
+  cursor: pointer;
+  color: #35503f;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.prometheus-chart-details code {
+  display: block;
+  margin-top: 8px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #f1f8f3;
+  color: #1f4030;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.prometheus-chart-status {
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  padding: 20px;
+}
+
+.prometheus-chart-status--error {
+  color: #8d3a2a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prometheus-chart-card {
+    transition: none;
+  }
+
+  .prometheus-chart-card:hover {
+    transform: none;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .prometheus-kpis {
+    grid-template-columns: 1fr;
+  }
 }
 
 .post-content h2 {

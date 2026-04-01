@@ -44,6 +44,16 @@ services:
       BLOG_REPO_POST_MAX_FILES: ${BLOG_REPO_POST_MAX_FILES:-12}
       BLOG_REPO_POST_MAX_FILE_BYTES: ${BLOG_REPO_POST_MAX_FILE_BYTES:-12000}
       BLOG_REPO_POST_MAX_TOTAL_BYTES: ${BLOG_REPO_POST_MAX_TOTAL_BYTES:-48000}
+      PROM_POST_BASE_URL: ${PROM_POST_BASE_URL:-https://prometheus.home-cloud.uk}
+      PROM_POST_PATH: ${PROM_POST_PATH:-/api/v1/query_range}
+      PROM_POST_QUERY_FILE: ${PROM_POST_QUERY_FILE:-/repo/services/blog-poster/config/prom-queries.json}
+      PROM_POST_RANGE: ${PROM_POST_RANGE:-24h}
+      PROM_POST_STEP: ${PROM_POST_STEP:-5m}
+      PROM_POST_TIMEOUT: ${PROM_POST_TIMEOUT:-30s}
+      PROM_POST_DRAFT: ${PROM_POST_DRAFT:-true}
+      PROM_POST_CATEGORIES: ${PROM_POST_CATEGORIES:-Metrics Observability}
+      PROM_POST_LAYOUT: ${PROM_POST_LAYOUT:-post}
+      PROM_POST_EXPORT_DIR: ${PROM_POST_EXPORT_DIR:-/repo/hub/assets/data/prometheus}
       BLOG_INCLUDE_DAY_IMAGE: ${BLOG_INCLUDE_DAY_IMAGE:-false}
       BLOG_IMAGE_SOURCE_DIR: /timelapse
       BLOG_IMAGE_OUTPUT_DIR: /repo/hub/assets/images/blog

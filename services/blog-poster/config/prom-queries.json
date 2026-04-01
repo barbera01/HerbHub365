@@ -1,0 +1,103 @@
+{
+  "queries": [
+    {
+      "id": "herbhub_env_temperature_c",
+      "title": "Environment Temperature",
+      "promql": "herbhub_env_temperature_c",
+      "chart_type": "line",
+      "unit": "°C",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_env_humidity_percent",
+      "title": "Environment Humidity",
+      "promql": "herbhub_env_humidity_percent",
+      "chart_type": "line",
+      "unit": "%",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_env_pressure_hpa",
+      "title": "Environment Pressure",
+      "promql": "herbhub_env_pressure_hpa",
+      "chart_type": "line",
+      "unit": "hPa",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_light_lux",
+      "title": "Ambient Light",
+      "promql": "herbhub_light_lux",
+      "chart_type": "line",
+      "unit": "lux",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_soil_percent",
+      "title": "Soil Moisture Percent",
+      "promql": "herbhub_soil_percent",
+      "chart_type": "line",
+      "unit": "%",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_soil_voltage",
+      "title": "Soil Sensor Voltage",
+      "promql": "herbhub_soil_voltage",
+      "chart_type": "line",
+      "unit": "V",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_temperature_c",
+      "title": "Probe Temperatures",
+      "promql": "herbhub_temperature_c",
+      "chart_type": "line",
+      "unit": "°C",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_water_distance_cm",
+      "title": "Water Distance",
+      "promql": "herbhub_water_distance_cm",
+      "chart_type": "line",
+      "unit": "cm",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_water_percent",
+      "title": "Water Reservoir Percent",
+      "promql": "herbhub_water_percent",
+      "chart_type": "line",
+      "unit": "%",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_water_volume_ml",
+      "title": "Water Reservoir Volume",
+      "promql": "herbhub_water_volume_ml",
+      "chart_type": "line",
+      "unit": "ml",
+      "range": "24h",
+      "step": "5m"
+    },
+    {
+      "id": "herbhub_last_run_seconds",
+      "title": "Last Run Age",
+      "promql": "herbhub_last_run_seconds",
+      "chart_type": "line",
+      "unit": "s",
+      "range": "24h",
+      "step": "5m"
+    }
+  ]
+}

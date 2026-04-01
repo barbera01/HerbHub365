@@ -357,6 +357,7 @@ func extractMarkdownContent(primary any, fallbacks ...string) string {
 	content := strings.TrimSpace(flattenContent(primary))
 	content = stripThinkTags(content)
 	content = stripPreambleBeforeTitle(content)
+	content = stripFencedCodeBlocks(content)
 	if content != "" && !looksLikeThinking(content) {
 		return content
 	}
@@ -466,6 +467,15 @@ func stripPreambleBeforeTitle(content string) string {
 		return strings.TrimSpace(content)
 	}
 	return content
+}
+
+// stripFencedCodeBlocks removes fenced code blocks (```...```) from model
+// output. Some models include code blocks despite explicit system prompt
+// instructions not to, which triggers the repo-post validation rejection.
+// The content inside the fence is kept as plain text so context is preserved.
+func stripFencedCodeBlocks(content string) string {
+	re := regexp.MustCompile("(?m)^```[a-zA-Z]*\\n?")
+	return strings.TrimSpace(re.ReplaceAllString(content, ""))
 }
 
 func boolPtr(value bool) *bool {

@@ -496,7 +496,7 @@ a:hover { color: var(--canopy); }
 /* ── Category Cards Grid ─────────────────────────────────── */
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--gap-md);
   margin-bottom: var(--gap-lg);
 }
@@ -538,6 +538,11 @@ a:hover { color: var(--canopy); }
 }
 .platform-card::before { background: linear-gradient(90deg, var(--clay), var(--gold)); }
 
+.monitor-card {
+  background: linear-gradient(160deg, rgba(198, 231, 224, 0.72) 0%, rgba(255,255,255,0.9) 100%);
+}
+.monitor-card::before { background: linear-gradient(90deg, #1f6f62, #47a78f); }
+
 /* Card decorative leaf */
 .card-leaf {
   position: absolute;
@@ -560,6 +565,7 @@ a:hover { color: var(--canopy); }
 }
 .herb-card .card-kicker { color: var(--canopy); }
 .platform-card .card-kicker { color: var(--clay); }
+.monitor-card .card-kicker { color: #1f6f62; }
 
 .category-card h2 {
   margin-bottom: 12px;
@@ -1430,6 +1436,12 @@ a:hover { color: var(--canopy); }
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
+@media screen and (max-width: 1200px) {
+  .category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media screen and (max-width: 900px) {
   .hero-inner {
     grid-template-columns: 1fr;

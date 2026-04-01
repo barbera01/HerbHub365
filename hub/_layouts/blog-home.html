@@ -26,6 +26,13 @@ layout: default
             </svg>
             Platform Architecture
           </a>
+          <a class="btn-ghost" href="{{ '/metrics/' | relative_url }}">
+            <!-- Heroicons: chart-bar -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7.5 15.75v-3m4.5 3v-7.5m4.5 7.5v-5.25"/>
+            </svg>
+            Monitor Metrics
+          </a>
         </div>
       </div>
 
@@ -249,6 +256,34 @@ layout: default
         {% endfor %}
         {% if platform_count == 0 %}
           <li><p style="color:var(--ink-muted); font-size:0.9rem;">Architecture posts loading — check back soon.</p></li>
+        {% endif %}
+      </ul>
+    </article>
+
+    <article class="category-card monitor-card">
+      <!-- Decorative pulse SVG -->
+      <svg class="card-leaf" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#1f6f62" d="M12 96h20l8-18 14 42 12-30 8 14h34" stroke="#1f6f62" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+
+      <p class="card-kicker">Monitor</p>
+      <h2><a href="{{ '/metrics/' | relative_url }}" aria-label="Metrics dashboard posts from Prometheus exports">Metrics</a></h2>
+      <p>Prometheus-powered chart posts with daily trends for climate, soil moisture, and reservoir telemetry from the greenhouse stack.</p>
+      <ul class="post-list compact-list" aria-label="Recent metrics posts">
+        {% assign metrics_count = 0 %}
+        {% for post in site.posts %}
+          {% if post.categories contains 'Metrics' or post.categories contains 'Observability' or post.categories contains 'Prometheus' %}
+            {% assign metrics_count = metrics_count | plus: 1 %}
+            {% if metrics_count <= 3 %}
+              <li>
+                <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+                <h3><a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+              </li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if metrics_count == 0 %}
+          <li><p style="color:var(--ink-muted); font-size:0.9rem;">Monitoring posts will appear after the first scheduled metrics export.</p></li>
         {% endif %}
       </ul>
     </article>

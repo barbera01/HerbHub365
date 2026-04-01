@@ -9,6 +9,7 @@
 - `generate`: create one post from archived snapshots for `BLOG_TARGET_DATE`
 - `draft`: pull one live queue message, keep it in RabbitMQ, and write a draft markdown file for testing
 - `repo-post`: create an ad hoc technical post from selected repository files and a user prompt
+- `prom-post`: export configured Prometheus `query_range` JSON files and generate a chart-enabled Jekyll post
 
 This gives you two deployment styles:
 
@@ -71,6 +72,16 @@ Important settings:
 - `BLOG_REPO_POST_PATHS`: comma-separated repo paths to inspect; required for `repo-post`
 - `BLOG_REPO_POST_DRAFT`: write repo posts to drafts by default for safety
 - `BLOG_REPO_POST_CATEGORIES`: front matter categories for repo posts, defaults to `Platform Update`
+- `PROM_POST_BASE_URL`: Prometheus base URL used by `prom-post`, e.g. `https://prometheus.home-cloud.uk`
+- `PROM_POST_PATH`: Prometheus API path, defaults to `/api/v1/query_range`
+- `PROM_POST_QUERY_FILE`: JSON query definitions file, defaults to `/repo/services/blog-poster/config/prom-queries.json`
+- `PROM_POST_RANGE`: default query range duration, defaults to `24h`
+- `PROM_POST_STEP`: default query step duration, defaults to `5m`
+- `PROM_POST_TIMEOUT`: HTTP timeout for Prometheus requests, defaults to `30s`
+- `PROM_POST_DRAFT`: write Prometheus posts to drafts by default for safety
+- `PROM_POST_CATEGORIES`: front matter categories for Prometheus posts, defaults to `Metrics Observability`
+- `PROM_POST_LAYOUT`: layout for Prometheus posts, defaults to `post`
+- `PROM_POST_EXPORT_DIR`: export directory for chart JSON files, defaults to `hub/assets/data/prometheus`
 - `GIT_PUBLISH_ENABLED`: enable commit and push after non-draft generation
 - `GIT_PAT`: GitHub personal access token used for HTTPS push
 
@@ -149,6 +160,17 @@ docker compose run --rm \
   -e BLOG_REPO_POST_PROMPT="Create a blog post on the timelapse service explaining what it does and how it works." \
   -e BLOG_REPO_POST_TITLE="How the Herb Hub timelapse service works" \
   -e BLOG_REPO_POST_PATHS="services/timelapse-builder,scripts/make-timelapse.sh,docker/docker-compose.yml" \
+  blog-poster
+```
+
+For an ad hoc Prometheus metrics draft post:
+
+```bash
+docker compose run --rm \
+  -e BLOG_POSTER_MODE=prom-post \
+  -e BLOG_TARGET_DATE=today \
+  -e PROM_POST_BASE_URL=https://prometheus.home-cloud.uk \
+  -e PROM_POST_DRAFT=true \
   blog-poster
 ```
 

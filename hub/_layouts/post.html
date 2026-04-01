@@ -2,7 +2,7 @@
 layout: default
 ---
 
-<div class="post-shell">
+<div class="post-shell{% if page.prometheus_charts %} post-shell--metrics{% endif %}">
 
   <!-- ── Post Header ─────────────────────────────────── -->
   <header class="post-header{% if page.image %} post-header--has-image{% endif %}">
@@ -35,6 +35,10 @@ layout: default
   </header>
 
   <!-- ── Post Body ───────────────────────────────────── -->
+  {% if page.prometheus_charts %}
+    {% include prometheus-charts.html %}
+  {% endif %}
+
   <article class="post-content" aria-label="Post content">
     {{ content }}
   </article>
@@ -86,4 +90,3 @@ layout: default
   </div>
 
 </div>
-

@@ -17,6 +17,7 @@ import (
 	"HerbHub365/services/blog-poster/internal/gitpublish"
 	"HerbHub365/services/blog-poster/internal/llm"
 	"HerbHub365/services/blog-poster/internal/model"
+	"HerbHub365/services/blog-poster/internal/prompost"
 	"HerbHub365/services/blog-poster/internal/rabbitmq"
 	"HerbHub365/services/blog-poster/internal/repopost"
 	"HerbHub365/services/blog-poster/internal/sensordata"
@@ -52,6 +53,10 @@ func main() {
 		if err := runRepoPost(ctx, cfg, generator, publisher); err != nil {
 			log.Fatal(err)
 		}
+	case "prom-post":
+		if err := runPromPost(ctx, cfg, generator, publisher); err != nil {
+			log.Fatal(err)
+		}
 	case "daemon":
 		if err := runDaemon(ctx, cfg, client, store, generator, publisher); err != nil && !errors.Is(err, context.Canceled) {
 			log.Fatal(err)
@@ -59,6 +64,47 @@ func main() {
 	default:
 		log.Fatalf("unsupported BLOG_POSTER_MODE %q", mode)
 	}
+}
+
+func runPromPost(ctx context.Context, cfg config.Config, generator *blog.Generator, publisher *gitpublish.Publisher) error {
+	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
+	defer cancel()
+
+	targetDate, err := cfg.ResolveTargetDate(time.Now())
+	if err != nil {
+		return err
+	}
+
+	export, err := prompost.Generate(targetDate, cfg.PromPost, cfg.LLM.PromptSiteName)
+	if err != nil {
+		return err
+	}
+
+	result, err := generator.GeneratePrometheusPost(
+		targetDate,
+		export.Title,
+		export.Body,
+		cfg.PromPost.Draft,
+		cfg.PromPost.Categories,
+		cfg.PromPost.Layout,
+		export.AssetPaths,
+		export.PublicPaths,
+	)
+	if err != nil {
+		return err
+	}
+
+	if cfg.PromPost.Draft {
+		log.Printf("generated prometheus post draft %s", result.Path)
+		return nil
+	}
+
+	if err := publisher.PublishPost(jobCtx, result, targetDate); err != nil {
+		return err
+	}
+
+	log.Printf("generated prometheus post %s", result.Path)
+	return nil
 }
 
 func resolveMode(defaultMode string) string {

@@ -49,6 +49,17 @@
           </a>
         </li>
         <li>
+          <a href="{{ '/metrics/' | relative_url }}"
+             {% if page.url contains '/metrics' %}class="active" aria-current="page"{% endif %}
+             aria-label="Metrics monitoring">
+            <!-- Heroicons: chart-bar -->
+            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7.5 15.75v-3m4.5 3v-7.5m4.5 7.5v-5.25"/>
+            </svg>
+            <span class="nav-link-text">Metrics</span>
+          </a>
+        </li>
+        <li>
           <a href="{{ '/about/' | relative_url }}"
              {% if page.url contains '/about' %}class="active" aria-current="page"{% endif %}
              aria-label="About">
@@ -99,6 +110,7 @@
             <li><a href="{{ '/' | relative_url }}">Home</a></li>
             <li><a href="{{ '/herbs/' | relative_url }}">Herbs Journal</a></li>
             <li><a href="{{ '/platform-architecture/' | relative_url }}">Platform Architecture</a></li>
+            <li><a href="{{ '/metrics/' | relative_url }}">Metrics Monitoring</a></li>
             <li><a href="{{ '/about/' | relative_url }}">About</a></li>
           </ul>
         </nav>

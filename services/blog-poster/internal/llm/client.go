@@ -355,6 +355,8 @@ func truncateForLog(body []byte) string {
 
 func extractMarkdownContent(primary any, fallbacks ...string) string {
 	content := strings.TrimSpace(flattenContent(primary))
+	content = stripThinkTags(content)
+	content = stripPreambleBeforeTitle(content)
 	if content != "" && !looksLikeThinking(content) {
 		return content
 	}
@@ -441,6 +443,29 @@ func cleanDraftLine(value string) string {
 	trimmed = strings.TrimPrefix(trimmed, "*")
 	trimmed = strings.TrimSpace(trimmed)
 	return trimmed
+}
+
+// stripThinkTags removes <think>...</think> XML blocks that some models
+// (e.g. Qwen 3.5) emit even when think:false is set in the request.
+func stripThinkTags(content string) string {
+	re := regexp.MustCompile(`(?s)<think>.*?</think>`)
+	cleaned := re.ReplaceAllString(content, "")
+	return strings.TrimSpace(cleaned)
+}
+
+// stripPreambleBeforeTitle removes any text that appears before the first
+// markdown heading (# Title). Models sometimes emit conversational preamble
+// like "Sure, here is your blog post:" before the actual content.
+func stripPreambleBeforeTitle(content string) string {
+	idx := strings.Index(content, "\n# ")
+	if idx > 0 {
+		return strings.TrimSpace(content[idx+1:])
+	}
+	// Also handle content that starts with # after leading whitespace
+	if strings.HasPrefix(strings.TrimSpace(content), "# ") {
+		return strings.TrimSpace(content)
+	}
+	return content
 }
 
 func boolPtr(value bool) *bool {

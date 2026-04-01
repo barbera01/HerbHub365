@@ -208,7 +208,7 @@ func isAllowedFile(path string) bool {
 	base := filepath.Base(path)
 	ext := strings.ToLower(filepath.Ext(base))
 	switch ext {
-	case ".go", ".sh", ".md", ".yml", ".yaml", ".json", ".toml", ".conf", ".txt", ".py", ".rb", ".html", ".css", ".js", ".ts":
+	case ".go", ".sh", ".md", ".markdown", ".yml", ".yaml", ".json", ".toml", ".conf", ".txt", ".py", ".rb", ".html", ".css", ".js", ".ts", ".scss":
 		return true
 	}
 	return strings.EqualFold(base, "dockerfile") || strings.EqualFold(base, "makefile")

@@ -1,4 +1,3 @@
-
 services:
   blog-poster:
     build:
@@ -139,7 +138,7 @@ services:
       - ./rabbitmq:/var/lib/rabbitmq
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.rabbitmq.rule=Host(\"rabbit.herbhub365.com\")"
+      - 'traefik.http.routers.rabbitmq.rule=Host("rabbit.herbhub365.com")'
       - "traefik.http.routers.rabbitmq.entrypoints=websecure"
       - "traefik.http.routers.rabbitmq.tls=true"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
@@ -161,7 +160,11 @@ services:
       RABBITMQ_URL: ${WATERING_RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
       METRICS_URL: ${WATERING_METRICS_URL:-http://hh-02:9100/metrics}
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8787/health || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:8787/health || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       start_period: 5s
@@ -181,15 +184,13 @@ services:
     volumes:
       - ./dashboard:/app/config # Make sure your local config directory exists
       - /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations, see alternative methods
-  
 
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(\"dashboard.herbhub365.com\")"
+      - 'traefik.http.routers.dashboard.rule=Host("dashboard.herbhub365.com")'
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.services.dashboard.loadbalancer.server.port=3000"
-    
 
   schedular:
     image: soulteary/cronicle:0.9.63
@@ -202,14 +203,18 @@ services:
       - ./scheduler/data:/opt/cronicle/data
       - ./scheduler/plugins:/opt/cronicle/plugins
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:3012/api/app/ping || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider localhost:3012/api/app/ping || exit 1",
+        ]
       interval: 5s
       timeout: 1s
       retries: 3
     logging:
-        driver: "json-file"
-        options:
-            max-size: "10m"
+      driver: "json-file"
+      options:
+        max-size: "10m"
 
     labels:
       - "traefik.enable=true"
@@ -233,7 +238,33 @@ services:
       - /etc/traefik:/etc/traefik
       - /usr/share/certs/herbhub365:/etc/traefik/certs
     restart: unless-stopped
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    networks:
+      - herbhub
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
 
+  prometheus-agent:
+    image: prom/prometheus:latest
+    container_name: prometheus-agent
+    restart: unless-stopped
+    networks:
+      - herbhub
+    command:
+      - --config.file=/etc/prometheus/prometheus-agent.yml
+      - --enable-feature=agent
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - ./monitoring/prometheus-agent.yml:/etc/prometheus/prometheus-agent.yml:ro
+    depends_on:
+      - cadvisor
 networks:
   herbhub:
     external: true

@@ -193,7 +193,9 @@ services:
       - "traefik.http.services.dashboard.loadbalancer.server.port=3000"
 
   schedular:
-    image: soulteary/cronicle:0.9.63
+    image: cronicle/edge:v1.14.2
+    command: ["manager"]
+    hostname: main
     restart: always
     container_name: scheduler
     networks:
@@ -202,6 +204,13 @@ services:
       - ./scheduler/config:/opt/cronicle/config
       - ./scheduler/data:/opt/cronicle/data
       - ./scheduler/plugins:/opt/cronicle/plugins
+    secrets:
+      - source: scheduler_ssh_private_key
+        target: scheduler_ssh_private_key
+        mode: 0400
+      - source: scheduler_ssh_known_hosts
+        target: scheduler_ssh_known_hosts
+        mode: 0444
     healthcheck:
       test:
         [

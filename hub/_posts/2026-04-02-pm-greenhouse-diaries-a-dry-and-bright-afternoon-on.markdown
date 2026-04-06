@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Diaries: A Dry and Bright Afternoon on April 2nd"
 date: 2026-04-02 18:00:54 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-02-pm-greenhouse-diaries-a-dry-and-bright-afternoon-on.mp3
 ---
 
 ![Timelapse image for April 2, 2026](/assets/images/blog/2026-04-02-greenhouse-diaries-a-dry-and-bright-afternoon-on.jpg)

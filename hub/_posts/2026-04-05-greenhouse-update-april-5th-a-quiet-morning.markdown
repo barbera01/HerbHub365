@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Update: April 5th – A Quiet Morning for Our Herbs"
 date: 2026-04-05 09:00:48 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-05-greenhouse-update-april-5th-a-quiet-morning.mp3
 ---
 
 ![Timelapse image for April 5, 2026](/assets/images/blog/2026-04-05-greenhouse-update-april-5th-a-quiet-morning.jpg)

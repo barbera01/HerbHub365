@@ -3,6 +3,7 @@ layout: post
 title: "April 1st Greenhouse Update: A Quiet Evening in the Garden"
 date: 2026-04-01 18:00:50 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-01-april-1st-greenhouse-update-a-quiet-evening-in.mp3
 ---
 
 ![Timelapse image for April 1, 2026](/assets/images/blog/2026-04-01-april-1st-greenhouse-update-a-quiet-evening-in.jpg)

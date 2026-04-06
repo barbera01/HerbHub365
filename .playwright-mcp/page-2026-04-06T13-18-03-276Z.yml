@@ -1,0 +1,109 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "Herb Hub 365 home" [ref=e3] [cursor=pointer]:
+      - /url: /
+      - img "Herb Hub 365 logo" [ref=e5]
+      - generic [ref=e6]: Herb Hub 365
+    - list [ref=e7]:
+      - listitem [ref=e8]:
+        - link "Home" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - img [ref=e10]
+          - generic [ref=e12]: Home
+      - listitem [ref=e13]:
+        - link "Herbs journal" [ref=e14] [cursor=pointer]:
+          - /url: /herbs/
+          - img [ref=e15]
+          - generic [ref=e17]: Herbs
+      - listitem [ref=e18]:
+        - link "Platform architecture" [ref=e19] [cursor=pointer]:
+          - /url: /platform-architecture/
+          - img [ref=e20]
+          - generic [ref=e22]: Platform
+      - listitem [ref=e23]:
+        - link "Metrics monitoring" [ref=e24] [cursor=pointer]:
+          - /url: /metrics/
+          - img [ref=e25]
+          - generic [ref=e27]: Metrics
+      - listitem [ref=e28]:
+        - link "About" [ref=e29] [cursor=pointer]:
+          - /url: /about/
+          - img [ref=e30]
+          - generic [ref=e32]: About
+  - img
+  - img
+  - main "Content" [ref=e33]:
+    - generic [ref=e35]:
+      - generic [ref=e37]:
+        - paragraph [ref=e38]: Herb / Hub / Update
+        - 'heading "Greenhouse Morning Report: March 29, 2026" [level=1] [ref=e39]'
+        - paragraph [ref=e40]:
+          - time [ref=e41]: March 29, 2026
+      - generic "Listen to this post" [ref=e42]:
+        - generic [ref=e43]:
+          - img [ref=e44]
+          - generic [ref=e46]: Listen to this post
+          - 'generic "Audio narration of: Greenhouse Morning Report: March 29, 2026" [ref=e47]': Your browser does not support audio playback.
+      - article "Post content" [ref=e48]:
+        - paragraph [ref=e49]:
+          - img "Timelapse image for March 29, 2026" [ref=e50]
+        - paragraph [ref=e51]: The morning inside the Herb Hub began quietly around 6 AM with crisp air hovering near forty percent humidity and temperatures just under nineteen degrees Celsius. As daylight crept across the glass, light levels climbed steadily to over two hundred seventy-four lux by mid-morning, signaling a bright day ahead despite our monitoring window ending at 8:30 AM.
+        - paragraph [ref=e52]: Conditions remained stable within the growing beds as basil held strong with soil moisture near eighty percent and oregano sat comfortably around forty-two percent. Chilli showed a slightly drier profile compared to its neighbors today, reading in the low thirty-three percent range as it adjusted to the morning light and gentle warmth rising through the greenhouse floor.
+        - paragraph [ref=e53]: There were no urgent alarms or warnings flashing on our dashboard this early Tuesday; everything appeared to be settling into a healthy routine naturally. The water reservoir remained full with levels consistent throughout our snapshots, ensuring plenty of hydration available for when demand increases later in the day. With pressure steady and temperatures climbing gently toward nineteen point six degrees by eight AM, it is an ideal time to prepare for any midday watering needs that might arise as the sun peaks higher outside.
+      - navigation "Post navigation" [ref=e54]:
+        - 'link "Previous post: Afternoon Greenhouse Update: A Dry and Bright Day at Herb Hub 365" [ref=e55] [cursor=pointer]':
+          - /url: /herb/hub/update/2026/03/28/pm-afternoon-greenhouse-update-a-dry-and-bright-day.html
+          - img [ref=e56]
+          - text: "Afternoon Greenhouse Update: A Dr..."
+        - 'link "Next post: Greenhouse Update: A Sunny Afternoon on March 29th" [ref=e58] [cursor=pointer]':
+          - /url: /herb/hub/update/2026/03/29/pm-greenhouse-update-a-sunny-afternoon-on-march-29th.html
+          - text: "Greenhouse Update: A Sunny Aftern..."
+          - img [ref=e59]
+      - link "Back to Herb Hub 365 home" [ref=e62] [cursor=pointer]:
+        - /url: /
+        - img [ref=e63]
+        - text: Back to the Greenhouse
+  - contentinfo [ref=e65]:
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - generic [ref=e68]: Herb Hub 365
+        - paragraph [ref=e69]: Growing herbs with sensors, AI vision, and a love for horticulture. Greenhouse notes, platform architecture, and the science behind the garden.
+        - paragraph [ref=e70]:
+          - img [ref=e71]
+          - text: Greenhouse, 2026
+      - 'navigation "Footer navigation: Sections" [ref=e74]':
+        - heading "Sections" [level=4] [ref=e75]
+        - list [ref=e76]:
+          - listitem [ref=e77]:
+            - link "Home" [ref=e78] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e79]:
+            - link "Herbs Journal" [ref=e80] [cursor=pointer]:
+              - /url: /herbs/
+          - listitem [ref=e81]:
+            - link "Platform Architecture" [ref=e82] [cursor=pointer]:
+              - /url: /platform-architecture/
+          - listitem [ref=e83]:
+            - link "Metrics Monitoring" [ref=e84] [cursor=pointer]:
+              - /url: /metrics/
+          - listitem [ref=e85]:
+            - link "About" [ref=e86] [cursor=pointer]:
+              - /url: /about/
+      - 'navigation "Footer navigation: Recent posts" [ref=e87]':
+        - heading "Recent Posts" [level=4] [ref=e88]
+        - list [ref=e89]:
+          - listitem [ref=e90]:
+            - link "Prometheus Metrics Snapshot — April 1, ..." [ref=e91] [cursor=pointer]:
+              - /url: /metrics/observability/2026/04/01/prometheus-metrics-snapshot-april-1-2026.html
+          - listitem [ref=e92]:
+            - 'link "April 1st Greenhouse Update: A Quiet Ev..." [ref=e93] [cursor=pointer]':
+              - /url: /herb/hub/update/2026/04/01/april-1st-greenhouse-update-a-quiet-evening-in.html
+          - listitem [ref=e94]:
+            - 'link "Herb Hub 365: A Warm and Bright Afterno..." [ref=e95] [cursor=pointer]':
+              - /url: /herb/hub/update/2026/03/31/pm-herb-hub-365-a-warm-and-bright-afternoon.html
+          - listitem [ref=e96]:
+            - 'link "Herb Hub 365: Afternoon Update for Marc..." [ref=e97] [cursor=pointer]':
+              - /url: /herb/hub/update/2026/03/31/pm-herb-hub-365-afternoon-update-for-march-31st.html
+    - generic [ref=e98]:
+      - generic [ref=e99]: © 2026 Herb Hub 365. Grown with care.
+      - generic [ref=e100]: Greenhouse notes, herb growing updates, and platform arch...

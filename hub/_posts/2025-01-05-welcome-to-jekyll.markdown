@@ -3,6 +3,7 @@ layout: post
 title: "Welcome to the Herb Hub"
 date: 2025-01-05 20:36:44 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2025-01-05-welcome-to-jekyll.mp3
 ---
 
 This image is a delightful blend of DIY ingenuity and tech wizardry, showcasing what can only be described as the ultimate Herb Hub control center! At the heart of this contraption lies a Raspberry Pi 400 mounted on a perforated white board, its neat layout punctuated by a spaghetti-like jungle of colorful wires. Connected to sensors and a relay module, this setup screams "mad scientist meets gardener extraordinaire."

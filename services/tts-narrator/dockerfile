@@ -1,0 +1,21 @@
+FROM golang:1.23-alpine AS builder
+
+WORKDIR /src
+
+ARG TARGETOS=linux
+ARG TARGETARCH
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/tts-narrator ./cmd/tts-narrator
+
+FROM alpine:3.20
+
+WORKDIR /app
+RUN apk add --no-cache ca-certificates git
+COPY --from=builder /out/tts-narrator /usr/local/bin/tts-narrator
+COPY config/tts-rules.json /app/config/tts-rules.json
+
+ENTRYPOINT ["/usr/local/bin/tts-narrator"]

@@ -1,0 +1,51 @@
+{% if page.audio_url %}
+<div class="audio-player" aria-label="Listen to this post">
+  <div class="audio-player__inner">
+    <svg class="audio-player__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+    </svg>
+    <span class="audio-player__label">Listen to this post</span>
+    <audio
+      class="audio-player__element"
+      controls
+      preload="none"
+      aria-label="Audio narration of: {{ page.title | escape }}"
+    >
+      <source src="{{ page.audio_url | relative_url }}" type="audio/mpeg">
+      Your browser does not support audio playback.
+    </audio>
+  </div>
+</div>
+
+<style>
+.audio-player {
+  margin: 1.25rem 0 1.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface, #f5f7f4);
+  border: 1.5px solid rgba(74,124,89,0.2);
+  border-radius: 10px;
+}
+.audio-player__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.audio-player__icon {
+  color: var(--leaf, #4a7c59);
+  flex-shrink: 0;
+}
+.audio-player__label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--leaf, #4a7c59);
+  white-space: nowrap;
+}
+.audio-player__element {
+  flex: 1;
+  min-width: 200px;
+  height: 36px;
+  accent-color: var(--leaf, #4a7c59);
+}
+</style>
+{% endif %}

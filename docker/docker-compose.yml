@@ -71,6 +71,41 @@ services:
       - ../services/blog-poster/data:/data
       - ${BLOG_POSTER_IMAGE_SOURCE_PATH:-/mnt/hh01-timelapse}:/timelapse:ro
 
+  tts-narrator:
+    build:
+      context: ../services/tts-narrator
+      dockerfile: dockerfile
+    container_name: tts-narrator
+    restart: unless-stopped
+    networks:
+      - herbhub
+    environment:
+      TTS_MODE: ${TTS_MODE:-daemon}
+      TTS_SCHEDULE: ${TTS_SCHEDULE:-10 0 * * *}
+      TTS_RUN_ON_START: ${TTS_RUN_ON_START:-false}
+      TTS_TARGET_DATE: ${TTS_TARGET_DATE:-yesterday}
+      TTS_TARGET_SLUG: ${TTS_TARGET_SLUG:-}
+      TTS_BASE_URL: ${TTS_BASE_URL:-https://kokoro-api.lab.home-cloud.uk/v1/audio/speech}
+      TTS_MODEL: ${TTS_MODEL:-kokoro}
+      TTS_VOICE: ${TTS_VOICE:-eve}
+      TTS_SPEED: ${TTS_SPEED:-0}
+      TTS_FORMAT: ${TTS_FORMAT:-mp3}
+      TTS_REQUEST_TIMEOUT: ${TTS_REQUEST_TIMEOUT:-120s}
+      TTS_RULES_FILE: /app/config/tts-rules.json
+      HUB_DIR: /repo/hub
+      BLOG_POSTS_DIR: /repo/hub/_posts
+      TTS_AUDIO_DIR: /repo/hub/assets/audio/blog
+      TTS_AUDIO_PUBLIC_PATH: /assets/audio/blog
+      GIT_PUBLISH_ENABLED: ${TTS_GIT_PUBLISH_ENABLED:-false}
+      GIT_REPO_DIR: /repo
+      GIT_REMOTE_NAME: ${TTS_GIT_REMOTE_NAME:-origin}
+      GIT_PUSH_BRANCH: ${TTS_GIT_PUSH_BRANCH:-main}
+      GIT_PAT: ${TTS_GIT_PAT:-}
+      GIT_AUTHOR_NAME: ${TTS_GIT_AUTHOR_NAME:-Herb Hub Bot}
+      GIT_AUTHOR_EMAIL: ${TTS_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
+    volumes:
+      - ..:/repo
+
   timelapse-builder:
     build:
       context: ..

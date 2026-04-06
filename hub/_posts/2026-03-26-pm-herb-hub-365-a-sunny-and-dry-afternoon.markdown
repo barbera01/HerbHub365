@@ -3,6 +3,7 @@ layout: post
 title: "Herb Hub 365: A Sunny and Dry Afternoon Update for March 26th"
 date: 2026-03-26 13:00:43 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-03-26-pm-herb-hub-365-a-sunny-and-dry-afternoon.mp3
 ---
 
 The afternoon sun brought a noticeable shift to the greenhouse environment today, pushing light levels up from roughly 117 lux at morning start to a bright 315 lux by midday. As expected with such strong illumination, the ambient temperature climbed steadily before settling back down toward evening values around 18.6°C.

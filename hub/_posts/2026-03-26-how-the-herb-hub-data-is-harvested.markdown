@@ -3,6 +3,7 @@ layout: post
 title: "How the Herb Hub data is harvested"
 date: 2026-03-26 19:17:49 +0000
 categories: Platform Update
+audio_url: /assets/audio/blog/2026-03-26-how-the-herb-hub-data-is-harvested.mp3
 ---
 
 The Herb Hub platform relies on a robust pipeline for collecting sensor information and distributing that telemetry across its infrastructure. At the heart of this process lies an automated mechanism designed to capture snapshots from various sensors, format them into standard JSON payloads, and securely deliver them via a message bus architecture using RabbitMQ. This system ensures that data flows reliably from edge devices to central processing nodes without manual intervention.

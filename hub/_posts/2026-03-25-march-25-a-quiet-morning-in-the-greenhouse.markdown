@@ -3,6 +3,7 @@ layout: post
 title: "March 25: A Quiet Morning in the Greenhouse"
 date: 2026-03-25 17:50:40 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-03-25-march-25-a-quiet-morning-in-the-greenhouse.mp3
 ---
 
 The morning began with a gentle hum from our sensors, capturing three snapshots of life inside Herb Hub 365 between 11:40 and 11:52. The atmosphere felt crisp yet stable, with ambient humidity hovering just above 34%. While this dry air is typical for early spring, the climate-controlled space kept everything balanced despite the season's usual chill.

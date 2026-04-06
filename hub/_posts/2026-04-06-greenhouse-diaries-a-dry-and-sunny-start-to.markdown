@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Diaries: A Dry and Sunny Start to April 6th"
 date: 2026-04-06 09:01:05 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-06-greenhouse-diaries-a-dry-and-sunny-start-to.mp3
 ---
 
 ![Timelapse image for April 6, 2026](/assets/images/blog/2026-04-06-greenhouse-diaries-a-dry-and-sunny-start-to.jpg)

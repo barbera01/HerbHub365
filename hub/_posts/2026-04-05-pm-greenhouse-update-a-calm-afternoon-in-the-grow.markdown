@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Update: A Calm Afternoon in the Grow Room"
 date: 2026-04-05 18:01:36 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-05-pm-greenhouse-update-a-calm-afternoon-in-the-grow.mp3
 ---
 
 ![Timelapse image for April 5, 2026](/assets/images/blog/2026-04-05-greenhouse-update-a-calm-afternoon-in-the-grow.jpg)

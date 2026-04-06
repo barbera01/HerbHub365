@@ -3,6 +3,7 @@ layout: post
 title: "A Cool and Dry Afternoon in the Greenhouse"
 date: 2026-04-04 18:00:39 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-04-pm-a-cool-and-dry-afternoon-in-the-greenhouse.mp3
 ---
 
 ![Timelapse image for April 4, 2026](/assets/images/blog/2026-04-04-a-cool-and-dry-afternoon-in-the-greenhouse.jpg)

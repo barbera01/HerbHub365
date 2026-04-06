@@ -1,0 +1,84 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "Herb Hub 365 home" [ref=e3] [cursor=pointer]:
+      - /url: /
+      - img "Herb Hub 365 logo" [ref=e5]
+      - generic [ref=e6]: Herb Hub 365
+    - list [ref=e7]:
+      - listitem [ref=e8]:
+        - link "Home" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - img [ref=e10]
+          - generic [ref=e12]: Home
+      - listitem [ref=e13]:
+        - link "Herbs journal" [ref=e14] [cursor=pointer]:
+          - /url: /herbs/
+          - img [ref=e15]
+          - generic [ref=e17]: Herbs
+      - listitem [ref=e18]:
+        - link "Platform architecture" [ref=e19] [cursor=pointer]:
+          - /url: /platform-architecture/
+          - img [ref=e20]
+          - generic [ref=e22]: Platform
+      - listitem [ref=e23]:
+        - link "Metrics monitoring" [ref=e24] [cursor=pointer]:
+          - /url: /metrics/
+          - img [ref=e25]
+          - generic [ref=e27]: Metrics
+      - listitem [ref=e28]:
+        - link "About" [ref=e29] [cursor=pointer]:
+          - /url: /about/
+          - img [ref=e30]
+          - generic [ref=e32]: About
+  - img
+  - img
+  - main "Content" [ref=e33]:
+    - generic [ref=e35]:
+      - heading "404" [level=1] [ref=e36]
+      - paragraph [ref=e37]:
+        - strong [ref=e38]: Page not found :(
+      - paragraph [ref=e39]: The requested page could not be found.
+  - contentinfo [ref=e40]:
+    - generic [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]: Herb Hub 365
+        - paragraph [ref=e44]: Growing herbs with sensors, AI vision, and a love for horticulture. Greenhouse notes, platform architecture, and the science behind the garden.
+        - paragraph [ref=e45]:
+          - img [ref=e46]
+          - text: Greenhouse, 2026
+      - 'navigation "Footer navigation: Sections" [ref=e49]':
+        - heading "Sections" [level=4] [ref=e50]
+        - list [ref=e51]:
+          - listitem [ref=e52]:
+            - link "Home" [ref=e53] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e54]:
+            - link "Herbs Journal" [ref=e55] [cursor=pointer]:
+              - /url: /herbs/
+          - listitem [ref=e56]:
+            - link "Platform Architecture" [ref=e57] [cursor=pointer]:
+              - /url: /platform-architecture/
+          - listitem [ref=e58]:
+            - link "Metrics Monitoring" [ref=e59] [cursor=pointer]:
+              - /url: /metrics/
+          - listitem [ref=e60]:
+            - link "About" [ref=e61] [cursor=pointer]:
+              - /url: /about/
+      - 'navigation "Footer navigation: Recent posts" [ref=e62]':
+        - heading "Recent Posts" [level=4] [ref=e63]
+        - list [ref=e64]:
+          - listitem [ref=e65]:
+            - link "Prometheus Metrics Snapshot — April 1, ..." [ref=e66] [cursor=pointer]:
+              - /url: /metrics/observability/2026/04/01/prometheus-metrics-snapshot-april-1-2026.html
+          - listitem [ref=e67]:
+            - 'link "April 1st Greenhouse Update: A Quiet Ev..." [ref=e68] [cursor=pointer]':
+              - /url: /herb/hub/update/2026/04/01/april-1st-greenhouse-update-a-quiet-evening-in.html
+          - listitem [ref=e69]:
+            - 'link "Herb Hub 365: A Warm and Bright Afterno..." [ref=e70] [cursor=pointer]':
+              - /url: /herb/hub/update/2026/03/31/pm-herb-hub-365-a-warm-and-bright-afternoon.html
+          - listitem [ref=e71]:
+            - 'link "Herb Hub 365: Afternoon Update for Marc..." [ref=e72] [cursor=pointer]':
+              - /url: /herb/hub/update/2026/03/31/pm-herb-hub-365-afternoon-update-for-march-31st.html
+    - generic [ref=e73]:
+      - generic [ref=e74]: © 2026 Herb Hub 365. Grown with care.
+      - generic [ref=e75]: Greenhouse notes, herb growing updates, and platform arch...

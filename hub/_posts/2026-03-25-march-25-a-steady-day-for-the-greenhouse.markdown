@@ -3,6 +3,7 @@ layout: post
 title: "March 25: A Steady Day for the Greenhouse Crew"
 date: 2026-03-25 20:00:00 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-03-25-march-25-a-steady-day-for-the-greenhouse.mp3
 ---
 
 The day began with gentle warmth settling over Herb Hub 365, where temperatures hovered comfortably in the low twenties. By mid-morning, our basil was thriving at twenty-one degrees Celsius, while chilli and oregano followed suit just behind them. The water reservoir sat cool at eighteen point nine degrees, keeping things balanced as natural light levels climbed toward their peak of over nine hundred lux by early afternoon.

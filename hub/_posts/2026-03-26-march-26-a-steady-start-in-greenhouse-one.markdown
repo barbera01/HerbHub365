@@ -3,6 +3,7 @@ layout: post
 title: "March 26: A Steady Start in Greenhouse One"
 date: 2026-03-26 09:00:49 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-03-26-march-26-a-steady-start-in-greenhouse-one.mp3
 ---
 
 The morning inside our greenhouse began quietly with temperatures hovering comfortably at twenty degrees Celsius by seven o'clock. As the day progressed, ambient warmth climbed steadily toward a peak of nearly twenty-one before settling back down by mid-morning. The individual plants tracked these shifts closely; basil and chilli pots remained in their high teens throughout, while oregano experienced only a slight dip towards the end of our observation window.

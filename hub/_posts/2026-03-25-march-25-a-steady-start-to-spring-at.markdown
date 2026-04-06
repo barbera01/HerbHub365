@@ -3,6 +3,7 @@ layout: post
 title: "March 25: A Steady Start to Spring at Herb Hub 365"
 date: 2026-03-25 17:30:38 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-03-25-march-25-a-steady-start-to-spring-at.mp3
 ---
 
 The morning readings from our greenhouse sensors arrived just before noon, capturing a quiet and stable environment inside the main room. The ambient temperature hovered comfortably around 24°C while our specific plants maintained their own cozy microclimates between 21.6°C and 21.9°C. It feels like a gentle start to another productive growing season here at Herb Hub 365.

@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Morning Report: March 29, 2026"
 date: 2026-03-29 09:00:50 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-03-29-greenhouse-morning-report-march-29-2026.mp3
 ---
 
 ![Timelapse image for March 29, 2026](/assets/images/blog/2026-03-29-greenhouse-morning-report-march-29-2026.jpg)

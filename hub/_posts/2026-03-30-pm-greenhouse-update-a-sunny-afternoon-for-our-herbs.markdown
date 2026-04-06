@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Update: A Sunny Afternoon for Our Herbs"
 date: 2026-03-30 13:00:55 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-03-30-pm-greenhouse-update-a-sunny-afternoon-for-our-herbs.mp3
 ---
 
 ![Timelapse image for March 30, 2026](/assets/images/blog/2026-03-30-greenhouse-update-a-sunny-afternoon-for-our-herbs.jpg)

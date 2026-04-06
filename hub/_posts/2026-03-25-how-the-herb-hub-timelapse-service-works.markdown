@@ -3,6 +3,7 @@ layout: post
 title: "How the Herb Hub timelapse service works"
 date: 2026-03-25 20:00:00 +0000
 categories: Platform Update
+audio_url: /assets/audio/blog/2026-03-25-how-the-herb-hub-timelapse-service-works.mp3
 ---
 
 The Herb Hub platform includes a dedicated component designed to transform raw image captures into polished MP4 video sequences. This service, often referred to as the timelapse builder, allows users and automated systems to generate time-lapsed footage directly from stored images without requiring manual intervention for every new batch of photos. It is an integral part of the broader monitoring infrastructure that supports long-term observation projects on the platform.

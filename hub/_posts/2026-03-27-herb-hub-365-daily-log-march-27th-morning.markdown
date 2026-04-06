@@ -3,6 +3,7 @@ layout: post
 title: "Herb Hub 365 Daily Log: March 27th Morning Readings"
 date: 2026-03-27 09:00:57 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-03-27-herb-hub-365-daily-log-march-27th-morning.mp3
 ---
 
 The morning inside the greenhouse began with a gentle start as our sensors woke up around 7:00 AM. The environment was comfortably stable, hovering between 40% and 41% humidity while ambient temperatures settled at roughly 21°C. Inside the growing beds, things were slightly cooler than outside air; basil sat near 20°C, chilli plants just under that mark, oregano in between, and our water reservoir resting around 18.8°C.

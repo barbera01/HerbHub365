@@ -3,6 +3,7 @@ layout: post
 title: "A Calm Morning in the Greenhouse: March 31st Updates"
 date: 2026-03-31 09:01:16 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-03-31-a-calm-morning-in-the-greenhouse-march-31st.mp3
 ---
 
 ![Timelapse image for March 31, 2026](/assets/images/blog/2026-03-31-a-calm-morning-in-the-greenhouse-march-31st.jpg)

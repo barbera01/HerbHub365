@@ -121,6 +121,9 @@ logs/
 # Timelapse builder output
 /services/timelapse-builder/output/
 
+# Video assets (large files — not tracked in git)
+/Resources/video/
+
 # ====================
 # OpenCode (local tooling)
 # ====================

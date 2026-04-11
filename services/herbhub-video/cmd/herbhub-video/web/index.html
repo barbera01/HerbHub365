@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HerbHub Video</title>
+      <!-- HerbHub365 Design System Fonts: Exo + Roboto Mono -->
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Exo:wght@300;400;500;600;700&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                </svg>
+                <span class="logo-text">HerbHub Video</span>
+            </div>
+
+            <div class="nav-section">
+                <button class="nav-item active" data-view="posts">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Posts</span>
+                </button>
+                <button class="nav-item" data-view="jobs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span>Jobs</span>
+                    <span id="active-jobs-badge" class="badge hidden">0</span>
+                </button>
+                <button class="nav-item" data-view="videos">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <span>Videos</span>
+                </button>
+                <button class="nav-item" data-view="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Settings</span>
+                </button>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="api-status" id="api-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking...</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main id="content">
+            <!-- Posts View -->
+            <div id="view-posts" class="view active">
+                <div class="view-header">
+                    <div>
+                        <h1>Blog Posts</h1>
+                        <p class="subtitle">Select a post to generate a narrated video</p>
+                    </div>
+                    <div class="header-actions">
+                        <input type="text" id="post-search" class="search-input" placeholder="Search posts...">
+                    </div>
+                </div>
+                <div id="posts-list" class="card-grid">
+                    <div class="loading-state">Loading posts...</div>
+                </div>
+            </div>
+
+            <!-- Jobs View -->
+            <div id="view-jobs" class="view">
+                <div class="view-header">
+                    <div>
+                        <h1>Generation Jobs</h1>
+                        <p class="subtitle">Track video generation progress through the full pipeline</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="App.loadJobs()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        Refresh
+                    </button>
+                </div>
+                <div id="jobs-list" class="jobs-container">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <p>No jobs yet. Generate a video from the Posts tab.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Videos View -->
+            <div id="view-videos" class="view">
+                <div class="view-header">
+                    <div>
+                        <h1>Video Gallery</h1>
+                        <p class="subtitle">Browse and play generated videos</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="App.loadVideos()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        Refresh
+                    </button>
+                </div>
+                <div id="videos-list" class="card-grid">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <p>No videos generated yet.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="view-settings" class="view">
+                <div class="view-header">
+                    <div>
+                        <h1>Settings</h1>
+                        <p class="subtitle">Service configuration (read-only)</p>
+                    </div>
+                </div>
+                <div id="settings-content" class="settings-grid">
+                    <div class="loading-state">Loading configuration...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Generate Modal -->
+    <div id="generate-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="App.closeModal()"></div>
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h2>Generate Video</h2>
+                <button class="modal-close" onclick="App.closeModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Post Info -->
+                <div class="form-group">
+                    <label>Post</label>
+                    <div id="modal-post-title" class="form-value"></div>
+                </div>
+
+                <!-- Avatar Selection -->
+                <div class="form-group">
+                    <label for="modal-avatar">Avatar</label>
+                    <select id="modal-avatar" class="form-select">
+                        <option value="eve">Eve</option>
+                    </select>
+                </div>
+
+                <!-- Concat Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="modal-concat" class="toggle-input" checked>
+                            <span class="toggle-switch"></span>
+                            <span>Intro/Outro Stitching</span>
+                        </label>
+                    </div>
+                    <div id="concat-options" class="form-section-body">
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="modal-intro">Intro Video</label>
+                                <select id="modal-intro" class="form-select">
+                                    <option value="">Server default</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="modal-outro">Outro Video</label>
+                                <select id="modal-outro" class="form-select">
+                                    <option value="">Server default</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chroma Key Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="modal-chromakey" class="toggle-input">
+                            <span class="toggle-switch"></span>
+                            <span>Chroma Key (Green Screen Removal)</span>
+                        </label>
+                    </div>
+                    <div id="chromakey-options" class="form-section-body hidden">
+                        <div class="form-group">
+                            <label for="modal-bg">Background Image</label>
+                            <select id="modal-bg" class="form-select">
+                                <option value="">Server default</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Override -->
+                <div class="form-group">
+                    <label for="modal-text">Text Override (optional)</label>
+                    <textarea id="modal-text" class="form-textarea" rows="4" placeholder="Leave empty to use the post content with TTS preprocessing..."></textarea>
+                    <div class="form-hint">The video-narrator will apply TTS rules (60+ transformations) to the post content automatically.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="App.closeModal()">Cancel</button>
+                <button class="btn btn-primary" id="modal-submit" onclick="App.submitGenerate()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Generate Video
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

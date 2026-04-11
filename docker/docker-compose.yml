@@ -117,7 +117,7 @@ services:
       HERBHUB_VIDEO_MODE: ${HERBHUB_VIDEO_MODE:-daemon}
       HERBHUB_VIDEO_SCHEDULE: ${HERBHUB_VIDEO_SCHEDULE:-0 9 * * *}
       HERBHUB_VIDEO_RUN_ON_START: ${HERBHUB_VIDEO_RUN_ON_START:-false}
-      HERBHUB_VIDEO_LISTEN_ADDR: ${HERBHUB_VIDEO_LISTEN_ADDR:-:8080}
+      LISTEN_ADDR: ${LISTEN_ADDR:-:8080}
       NARRATOR_URL: ${NARRATOR_URL:-http://video-narrator:8080}
       HUB_DIR: ${HUB_DIR:-/repo/hub}
       BLOG_POSTS_DIR: ${BLOG_POSTS_DIR:-/repo/hub/_posts}
@@ -128,8 +128,8 @@ services:
       HERBHUB_VIDEO_GIT_PAT: ${HERBHUB_VIDEO_GIT_PAT:-}
       HERBHUB_VIDEO_GIT_AUTHOR_NAME: ${HERBHUB_VIDEO_GIT_AUTHOR_NAME:-Herb Hub Bot}
       HERBHUB_VIDEO_GIT_AUTHOR_EMAIL: ${HERBHUB_VIDEO_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
-      HERBHUB_VIDEO_POLL_INTERVAL: ${HERBHUB_VIDEO_POLL_INTERVAL:-3s}
-      HERBHUB_VIDEO_REQUEST_TIMEOUT: ${HERBHUB_VIDEO_REQUEST_TIMEOUT:-120s}
+      POLL_INTERVAL: ${POLL_INTERVAL:-3s}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-120s}
     volumes:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video
@@ -229,7 +229,7 @@ services:
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.services.dashboard.loadbalancer.server.port=3000"
 
-  schedular:
+  scheduler:
     image: cronicle/edge:v1.14.2
     command: ["manager"]
     hostname: main
@@ -314,3 +314,9 @@ services:
 networks:
   herbhub:
     external: true
+
+secrets:
+  scheduler_ssh_private_key:
+    file: ./scheduler/secrets/id_ed25519
+  scheduler_ssh_known_hosts:
+    file: ./scheduler/secrets/known_hosts

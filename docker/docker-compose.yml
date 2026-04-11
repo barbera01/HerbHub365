@@ -140,6 +140,35 @@ services:
        - "traefik.http.routers.herbhub-video.tls=true"
        - "traefik.http.services.herbhub-video.loadbalancer.server.port=8080"
 
+  video-narrator:
+    build:
+      context: ../services/video-narrator
+      dockerfile: dockerfile
+    container_name: video-narrator
+    restart: unless-stopped
+    networks:
+      - herbhub
+    environment:
+      VIDEO_MODE: ${VIDEO_MODE:-server}
+      SERVER_LISTEN_ADDR: ${VIDEO_SERVER_LISTEN_ADDR:-:8080}
+      HUB_DIR: ${HUB_DIR:-/repo/hub}
+      BLOG_POSTS_DIR: ${BLOG_POSTS_DIR:-/repo/hub/_posts}
+      VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/output/video}
+      VIDEO_RULES_FILE: ${VIDEO_RULES_FILE:-/app/config/tts-rules.json}
+      VIDEO_BASE_URL: ${VIDEO_BASE_URL:-http://172.16.106.81:8011}
+      VIDEO_REQUEST_TIMEOUT: ${VIDEO_REQUEST_TIMEOUT:-120s}
+      CONCAT_ENABLED: ${CONCAT_ENABLED:-true}
+      CONCAT_INTRO: ${CONCAT_INTRO:-/app/resources/video/intro.mp4}
+      CONCAT_OUTRO: ${CONCAT_OUTRO:-/app/resources/video/outro.mp4}
+      CHROMA_KEY_ENABLED: ${CHROMA_KEY_ENABLED:-false}
+      CHROMA_KEY_BG_PATH: ${CHROMA_KEY_BG_PATH:-}
+      CHROMA_KEY_BG_COLOR: ${CHROMA_KEY_BG_COLOR:-0x1a1a2e}
+    volumes:
+      - ..:/repo
+      - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video
+      - ${VIDEO_RESOURCES_PATH:-../services/video-narrator/resources/video}:/app/resources/video:ro
+      - ${VIDEO_BG_RESOURCES_PATH:-../services/video-narrator/resources/video_backgrounds}:/app/resources/video_backgrounds:ro
+
 
 
   timelapse-builder:

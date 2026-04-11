@@ -77,7 +77,7 @@ services:
     container_name: tts-narrator
     restart: unless-stopped
     networks:
-      - herbhub
+        - herbhub
     environment:
       TTS_MODE: ${TTS_MODE:-daemon}
       TTS_SCHEDULE: ${TTS_SCHEDULE:-10 0 * * *}
@@ -103,7 +103,44 @@ services:
       GIT_AUTHOR_NAME: ${TTS_GIT_AUTHOR_NAME:-Herb Hub Bot}
       GIT_AUTHOR_EMAIL: ${TTS_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
     volumes:
+       - ..:/repo
+
+  herbhub-video:
+    build:
+      context: ../services/herbhub-video
+      dockerfile: Dockerfile
+    container_name: herbhub-video
+    restart: unless-stopped
+    networks:
+         - herbhub
+    environment:
+      HERBHUB_VIDEO_MODE: ${HERBHUB_VIDEO_MODE:-daemon}
+      HERBHUB_VIDEO_SCHEDULE: ${HERBHUB_VIDEO_SCHEDULE:-0 9 * * *}
+      HERBHUB_VIDEO_RUN_ON_START: ${HERBHUB_VIDEO_RUN_ON_START:-false}
+      HERBHUB_VIDEO_LISTEN_ADDR: ${HERBHUB_VIDEO_LISTEN_ADDR:-:8080}
+      NARRATOR_URL: ${NARRATOR_URL:-http://video-narrator:8080}
+      HUB_DIR: ${HUB_DIR:-/repo/hub}
+      BLOG_POSTS_DIR: ${BLOG_POSTS_DIR:-/repo/hub/_posts}
+      VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/output/video}
+      HERBHUB_VIDEO_GIT_PUBLISH_ENABLED: ${HERBHUB_VIDEO_GIT_PUBLISH_ENABLED:-false}
+      HERBHUB_VIDEO_GIT_REMOTE_NAME: ${HERBHUB_VIDEO_GIT_REMOTE_NAME:-origin}
+      HERBHUB_VIDEO_GIT_PUSH_BRANCH: ${HERBHUB_VIDEO_GIT_PUSH_BRANCH:-main}
+      HERBHUB_VIDEO_GIT_PAT: ${HERBHUB_VIDEO_GIT_PAT:-}
+      HERBHUB_VIDEO_GIT_AUTHOR_NAME: ${HERBHUB_VIDEO_GIT_AUTHOR_NAME:-Herb Hub Bot}
+      HERBHUB_VIDEO_GIT_AUTHOR_EMAIL: ${HERBHUB_VIDEO_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
+      HERBHUB_VIDEO_POLL_INTERVAL: ${HERBHUB_VIDEO_POLL_INTERVAL:-3s}
+      HERBHUB_VIDEO_REQUEST_TIMEOUT: ${HERBHUB_VIDEO_REQUEST_TIMEOUT:-120s}
+    volumes:
       - ..:/repo
+      - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video
+    labels:
+       - "traefik.enable=true"
+       - 'traefik.http.routers.herbhub-video.rule=Host(`video.herbhub365.com`)'
+       - "traefik.http.routers.herbhub-video.entrypoints=websecure"
+       - "traefik.http.routers.herbhub-video.tls=true"
+       - "traefik.http.services.herbhub-video.loadbalancer.server.port=8080"
+
+
 
   timelapse-builder:
     build:

@@ -94,7 +94,7 @@ docker-compose.override.yml
 /docker/scheduler/plugins/
 /docker/traefik/acme.json
 /docker/traefik/*.log
-
+/docker/scheduler/secrets/
 # ====================
 # Optional: Other Useful Ignored Files
 # ====================

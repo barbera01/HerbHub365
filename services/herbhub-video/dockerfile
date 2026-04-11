@@ -1,0 +1,29 @@
+FROM golang:1.23-alpine AS builder
+
+WORKDIR /src
+
+ARG TARGETOS=linux
+ARG TARGETARCH
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/herbhub-video ./cmd/herbhub-video
+
+FROM alpine:3.20
+
+WORKDIR /app
+
+RUN apk add --no-cache ca-certificates
+
+COPY --from=builder /out/herbhub-video /usr/local/bin/herbhub-video
+
+# Default env vars — override at runtime.
+ENV LISTEN_ADDR=":8080"
+ENV HUB_DIR="/repo/hub"
+ENV VIDEO_OUTPUT_DIR="/output/video"
+
+EXPOSE 8080
+
+ENTRYPOINT ["/usr/local/bin/herbhub-video"]

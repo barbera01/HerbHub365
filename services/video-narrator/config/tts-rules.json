@@ -1,0 +1,558 @@
+{
+  "_info": "Shared TTS preprocessing rules for Herb Hub 365 (Eve & Rowan voices). Rules are applied in order — order matters. Set 'enabled': false to disable a rule without deleting it. Changes are picked up automatically on next run of tts-preprocess.py.",
+  "wind_directions": {
+    "NNE": "north-northeast",
+    "NNW": "north-northwest",
+    "ENE": "east-northeast",
+    "ESE": "east-southeast",
+    "SSE": "south-southeast",
+    "SSW": "south-southwest",
+    "WNW": "west-northwest",
+    "WSW": "west-southwest",
+    "NE": "northeast",
+    "NW": "northwest",
+    "SE": "southeast",
+    "SW": "southwest",
+    "N": "north",
+    "E": "east",
+    "S": "south",
+    "W": "west"
+  },
+  "rules": [
+    {
+      "_group": "HTML / Markdown"
+    },
+    {
+      "name": "html-tags",
+      "pattern": "<[^>]+>",
+      "replacement": " ",
+      "comment": "Strip HTML tags"
+    },
+    {
+      "name": "md-images",
+      "pattern": "!\\[[^\\]]*\\]\\([^\\)]*\\)",
+      "replacement": "",
+      "comment": "Remove markdown images entirely"
+    },
+    {
+      "name": "md-links",
+      "pattern": "\\[([^\\]]+)\\]\\([^\\)]+\\)",
+      "replacement": "\\1",
+      "comment": "Markdown links → keep display text only"
+    },
+    {
+      "name": "md-hr",
+      "pattern": "^(-{3,}|\\*{3,}|_{3,})\\s*$",
+      "replacement": "...",
+      "flags": [
+        "MULTILINE"
+      ],
+      "comment": "Horizontal rule → ellipsis section-break pause (must run before md-italic strips * and _)"
+    },
+    {
+      "name": "md-heading",
+      "type": "special",
+      "comment": "H1 → title sentence. H2 → — section —. H3+ → label —"
+    },
+    {
+      "name": "md-bold-italic",
+      "pattern": "(\\*\\*|__)(.*?)\\1",
+      "replacement": " — \\2 — ",
+      "comment": "**bold** → — bold — (em-dash breath emphasis)",
+      "type": "special"
+    },
+    {
+      "name": "md-italic",
+      "pattern": "(\\*|_)(.*?)\\1",
+      "replacement": "\\2",
+      "comment": "Strip *italic* and _italic_",
+      "type": "special"
+    },
+    {
+      "name": "md-inline-code",
+      "pattern": "`([^`]+)`",
+      "replacement": "\\1",
+      "comment": "Strip inline code backticks"
+    },
+    {
+      "name": "md-code-fence",
+      "pattern": "```[\\s\\S]*?```",
+      "replacement": "",
+      "comment": "Remove entire code fence blocks"
+    },
+    {
+      "name": "md-blockquote",
+      "pattern": "^>\\s?",
+      "replacement": "",
+      "flags": [
+        "MULTILINE"
+      ],
+      "comment": "Strip blockquote > markers"
+    },
+    {
+      "name": "html-entities",
+      "type": "special",
+      "comment": "Decode HTML entities: &amp; &lt; &gt; &nbsp; etc."
+    },
+    {
+      "_group": "Temperature"
+    },
+    {
+      "name": "temp-celsius",
+      "pattern": "(-?\\d+(?:\\.\\d+)?)\\s*°\\s*C\\b",
+      "replacement": "\\1 degrees",
+      "comment": "19.5°C → 19.5 degrees"
+    },
+    {
+      "name": "temp-fahrenheit",
+      "pattern": "(-?\\d+(?:\\.\\d+)?)\\s*°\\s*F\\b",
+      "replacement": "\\1 degrees Fahrenheit",
+      "comment": "72°F → 72 degrees Fahrenheit"
+    },
+    {
+      "name": "temp-degree-symbol",
+      "pattern": "(-?\\d+(?:\\.\\d+)?)\\s*°",
+      "replacement": "\\1 degrees",
+      "comment": "Bare degree symbol fallback: 20° → 20 degrees"
+    },
+    {
+      "_group": "Pressure & Weather"
+    },
+    {
+      "name": "pressure-hpa",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*hPa\\b",
+      "replacement": "\\1 hectopascals",
+      "flags": [],
+      "comment": "Case-sensitive: 1016 hPa → 1016 hectopascals (not HPA)"
+    },
+    {
+      "name": "pressure-mbar",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*mbar\\b",
+      "replacement": "\\1 millibars"
+    },
+    {
+      "name": "pressure-atm",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*atm\\b",
+      "replacement": "\\1 atmospheres"
+    },
+    {
+      "name": "pressure-psi",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*psi\\b",
+      "replacement": "\\1 pounds per square inch"
+    },
+    {
+      "name": "uv-index",
+      "pattern": "\\bUV(?!\\s+index)\\s*(\\d+)\\b",
+      "replacement": "UV index \\1",
+      "comment": "UV 4 → UV index 4 (skips if 'UV index N' already written)",
+      "type": "special"
+    },
+    {
+      "name": "beaufort",
+      "pattern": "\\bBft\\.?\\s*(\\d+)\\b",
+      "replacement": "Beaufort \\1"
+    },
+    {
+      "name": "wind-directions",
+      "type": "special",
+      "comment": "NNW → north-northwest etc. Edit the wind_directions table above"
+    },
+    {
+      "_group": "Speed & Distance"
+    },
+    {
+      "name": "speed-kmh",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*km/h\\b",
+      "replacement": "\\1 kilometres per hour"
+    },
+    {
+      "name": "speed-mph",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*mph\\b",
+      "replacement": "\\1 miles per hour"
+    },
+    {
+      "name": "speed-ms",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*m/s\\b",
+      "replacement": "\\1 metres per second"
+    },
+    {
+      "name": "speed-knots",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*kn\\b",
+      "replacement": "\\1 knots"
+    },
+    {
+      "name": "dist-kilometres",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*km\\b",
+      "replacement": "\\1 kilometres"
+    },
+    {
+      "name": "dist-metres",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*m\\b(?!\\w)",
+      "replacement": "\\1 metres",
+      "type": "special"
+    },
+    {
+      "name": "dist-centimetres",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*cm\\b",
+      "replacement": "\\1 centimetres"
+    },
+    {
+      "name": "dist-millimetres",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*mm\\b",
+      "replacement": "\\1 millimetres"
+    },
+    {
+      "name": "dist-miles",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*mi\\b",
+      "replacement": "\\1 miles"
+    },
+    {
+      "name": "dist-feet",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*ft\\b",
+      "replacement": "\\1 feet"
+    },
+    {
+      "name": "dist-inches",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*in\\b",
+      "replacement": "\\1 inches"
+    },
+    {
+      "_group": "Weight & Volume"
+    },
+    {
+      "name": "weight-tonnes",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*t\\b(?!\\w)",
+      "replacement": "\\1 tonnes",
+      "type": "special"
+    },
+    {
+      "name": "weight-kilograms",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*kg\\b",
+      "replacement": "\\1 kilograms"
+    },
+    {
+      "name": "weight-grams",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*g\\b(?!\\w)",
+      "replacement": "\\1 grams",
+      "type": "special"
+    },
+    {
+      "name": "weight-milligrams",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*mg\\b",
+      "replacement": "\\1 milligrams"
+    },
+    {
+      "name": "vol-litres",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*[lL]\\b(?!\\w)",
+      "replacement": "\\1 litres",
+      "type": "special"
+    },
+    {
+      "name": "vol-millilitres",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*ml\\b",
+      "replacement": "\\1 millilitres"
+    },
+    {
+      "_group": "Currency"
+    },
+    {
+      "name": "currency-gbp",
+      "type": "special",
+      "comment": "£1.99 → 1 pound 99 pence  |  £1.01 → 1 pound 1 penny"
+    },
+    {
+      "name": "currency-usd",
+      "type": "special",
+      "comment": "$4.99 → 4 dollars 99 cents"
+    },
+    {
+      "name": "currency-eur",
+      "type": "special",
+      "comment": "€4.99 → 4 euros 99 cents"
+    },
+    {
+      "name": "currency-gbp-whole",
+      "pattern": "£(\\d[\\d,]*)\\b",
+      "replacement": "\\1 pounds",
+      "comment": "£50 → 50 pounds"
+    },
+    {
+      "name": "currency-usd-whole",
+      "pattern": "\\$(\\d[\\d,]*)\\b",
+      "replacement": "\\1 dollars"
+    },
+    {
+      "name": "currency-eur-whole",
+      "pattern": "€(\\d[\\d,]*)\\b",
+      "replacement": "\\1 euros"
+    },
+    {
+      "_group": "Percentages"
+    },
+    {
+      "name": "percentage",
+      "pattern": "(\\d+(?:\\.\\d+)?)\\s*%",
+      "replacement": "\\1 percent"
+    },
+    {
+      "_group": "Time"
+    },
+    {
+      "name": "time-24h",
+      "type": "special",
+      "comment": "14:30 → 2:30 PM  |  18:00 → 6 PM"
+    },
+    {
+      "name": "time-12h-ampm",
+      "pattern": "\\b(\\d{1,2})([ap]m)\\b",
+      "replacement": "\\1 \\2",
+      "comment": "3pm → 3 pm"
+    },
+    {
+      "_group": "Dates"
+    },
+    {
+      "name": "date-dd-mm-yyyy",
+      "type": "special",
+      "comment": "06/04/2026 → the sixth of April 2026"
+    },
+    {
+      "name": "ordinals",
+      "type": "special",
+      "comment": "3rd → third  |  21st → twenty-first"
+    },
+    {
+      "_group": "Numbers"
+    },
+    {
+      "name": "number-commas",
+      "pattern": "(\\d{1,3}),(\\d{3})",
+      "replacement": "\\1\\2",
+      "flags": [],
+      "comment": "Remove thousands separators: 1,234,567 → 1234567"
+    },
+    {
+      "name": "number-commas-2",
+      "pattern": "(\\d{1,3}),(\\d{3})",
+      "replacement": "\\1\\2",
+      "flags": [],
+      "comment": "Second pass to catch 1,000,000 style numbers"
+    },
+    {
+      "_group": "Brands & Proper Nouns"
+    },
+    {
+      "name": "brand-herb-hub-365",
+      "pattern": "\\bHerb\\s+Hub\\s+365\\b",
+      "replacement": "Herb Hub 3 6 5",
+      "flags": [],
+      "comment": "Brand name: digits spoken individually. flags:[] = case-sensitive"
+    },
+    {
+      "_group": "Abbreviations"
+    },
+    {
+      "name": "abbr-eg",
+      "pattern": "\\be\\.g\\.",
+      "replacement": "for example"
+    },
+    {
+      "name": "abbr-ie",
+      "pattern": "\\bi\\.e\\.",
+      "replacement": "that is"
+    },
+    {
+      "name": "abbr-etc",
+      "pattern": "\\betc\\.",
+      "replacement": "and so on"
+    },
+    {
+      "name": "abbr-vs",
+      "pattern": "\\bvs?\\.?(?!\\w)",
+      "replacement": "versus",
+      "type": "special"
+    },
+    {
+      "name": "abbr-approx",
+      "pattern": "\\bapprox\\.?(?!\\w)",
+      "replacement": "approximately",
+      "type": "special"
+    },
+    {
+      "name": "abbr-max",
+      "pattern": "\\bmax\\.?(?!\\w)",
+      "replacement": "maximum",
+      "type": "special"
+    },
+    {
+      "name": "abbr-min",
+      "pattern": "\\bmin\\.?(?!\\w)",
+      "replacement": "minimum",
+      "type": "special"
+    },
+    {
+      "name": "abbr-avg",
+      "pattern": "\\bavg\\.?(?!\\w)",
+      "replacement": "average",
+      "type": "special"
+    },
+    {
+      "name": "abbr-no",
+      "pattern": "\\bno\\.\\s*(\\d)",
+      "replacement": "number \\1",
+      "comment": "no. 5 → number 5"
+    },
+    {
+      "name": "abbr-fig",
+      "pattern": "\\bfig\\.\\s*(\\d)",
+      "replacement": "figure \\1"
+    },
+    {
+      "name": "abbr-est",
+      "pattern": "\\best\\.?(?!\\w)",
+      "replacement": "estimated",
+      "type": "special"
+    },
+    {
+      "name": "abbr-ca",
+      "pattern": "\\bca\\.?(?!\\w)",
+      "replacement": "approximately",
+      "comment": "ca. 1850 → approximately 1850",
+      "type": "special"
+    },
+    {
+      "_group": "Symbols & Arrows"
+    },
+    {
+      "name": "arrow-right",
+      "pattern": "\\s*->\\s*",
+      "replacement": ", leading to "
+    },
+    {
+      "name": "arrow-right-unicode",
+      "pattern": "\\s*→\\s*",
+      "replacement": ", leading to "
+    },
+    {
+      "name": "arrow-left",
+      "pattern": "\\s*<-\\s*",
+      "replacement": ", from "
+    },
+    {
+      "name": "symbol-times",
+      "pattern": "\\s*×\\s*",
+      "replacement": " times "
+    },
+    {
+      "name": "symbol-divide",
+      "pattern": "\\s*÷\\s*",
+      "replacement": " divided by "
+    },
+    {
+      "name": "symbol-plus",
+      "pattern": "\\s*\\+\\s*(?=\\w)",
+      "replacement": " plus ",
+      "type": "special"
+    },
+    {
+      "name": "symbol-equals",
+      "pattern": "\\s*=\\s*(?=\\d)",
+      "replacement": " equals ",
+      "type": "special"
+    },
+    {
+      "name": "symbol-ampersand",
+      "pattern": "&(?!#?\\w+;)",
+      "replacement": " and ",
+      "comment": "& → and, but leave HTML entities like &amp; alone",
+      "type": "special"
+    },
+    {
+      "name": "en-dash-range",
+      "pattern": "(\\d)\\s*–\\s*(\\d)",
+      "replacement": "\\1 to \\2",
+      "comment": "10–20 → 10 to 20"
+    },
+    {
+      "name": "en-dash",
+      "pattern": "\\s*–\\s*",
+      "replacement": ", ",
+      "comment": "En dash as pause"
+    },
+    {
+      "name": "em-dash-space",
+      "pattern": "[^\\S\\n]*—[^\\S\\n]*",
+      "replacement": " — ",
+      "flags": [],
+      "comment": "Em dash kept for TTS breath pause, normalise horizontal spacing only (preserve newlines)"
+    },
+    {
+      "name": "ellipsis",
+      "pattern": "\\.{3,}",
+      "replacement": "...",
+      "comment": "Normalise any run of dots to standard ellipsis"
+    },
+    {
+      "name": "fraction-half",
+      "pattern": "\\b½\\b",
+      "replacement": "one half"
+    },
+    {
+      "name": "fraction-quarter",
+      "pattern": "\\b¼\\b",
+      "replacement": "one quarter"
+    },
+    {
+      "name": "fraction-third",
+      "pattern": "\\b⅓\\b",
+      "replacement": "one third"
+    },
+    {
+      "name": "fraction-three-quarters",
+      "pattern": "\\b¾\\b",
+      "replacement": "three quarters"
+    },
+    {
+      "name": "trademark",
+      "pattern": "[™®©]",
+      "replacement": "",
+      "comment": "Drop trademark/copyright symbols silently"
+    },
+    {
+      "name": "degree-lone",
+      "pattern": "(\\d)\\s*°",
+      "replacement": "\\1 degrees",
+      "comment": "Bare degree symbol after temp-celsius/fahrenheit have already run"
+    },
+    {
+      "_group": "Lists"
+    },
+    {
+      "name": "md-ordered-list",
+      "type": "special",
+      "comment": "1. X\\n2. Y\\n3. Z → First, x. Second, y. And finally, z."
+    },
+    {
+      "name": "md-list",
+      "type": "special",
+      "comment": "Bullet blocks → natural spoken flow with And connective"
+    },
+    {
+      "_group": "Whitespace Cleanup"
+    },
+    {
+      "name": "multi-space",
+      "pattern": "[ \\t]{2,}",
+      "replacement": " ",
+      "flags": [],
+      "comment": "Collapse multiple spaces/tabs to one"
+    },
+    {
+      "name": "space-before-punct",
+      "pattern": " +([,\\.!?;:])",
+      "replacement": "\\1",
+      "flags": [],
+      "comment": "Remove spaces before punctuation"
+    }
+  ]
+}

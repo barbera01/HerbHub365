@@ -1,0 +1,42 @@
+FROM golang:1.23-alpine AS builder
+
+WORKDIR /src
+
+ARG TARGETOS=linux
+ARG TARGETARCH
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/video-narrator ./cmd/video-narrator
+
+FROM alpine:3.20
+
+WORKDIR /app
+
+# ffmpeg is required for intro/outro stitching.
+RUN apk add --no-cache ca-certificates ffmpeg
+
+COPY --from=builder /out/video-narrator /usr/local/bin/video-narrator
+COPY config/tts-rules.json /app/config/tts-rules.json
+
+# Video assets volume — mount your intro/outro MP4s (and any future assets)
+# here at runtime.  New avatar variants can be dropped in without rebuilding
+# the image.
+#
+#   docker run ... \
+#     -v /path/to/your/Resources/video:/app/resources/video:ro \
+#     -v /path/to/your/Resources/video_backgrounds:/app/resources/video_backgrounds:ro \
+#     ...
+#
+# Expected paths (override with CONCAT_INTRO / CONCAT_OUTRO env vars if needed):
+#   /app/resources/video/intro.mp4
+#   /app/resources/video/outro.mp4
+#
+# Background images for chroma-key compositing:
+#   /app/resources/video_backgrounds/<name>.jpeg   (set via CHROMA_KEY_BG_PATH)
+VOLUME ["/app/resources/video"]
+VOLUME ["/app/resources/video_backgrounds"]
+
+ENTRYPOINT ["/usr/local/bin/video-narrator"]

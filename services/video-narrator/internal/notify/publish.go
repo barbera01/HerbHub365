@@ -15,11 +15,6 @@ import (
 
 // PublishCompletion emits a completion message and writes a JSON marker file.
 func PublishCompletion(ctx context.Context, cfg config.Config, slug, outputFile string) error {
-	publisher := queue.NewPublisher(cfg.RabbitMQURL, cfg.RabbitMQQueue)
-	if publisher == nil || !publisher.Enabled() {
-		return nil
-	}
-
 	if err := os.MkdirAll(cfg.Concat.OutputDir, 0755); err != nil {
 		return fmt.Errorf("create output dir: %w", err)
 	}
@@ -43,12 +38,16 @@ func PublishCompletion(ctx context.Context, cfg config.Config, slug, outputFile 
 		return fmt.Errorf("marshal payload: %w", err)
 	}
 
-	if err := publisher.Publish(ctx, data); err != nil {
-		return fmt.Errorf("publish: %w", err)
-	}
-
 	if err := os.WriteFile(markerPath, data, 0644); err != nil {
 		return fmt.Errorf("write marker: %w", err)
+	}
+
+	publisher := queue.NewPublisher(cfg.RabbitMQURL, cfg.RabbitMQQueue)
+	if publisher == nil || !publisher.Enabled() {
+		return nil
+	}
+	if err := publisher.Publish(ctx, data); err != nil {
+		return fmt.Errorf("publish: %w", err)
 	}
 	return nil
 }

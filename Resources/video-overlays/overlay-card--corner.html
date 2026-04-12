@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<!--
+  HerbHub365 — Video Overlay: Corner Card
+  ────────────────────────────────────────
+  Canvas:  520 × 282 px  (transparent background → PNG)
+  Sections: Environment (ambient) + Oregano / Chilli / Basil
+  Data keys:
+    Environment:  env_temp, env_humidity, env_pressure
+    Herbs:        oregano_temp, oregano_soil, oregano_humidity, oregano_status
+                  chilli_temp,  chilli_soil,  chilli_humidity,  chilli_status
+                  basil_temp,   basil_soil,   basil_humidity,   basil_status
+    Footer:       avg_temp, avg_humidity, hub_uptime, alert_count, timestamp
+  Status values:  healthy | monitor | alert
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HerbHub365 — Corner Overlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;700&family=Raleway:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --forest:     #1a3d2b;
+      --canopy:     #2d5a3d;
+      --leaf:       #5fa870;
+      --sage:       #7dba90;
+      --clay:       #c0714a;
+      --gold:       #c8a45a;
+      --ink:        #e8f0ea;
+      --ink-soft:   #b8ccbe;
+      --ink-muted:  #7a9e85;
+      --card-bg:    rgba(10, 22, 14, 0.92);
+      --border-col: rgba(74, 124, 89, 0.28);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 520px;
+      height: auto;
+      overflow: visible;
+      background: transparent;
+      -webkit-font-smoothing: antialiased;
+      font-family: 'Raleway', sans-serif;
+    }
+
+    .card {
+      width: 520px;
+      height: auto;
+      background-color: var(--card-bg);
+      background-image: linear-gradient(150deg, rgba(45,90,61,0.14) 0%, transparent 55%);
+      border: 1px solid var(--border-col);
+      border-radius: 22px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 1px 0 rgba(74,124,89,0.18) inset;
+    }
+
+    /* Top accent stripe */
+    .card-stripe {
+      height: 3px;
+      flex-shrink: 0;
+      background: linear-gradient(90deg, var(--canopy), var(--leaf) 55%, var(--sage));
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 15px 7px;
+      border-bottom: 1px solid rgba(74,124,89,0.14);
+      flex-shrink: 0;
+    }
+
+    .brand { display: flex; align-items: center; gap: 7px; }
+    .brand-leaf { color: var(--leaf); display: block; }
+    .brand-name {
+      font-family: 'Lora', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .brand-name em {
+      font-style: normal;
+      color: var(--sage);
+      font-size: 10px;
+      font-weight: 600;
+      vertical-align: super;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 9px; }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(34,197,94,0.11);
+      border: 1px solid rgba(34,197,94,0.27);
+      border-radius: 100px;
+      padding: 2px 7px 2px 5px;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: livePulse 2s ease-in-out infinite;
+    }
+    .live-text {
+      font-size: 8px; font-weight: 800;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      color: #4ade80;
+    }
+
+    .timestamp {
+      font-family: 'Courier New', monospace;
+      font-size: 10px; color: var(--ink-muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Environment section ───────────────────────────────── */
+    .env-section {
+      display: flex;
+      align-items: stretch;
+      padding: 0;
+      border-bottom: 1px solid rgba(74,124,89,0.14);
+      flex-shrink: 0;
+      background: rgba(30,58,138,0.08);
+    }
+
+    .env-label-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 3px;
+      padding: 7px 10px 7px 14px;
+      border-right: 1px solid rgba(74,124,89,0.12);
+      flex-shrink: 0;
+    }
+    .env-icon { color: #7dba90; display: block; }
+    .env-label-text {
+      font-size: 6.5px; font-weight: 800;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--ink-muted);
+      writing-mode: horizontal-tb;
+    }
+
+    .env-readings {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .env-reading {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+      padding: 7px 6px;
+    }
+    .env-reading + .env-reading {
+      border-left: 1px solid rgba(74,124,89,0.10);
+    }
+
+    .env-reading-icon { display: flex; align-items: center; margin-bottom: 1px; }
+
+    .env-reading-value {
+      font-family: 'Lora', serif;
+      font-size: 13px; font-weight: 700;
+      color: var(--ink); line-height: 1;
+    }
+    .env-reading-label {
+      font-size: 7px; font-weight: 700;
+      letter-spacing: 0.11em; text-transform: uppercase;
+      color: var(--ink-muted); line-height: 1;
+    }
+
+    /* ── Herb list ─────────────────────────────────────────── */
+    .herb-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .herb-row {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px 0 10px;
+      gap: 9px;
+      position: relative;
+      border-bottom: 1px solid rgba(74,124,89,0.07);
+    }
+    .herb-row:last-child { border-bottom: none; }
+
+    .herb-row::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 8px; bottom: 8px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+    }
+    .herb-row--healthy::before { background: #4a7c59; }
+    .herb-row--monitor::before { background: #c8a45a; }
+    .herb-row--alert::before   { background: #c0714a; }
+
+    .herb-icon {
+      width: 26px; height: 26px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .herb-icon--oregano { background: rgba(107,158,120,0.20); color: #7dba90; }
+    .herb-icon--chilli  { background: rgba(192,113,74,0.22);  color: #d4855e; }
+    .herb-icon--basil   { background: rgba(45,90,61,0.24);    color: #5fa870; }
+
+    .herb-name {
+      font-size: 9px; font-weight: 800;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      color: var(--ink-soft); width: 54px; flex-shrink: 0;
+    }
+
+    .herb-readings { display: flex; gap: 11px; flex: 1; }
+
+    .reading { display: flex; flex-direction: column; gap: 1px; }
+    .reading-value {
+      font-family: 'Lora', serif;
+      font-size: 13px; font-weight: 700;
+      color: var(--ink); line-height: 1;
+    }
+    .reading-label {
+      font-size: 7px; font-weight: 700;
+      letter-spacing: 0.11em; text-transform: uppercase;
+      color: var(--ink-muted); line-height: 1;
+    }
+
+    .status-badge {
+      font-size: 7.5px; font-weight: 800;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      padding: 3px 7px;
+      border-radius: 100px; border: 1px solid transparent;
+      flex-shrink: 0; line-height: 1;
+    }
+    .status-badge--healthy { color: #4ade80; background: rgba(34,197,94,0.12);  border-color: rgba(34,197,94,0.28); }
+    .status-badge--monitor { color: #fbbf24; background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.28); }
+    .status-badge--alert   {
+      color: #fca5a5; background: rgba(248,113,113,0.14); border-color: rgba(248,113,113,0.32);
+      animation: alertGlow 2.8s ease-in-out infinite;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    .card-footer {
+      display: flex; padding: 6px 15px;
+      border-top: 1px solid rgba(74,124,89,0.14);
+      flex-shrink: 0;
+    }
+    .footer-stat {
+      flex: 1; display: flex; flex-direction: column;
+      gap: 2px; align-items: center;
+    }
+    .footer-stat + .footer-stat { border-left: 1px solid rgba(74,124,89,0.15); }
+    .footer-value {
+      font-family: 'Lora', serif;
+      font-size: 12px; font-weight: 700;
+      color: var(--ink); line-height: 1;
+    }
+    .footer-value--alert { color: #fca5a5; }
+    .footer-label {
+      font-size: 6.5px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-muted); line-height: 1;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+    @keyframes alertGlow {
+      0%, 100% { border-color: rgba(248,113,113,0.32); background: rgba(248,113,113,0.14); }
+      50%       { border-color: rgba(248,113,113,0.55); background: rgba(248,113,113,0.24); }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="card-stripe"></div>
+
+  <!-- ── HEADER ─────────────────────────────────────────────── -->
+  <header class="card-header">
+    <div class="brand">
+      <svg class="brand-leaf" viewBox="0 0 40 60" width="14" height="20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M20 4C30 12 36 26 34 38C32 50 26 58 20 62C14 58 8 50 6 38C4 26 10 12 20 4Z" fill="currentColor"/>
+        <line x1="20" y1="8"  x2="20" y2="58" stroke="#0a160e" stroke-width="1.4" opacity="0.45" stroke-linecap="round"/>
+        <line x1="20" y1="22" x2="14" y2="30" stroke="#0a160e" stroke-width="1"   opacity="0.28" stroke-linecap="round"/>
+        <line x1="20" y1="22" x2="26" y2="30" stroke="#0a160e" stroke-width="1"   opacity="0.28" stroke-linecap="round"/>
+        <line x1="20" y1="34" x2="13" y2="42" stroke="#0a160e" stroke-width="1"   opacity="0.28" stroke-linecap="round"/>
+        <line x1="20" y1="34" x2="27" y2="42" stroke="#0a160e" stroke-width="1"   opacity="0.28" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-name">HerbHub<em>365</em></div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span class="live-text">Live</span>
+      </div>
+      <div class="timestamp" data-key="timestamp">14:23:07</div>
+    </div>
+  </header>
+
+  <!-- ── ENVIRONMENT ────────────────────────────────────────── -->
+  <div class="env-section">
+    <div class="env-label-col">
+      <!-- Globe/environment icon -->
+      <svg class="env-icon" viewBox="0 0 24 24" width="13" height="13" fill="none"
+           stroke="currentColor" stroke-width="1.6" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M3.6 9h16.8M3.6 15h16.8M11.5 3a17 17 0 0 0 0 18M12.5 3a17 17 0 0 1 0 18"/>
+      </svg>
+      <span class="env-label-text">Env</span>
+    </div>
+    <div class="env-readings">
+
+      <!-- Temperature -->
+      <div class="env-reading">
+        <div class="env-reading-icon">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#f87171"
+               stroke-width="1.8" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+          </svg>
+        </div>
+        <div class="env-reading-value" data-key="env_temp">24.1°</div>
+        <div class="env-reading-label">Temp °C</div>
+      </div>
+
+      <!-- Humidity -->
+      <div class="env-reading">
+        <div class="env-reading-icon">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#60a5fa"
+               stroke-width="1.8" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+          </svg>
+        </div>
+        <div class="env-reading-value" data-key="env_humidity">68%</div>
+        <div class="env-reading-label">Humidity</div>
+      </div>
+
+      <!-- Pressure -->
+      <div class="env-reading">
+        <div class="env-reading-icon">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#a78bfa"
+               stroke-width="1.8" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="12" r="8"/>
+            <path d="M12 12l2.8-3.5" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="1.2" fill="#a78bfa" stroke="none"/>
+          </svg>
+        </div>
+        <div class="env-reading-value" data-key="env_pressure">1013</div>
+        <div class="env-reading-label">hPa</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── HERB ROWS ──────────────────────────────────────────── -->
+  <div class="herb-list">
+
+    <!-- OREGANO -->
+    <div class="herb-row herb-row--healthy" data-herb="oregano">
+      <div class="herb-icon herb-icon--oregano" aria-hidden="true">
+        <svg viewBox="0 0 40 60" width="12" height="18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 4C30 12 36 26 34 38C32 50 26 58 20 62C14 58 8 50 6 38C4 26 10 12 20 4Z" fill="currentColor"/>
+          <line x1="20" y1="8" x2="20" y2="58" stroke="rgba(0,0,0,0.28)" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="herb-name">Oregano</div>
+      <div class="herb-readings">
+        <div class="reading">
+          <div class="reading-value" data-key="oregano_temp">21.8°</div>
+          <div class="reading-label">Temp °C</div>
+        </div>
+        <div class="reading">
+          <div class="reading-value" data-key="oregano_soil">54%</div>
+          <div class="reading-label">Soil</div>
+        </div>
+        <div class="reading">
+          <div class="reading-value" data-key="oregano_humidity">61%</div>
+          <div class="reading-label">Humid</div>
+        </div>
+      </div>
+      <div class="status-badge status-badge--healthy" data-key="oregano_status">Healthy</div>
+    </div>
+
+    <!-- CHILLI -->
+    <div class="herb-row herb-row--alert" data-herb="chilli">
+      <div class="herb-icon herb-icon--chilli" aria-hidden="true">
+        <svg viewBox="0 0 40 60" width="12" height="18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 4C30 12 36 26 34 38C32 50 26 58 20 62C14 58 8 50 6 38C4 26 10 12 20 4Z" fill="currentColor"/>
+          <line x1="20" y1="8" x2="20" y2="58" stroke="rgba(0,0,0,0.28)" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="herb-name">Chilli</div>
+      <div class="herb-readings">
+        <div class="reading">
+          <div class="reading-value" data-key="chilli_temp">28.4°</div>
+          <div class="reading-label">Temp °C</div>
+        </div>
+        <div class="reading">
+          <div class="reading-value" data-key="chilli_soil">18%</div>
+          <div class="reading-label">Soil</div>
+        </div>
+        <div class="reading">
+          <div class="reading-value" data-key="chilli_humidity">52%</div>
+          <div class="reading-label">Humid</div>
+        </div>
+      </div>
+      <div class="status-badge status-badge--alert" data-key="chilli_status">Alert</div>
+    </div>
+
+    <!-- BASIL -->
+    <div class="herb-row herb-row--monitor" data-herb="basil">
+      <div class="herb-icon herb-icon--basil" aria-hidden="true">
+        <svg viewBox="0 0 40 60" width="12" height="18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 4C30 12 36 26 34 38C32 50 26 58 20 62C14 58 8 50 6 38C4 26 10 12 20 4Z" fill="currentColor"/>
+          <line x1="20" y1="8" x2="20" y2="58" stroke="rgba(0,0,0,0.28)" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="herb-name">Basil</div>
+      <div class="herb-readings">
+        <div class="reading">
+          <div class="reading-value" data-key="basil_temp">22.1°</div>
+          <div class="reading-label">Temp °C</div>
+        </div>
+        <div class="reading">
+          <div class="reading-value" data-key="basil_soil">42%</div>
+          <div class="reading-label">Soil</div>
+        </div>
+        <div class="reading">
+          <div class="reading-value" data-key="basil_humidity">65%</div>
+          <div class="reading-label">Humid</div>
+        </div>
+      </div>
+      <div class="status-badge status-badge--monitor" data-key="basil_status">Monitor</div>
+    </div>
+
+  </div>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────── -->
+  <footer class="card-footer">
+    <div class="footer-stat">
+      <div class="footer-value" data-key="avg_temp">23.2°C</div>
+      <div class="footer-label">Avg Temp</div>
+    </div>
+    <div class="footer-stat">
+      <div class="footer-value" data-key="avg_humidity">60%</div>
+      <div class="footer-label">Avg Humid</div>
+    </div>
+    <div class="footer-stat">
+      <div class="footer-value" data-key="hub_uptime">14d 6h</div>
+      <div class="footer-label">Uptime</div>
+    </div>
+    <div class="footer-stat">
+      <div class="footer-value footer-value--alert" data-key="alert_count">1 Alert</div>
+      <div class="footer-label">Status</div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const STATUS_BADGE  = { healthy:'status-badge--healthy', monitor:'status-badge--monitor', alert:'status-badge--alert' };
+  const STATUS_ROW    = { healthy:'herb-row--healthy',     monitor:'herb-row--monitor',     alert:'herb-row--alert'    };
+  const STATUS_LABELS = { healthy:'Healthy', monitor:'Monitor', alert:'Alert' };
+
+  window.injectData = function(data) {
+    Object.entries(data).forEach(([key, val]) => {
+      document.querySelectorAll(`[data-key="${key}"]`).forEach(el => {
+        if (key.endsWith('_status')) {
+          const v = String(val).toLowerCase();
+          el.className = `status-badge ${STATUS_BADGE[v] || STATUS_BADGE.healthy}`;
+          el.textContent = STATUS_LABELS[v] || val;
+          const row = el.closest('[data-herb]');
+          if (row) row.className = row.className.replace(/herb-row--\w+/, STATUS_ROW[v] || STATUS_ROW.healthy);
+        } else {
+          el.textContent = val;
+          if (key === 'alert_count') el.classList.toggle('footer-value--alert', parseInt(val) > 0);
+        }
+      });
+    });
+  };
+
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.size) return;
+    const data = {};
+    params.forEach((v, k) => { data[k] = v; });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => window.injectData(data));
+    } else { window.injectData(data); }
+  })();
+</script>
+</body>
+</html>

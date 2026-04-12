@@ -24,18 +24,19 @@ import (
 )
 
 type Config struct {
-	RabbitURL    string
-	QueueName    string
-	DLQName      string
-	OutputDir    string
-	ClientSecret string
-	TokenPath    string
-	Privacy      string
-	CategoryID   string
-	Tags         []string
-	MadeForKids  bool
-	PostsDir     string
-	BlogBaseURL  string
+	RabbitURL              string
+	QueueName              string
+	DLQName                string
+	OutputDir              string
+	ClientSecret           string
+	TokenPath              string
+	Privacy                string
+	CategoryID             string
+	Tags                   []string
+	MadeForKids            bool
+	PostsDir               string
+	BlogBaseURL            string
+	ContainsSyntheticMedia bool
 }
 
 type ProducedMessage struct {
@@ -60,24 +61,23 @@ func main() {
 		log.Fatalf("youtube auth: %v", err)
 	}
 
-	if err := runConsumer(ctx, cfg, uploader); err != nil {
-		log.Fatalf("consumer: %v", err)
-	}
+	runWithReconnect(ctx, cfg, uploader)
 }
 
 func loadConfig() (Config, error) {
 	cfg := Config{
-		RabbitURL:    os.Getenv("RABBITMQ_URL"),
-		QueueName:    getEnv("RABBITMQ_QUEUE", "video.produced"),
-		DLQName:      getEnv("RABBITMQ_DLQ", "video.produced.dlq"),
-		OutputDir:    getEnv("VIDEO_OUTPUT_DIR", "/output/video"),
-		ClientSecret: os.Getenv("YOUTUBE_CLIENT_SECRET"),
-		TokenPath:    os.Getenv("YOUTUBE_TOKEN"),
-		Privacy:      getEnv("YOUTUBE_PRIVACY", "unlisted"),
-		CategoryID:   getEnv("YOUTUBE_CATEGORY_ID", "22"),
-		MadeForKids:  getBoolEnv("YOUTUBE_MADE_FOR_KIDS", false),
-		PostsDir:     getEnv("BLOG_POSTS_DIR", "/repo/hub/_posts"),
-		BlogBaseURL:  strings.TrimRight(os.Getenv("BLOG_BASE_URL"), "/"),
+		RabbitURL:              os.Getenv("RABBITMQ_URL"),
+		QueueName:              getEnv("RABBITMQ_QUEUE", "video.produced"),
+		DLQName:                getEnv("RABBITMQ_DLQ", "video.produced.dlq"),
+		OutputDir:              getEnv("VIDEO_OUTPUT_DIR", "/output/video"),
+		ClientSecret:           os.Getenv("YOUTUBE_CLIENT_SECRET"),
+		TokenPath:              os.Getenv("YOUTUBE_TOKEN"),
+		Privacy:                getEnv("YOUTUBE_PRIVACY", "unlisted"),
+		CategoryID:             getEnv("YOUTUBE_CATEGORY_ID", "22"),
+		MadeForKids:            getBoolEnv("YOUTUBE_MADE_FOR_KIDS", false),
+		PostsDir:               getEnv("BLOG_POSTS_DIR", "/repo/hub/_posts"),
+		BlogBaseURL:            strings.TrimRight(os.Getenv("BLOG_BASE_URL"), "/"),
+		ContainsSyntheticMedia: getBoolEnv("YOUTUBE_CONTAINS_SYNTHETIC_MEDIA", true),
 	}
 	if tags := strings.TrimSpace(os.Getenv("YOUTUBE_TAGS")); tags != "" {
 		cfg.Tags = splitCSV(tags)
@@ -138,6 +138,28 @@ func runConsumer(ctx context.Context, cfg Config, uploader *youtube.Service) err
 			if err := handleMessage(ctx, cfg, uploader, ch, msg); err != nil {
 				log.Printf("message failed: %v", err)
 			}
+		}
+	}
+}
+
+func runWithReconnect(ctx context.Context, cfg Config, uploader *youtube.Service) {
+	backoff := 2 * time.Second
+	for {
+		err := runConsumer(ctx, cfg, uploader)
+		if err == nil || errors.Is(err, context.Canceled) {
+			return
+		}
+		log.Printf("consumer stopped: %v", err)
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(backoff):
+		}
+		if backoff < 30*time.Second {
+			backoff *= 2
+		}
+		if backoff > 30*time.Second {
+			backoff = 30 * time.Second
 		}
 	}
 }
@@ -325,7 +347,13 @@ func uploadToYouTube(ctx context.Context, service *youtube.Service, videoPath, t
 			PrivacyStatus:           cfg.Privacy,
 			MadeForKids:             cfg.MadeForKids,
 			SelfDeclaredMadeForKids: cfg.MadeForKids,
+			ContainsSyntheticMedia:  cfg.ContainsSyntheticMedia,
 		},
+	}
+	log.Printf("youtube upload payload: title=%q privacy=%q madeForKids=%v synthetic=%v tags=%v category=%s",
+		title, cfg.Privacy, cfg.MadeForKids, cfg.ContainsSyntheticMedia, tags, cfg.CategoryID)
+	if description != "" {
+		log.Printf("youtube upload description: %q", description)
 	}
 
 	call := service.Videos.Insert([]string{"snippet", "status"}, video).Media(file)
@@ -336,6 +364,21 @@ func uploadToYouTube(ctx context.Context, service *youtube.Service, videoPath, t
 	}
 	if resp == nil || resp.Id == "" {
 		return "", fmt.Errorf("youtube response missing id")
+	}
+
+	// Reinforce status fields via update to ensure flags are persisted.
+	update := &youtube.Video{
+		Id: resp.Id,
+		Status: &youtube.VideoStatus{
+			PrivacyStatus:           cfg.Privacy,
+			SelfDeclaredMadeForKids: cfg.MadeForKids,
+			ContainsSyntheticMedia:  cfg.ContainsSyntheticMedia,
+		},
+	}
+	if updated, err := service.Videos.Update([]string{"status"}, update).Context(ctx).Do(); err != nil {
+		log.Printf("youtube status update failed for %s: %v", resp.Id, err)
+	} else if updated != nil && updated.Status != nil {
+		log.Printf("youtube status confirmed: madeForKids=%v synthetic=%v privacy=%s", updated.Status.SelfDeclaredMadeForKids, updated.Status.ContainsSyntheticMedia, updated.Status.PrivacyStatus)
 	}
 	return resp.Id, nil
 }

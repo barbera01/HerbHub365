@@ -375,9 +375,12 @@ func uploadToYouTube(ctx context.Context, service *youtube.Service, videoPath, t
 		},
 		Status: &youtube.VideoStatus{
 			PrivacyStatus:           cfg.Privacy,
-			MadeForKids:             cfg.MadeForKids,
 			SelfDeclaredMadeForKids: cfg.MadeForKids,
 			ContainsSyntheticMedia:  cfg.ContainsSyntheticMedia,
+			// ForceSendFields ensures boolean false values are included in the
+			// JSON payload — omitempty in the generated client would otherwise
+			// drop them, leaving YouTube without a made-for-kids declaration.
+			ForceSendFields: []string{"SelfDeclaredMadeForKids", "ContainsSyntheticMedia"},
 		},
 	}
 	log.Printf("youtube upload payload: title=%q privacy=%q madeForKids=%v synthetic=%v tags=%v category=%s",
@@ -403,6 +406,7 @@ func uploadToYouTube(ctx context.Context, service *youtube.Service, videoPath, t
 			PrivacyStatus:           cfg.Privacy,
 			SelfDeclaredMadeForKids: cfg.MadeForKids,
 			ContainsSyntheticMedia:  cfg.ContainsSyntheticMedia,
+			ForceSendFields:         []string{"SelfDeclaredMadeForKids", "ContainsSyntheticMedia"},
 		},
 	}
 	if updated, err := service.Videos.Update([]string{"status"}, update).Context(ctx).Do(); err != nil {
@@ -650,7 +654,7 @@ func updatePostEmbed(postsDir string, payload ProducedMessage, outputFile, video
 		return "", err
 	}
 	raw := string(content)
-	if strings.Contains(raw, videoID) || strings.Contains(raw, "youtube.com/embed/") || strings.Contains(raw, "youtu.be/") {
+	if strings.Contains(raw, videoID) {
 		return "", nil
 	}
 

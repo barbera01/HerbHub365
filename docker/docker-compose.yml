@@ -156,6 +156,8 @@ services:
       VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/output/video}
       VIDEO_RULES_FILE: ${VIDEO_RULES_FILE:-/app/config/tts-rules.json}
       VIDEO_BASE_URL: ${VIDEO_BASE_URL:-http://172.16.106.81:8011}
+      VIDEO_AVATAR: ${VIDEO_AVATAR:-eve}
+      VIDEO_AVATARS: ${VIDEO_AVATARS:-eve}
       VIDEO_REQUEST_TIMEOUT: ${VIDEO_REQUEST_TIMEOUT:-120s}
       RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}

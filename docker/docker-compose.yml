@@ -119,8 +119,6 @@ services:
       HERBHUB_VIDEO_RUN_ON_START: ${HERBHUB_VIDEO_RUN_ON_START:-false}
       LISTEN_ADDR: ${LISTEN_ADDR:-:8080}
       NARRATOR_URL: ${NARRATOR_URL:-http://video-narrator:8080}
-      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
-      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
       HUB_DIR: ${HUB_DIR:-/repo/hub}
       BLOG_POSTS_DIR: ${BLOG_POSTS_DIR:-/repo/hub/_posts}
       VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/output/video}
@@ -159,6 +157,8 @@ services:
       VIDEO_RULES_FILE: ${VIDEO_RULES_FILE:-/app/config/tts-rules.json}
       VIDEO_BASE_URL: ${VIDEO_BASE_URL:-http://172.16.106.81:8011}
       VIDEO_REQUEST_TIMEOUT: ${VIDEO_REQUEST_TIMEOUT:-120s}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
       CONCAT_ENABLED: ${CONCAT_ENABLED:-true}
       CONCAT_INTRO: ${CONCAT_INTRO:-/app/resources/video/intro.mp4}
       CONCAT_OUTRO: ${CONCAT_OUTRO:-/app/resources/video/outro.mp4}

@@ -44,10 +44,10 @@ func (p *Publisher) ensureChannel() error {
 	}
 	if _, err := ch.QueueDeclare(
 		p.queue,
-		true,  // durable
-		false, // auto-delete
-		false, // exclusive
-		false, // no-wait
+		true,
+		false,
+		false,
+		false,
 		nil,
 	); err != nil {
 		ch.Close()

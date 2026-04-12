@@ -24,12 +24,6 @@ type Config struct {
 
 	// RequestTimeout caps HTTP calls to the narrator.
 	RequestTimeout time.Duration
-
-	// RabbitMQURL is the AMQP connection string for completion notifications.
-	RabbitMQURL string
-
-	// RabbitMQQueue is the queue name for completion notifications.
-	RabbitMQQueue string
 }
 
 // PostConfig describes where Jekyll posts live.
@@ -49,8 +43,6 @@ func Load() Config {
 		OutputDir:      getEnv("VIDEO_OUTPUT_DIR", "/output/video"),
 		PollInterval:   getDurationEnv("POLL_INTERVAL", 3*time.Second),
 		RequestTimeout: getDurationEnv("REQUEST_TIMEOUT", 120*time.Second),
-		RabbitMQURL:    os.Getenv("RABBITMQ_URL"),
-		RabbitMQQueue:  getEnv("RABBITMQ_QUEUE", "video.produced"),
 
 		Post: PostConfig{
 			PostsDir: postsDir,

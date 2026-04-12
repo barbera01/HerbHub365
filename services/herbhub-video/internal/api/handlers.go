@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,12 +12,14 @@ import (
 
 	"HerbHub365/services/herbhub-video/internal/config"
 	"HerbHub365/services/herbhub-video/internal/post"
+	"HerbHub365/services/herbhub-video/internal/queue"
 	"HerbHub365/services/herbhub-video/internal/video"
 )
 
 type handlers struct {
 	cfg         config.Config
 	videoClient *video.Client
+	publisher   *queue.Publisher
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -171,6 +174,8 @@ func (h *handlers) handleJobs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.publishCompletedJobs(r.Context(), jobs)
+
 	writeJSON(w, http.StatusOK, map[string]any{
 		"jobs":  jobs,
 		"total": len(jobs),
@@ -198,6 +203,8 @@ func (h *handlers) handleJobByID(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "job not found")
 		return
 	}
+
+	h.publishCompletedJobs(r.Context(), []video.JobStatus{*job})
 
 	writeJSON(w, http.StatusOK, job)
 }
@@ -354,4 +361,9 @@ func (h *handlers) handleHealth(w http.ResponseWriter, r *http.Request) {
 		"status":          status,
 		"narrator_online": narratorOK,
 	})
+}
+
+// publishCompletedJobs emits RabbitMQ messages for completed jobs.
+func (h *handlers) publishCompletedJobs(ctx context.Context, jobs []video.JobStatus) {
+	publishCompletedJobsWithPublisher(ctx, h.cfg, h.publisher, jobs)
 }

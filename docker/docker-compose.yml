@@ -119,6 +119,8 @@ services:
       HERBHUB_VIDEO_RUN_ON_START: ${HERBHUB_VIDEO_RUN_ON_START:-false}
       LISTEN_ADDR: ${LISTEN_ADDR:-:8080}
       NARRATOR_URL: ${NARRATOR_URL:-http://video-narrator:8080}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
       HUB_DIR: ${HUB_DIR:-/repo/hub}
       BLOG_POSTS_DIR: ${BLOG_POSTS_DIR:-/repo/hub/_posts}
       VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/output/video}

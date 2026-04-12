@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"time"
 
 	"HerbHub365/services/herbhub-video/internal/api"
 	"HerbHub365/services/herbhub-video/internal/config"
@@ -23,6 +24,21 @@ func main() {
 	log.Printf("  narrator API: %s", cfg.NarratorURL)
 
 	videoClient := video.NewClient(cfg)
+
+	// Backend poller: publishes completion messages without UI polling.
+	go func() {
+		ticker := time.NewTicker(cfg.PollInterval)
+		defer ticker.Stop()
+		for {
+			jobs, err := videoClient.Jobs()
+			if err == nil {
+				api.PublishCompletedJobs(cfg, jobs)
+			} else {
+				log.Printf("job poller: %v", err)
+			}
+			<-ticker.C
+		}
+	}()
 
 	// Serve embedded frontend files from web/ subdirectory.
 	webFS, err := fs.Sub(webContent, "web")

@@ -171,6 +171,31 @@ services:
       - ${VIDEO_RESOURCES_PATH:-../services/video-narrator/resources/video}:/app/resources/video:ro
       - ${VIDEO_BG_RESOURCES_PATH:-../services/video-narrator/resources/video_backgrounds}:/app/resources/video_backgrounds:ro
 
+  video-publisher:
+    build:
+      context: ../services/video-publisher
+      dockerfile: dockerfile
+    container_name: video-publisher
+    restart: unless-stopped
+    networks:
+      - herbhub
+    environment:
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
+      RABBITMQ_DLQ: ${RABBITMQ_DLQ:-video.produced.dlq}
+      VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/output/video}
+      YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-/secrets/youtube/client_secret.json}
+      YOUTUBE_TOKEN: ${YOUTUBE_TOKEN:-/secrets/youtube/token.json}
+      YOUTUBE_PRIVACY: ${YOUTUBE_PRIVACY:-unlisted}
+      YOUTUBE_CATEGORY_ID: ${YOUTUBE_CATEGORY_ID:-22}
+      YOUTUBE_TAGS: ${YOUTUBE_TAGS:-}
+    volumes:
+      - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video
+      - /etc/herbhub365/youtube/client_secret.json:/secrets/youtube/client_secret.json:ro
+      - /etc/herbhub365/youtube/token.json:/secrets/youtube/token.json
+    depends_on:
+      - rabbitmq
+
 
 
   timelapse-builder:

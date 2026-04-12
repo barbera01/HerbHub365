@@ -42,6 +42,7 @@ type postListItem struct {
 	Excerpt   string `json:"excerpt"`
 	Filename  string `json:"filename"`
 	HasVideo  bool   `json:"has_video"`
+	Published bool   `json:"published"`
 	VideoFile string `json:"video_file,omitempty"`
 }
 
@@ -59,10 +60,10 @@ func (h *handlers) handlePosts(w http.ResponseWriter, r *http.Request) {
 
 	items := make([]postListItem, 0, len(posts))
 	for _, p := range posts {
-		hasVideo := p.HasVideo(h.cfg.OutputDir)
+		status := p.OutputStatus(h.cfg.OutputDir)
 		videoFile := ""
-		if hasVideo {
-			videoFile = p.VideoFilename()
+		if status.HasVideo {
+			videoFile = status.Filename
 		}
 		items = append(items, postListItem{
 			Slug:      p.Slug,
@@ -70,7 +71,8 @@ func (h *handlers) handlePosts(w http.ResponseWriter, r *http.Request) {
 			Date:      p.Date.Format("2006-01-02"),
 			Excerpt:   p.Excerpt,
 			Filename:  p.Filename,
-			HasVideo:  hasVideo,
+			HasVideo:  status.HasVideo,
+			Published: status.IsPublished,
 			VideoFile: videoFile,
 		})
 	}
@@ -105,13 +107,15 @@ func (h *handlers) handlePostBySlug(w http.ResponseWriter, r *http.Request) {
 
 	for _, p := range posts {
 		if p.Slug == slug {
+			status := p.OutputStatus(h.cfg.OutputDir)
 			writeJSON(w, http.StatusOK, map[string]any{
 				"slug":      p.Slug,
 				"title":     p.Title,
 				"date":      p.Date.Format("2006-01-02"),
 				"excerpt":   p.Excerpt,
 				"filename":  p.Filename,
-				"has_video": p.HasVideo(h.cfg.OutputDir),
+				"has_video": status.HasVideo,
+				"published": status.IsPublished,
 				"content":   p.RawContent,
 			})
 			return

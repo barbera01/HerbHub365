@@ -191,8 +191,7 @@ services:
       YOUTUBE_TAGS: ${YOUTUBE_TAGS:-}
     volumes:
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video
-      - /etc/herbhub365/youtube/client_secret.json:/secrets/youtube/client_secret.json:ro
-      - /etc/herbhub365/youtube/token.json:/secrets/youtube/token.json
+      - /etc/herbhub365/youtube:/secrets/youtube
     depends_on:
       - rabbitmq
 

@@ -466,6 +466,11 @@ var (
 	postFileRe         = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})-(.+)\.(markdown|md)$`)
 	frontMatterRe      = regexp.MustCompile(`(?s)^---\n.*?\n---\n?`)
 	frontMatterTitleRe = regexp.MustCompile(`(?m)^title:\s*["']?(.+?)["']?\s*$`)
+	mdImageRe          = regexp.MustCompile(`!\[[^\]]*\]\([^\)]*\)`)
+	mdLinkRe           = regexp.MustCompile(`\[([^\]]+)\]\([^\)]*\)`)
+	htmlTagRe          = regexp.MustCompile(`<[^>]+>`)
+	mdHeadingRe        = regexp.MustCompile(`(?m)^#{1,6}\s+`)
+	mdEmphRe           = regexp.MustCompile(`[*_]{1,2}([^*_]+)[*_]{1,2}`)
 )
 
 func loadPostMetadata(postsDir string, payload ProducedMessage, outputFile string) (PostMetadata, error) {
@@ -542,6 +547,11 @@ func extractTitle(raw, slug string) string {
 
 func extractExcerpt(raw string) string {
 	body := frontMatterRe.ReplaceAllString(raw, "")
+	body = mdImageRe.ReplaceAllString(body, "")
+	body = htmlTagRe.ReplaceAllString(body, "")
+	body = mdHeadingRe.ReplaceAllString(body, "")
+	body = mdLinkRe.ReplaceAllString(body, "$1")
+	body = mdEmphRe.ReplaceAllString(body, "$1")
 	body = strings.TrimSpace(body)
 	if len(body) > 200 {
 		body = body[:200] + "..."

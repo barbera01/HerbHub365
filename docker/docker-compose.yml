@@ -77,7 +77,7 @@ services:
     container_name: tts-narrator
     restart: unless-stopped
     networks:
-        - herbhub
+      - herbhub
     environment:
       TTS_MODE: ${TTS_MODE:-daemon}
       TTS_SCHEDULE: ${TTS_SCHEDULE:-10 0 * * *}
@@ -103,7 +103,7 @@ services:
       GIT_AUTHOR_NAME: ${TTS_GIT_AUTHOR_NAME:-Herb Hub Bot}
       GIT_AUTHOR_EMAIL: ${TTS_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
     volumes:
-       - ..:/repo
+      - ..:/repo
 
   herbhub-video:
     build:
@@ -112,7 +112,7 @@ services:
     container_name: herbhub-video
     restart: unless-stopped
     networks:
-         - herbhub
+      - herbhub
     environment:
       HERBHUB_VIDEO_MODE: ${HERBHUB_VIDEO_MODE:-daemon}
       HERBHUB_VIDEO_SCHEDULE: ${HERBHUB_VIDEO_SCHEDULE:-0 9 * * *}
@@ -134,11 +134,11 @@ services:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video
     labels:
-       - "traefik.enable=true"
-       - 'traefik.http.routers.herbhub-video.rule=Host(`video.herbhub365.com`)'
-       - "traefik.http.routers.herbhub-video.entrypoints=websecure"
-       - "traefik.http.routers.herbhub-video.tls=true"
-       - "traefik.http.services.herbhub-video.loadbalancer.server.port=8080"
+      - "traefik.enable=true"
+      - "traefik.http.routers.herbhub-video.rule=Host(`video.herbhub365.com`)"
+      - "traefik.http.routers.herbhub-video.entrypoints=websecure"
+      - "traefik.http.routers.herbhub-video.tls=true"
+      - "traefik.http.services.herbhub-video.loadbalancer.server.port=8080"
 
   video-narrator:
     build:
@@ -191,11 +191,9 @@ services:
       YOUTUBE_TAGS: ${YOUTUBE_TAGS:-}
     volumes:
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video
-      - /etc/herbhub365/youtube:/secrets/youtube
+      - /etc/youtube:/secrets/youtube
     depends_on:
       - rabbitmq
-
-
 
   timelapse-builder:
     build:

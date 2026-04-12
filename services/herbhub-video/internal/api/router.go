@@ -4,13 +4,15 @@ import (
 	"net/http"
 
 	"HerbHub365/services/herbhub-video/internal/config"
+	"HerbHub365/services/herbhub-video/internal/queue"
 	"HerbHub365/services/herbhub-video/internal/video"
 )
 
 // NewRouter builds the HTTP mux with all API routes and static file serving.
 func NewRouter(cfg config.Config, videoClient *video.Client, webFS http.FileSystem) http.Handler {
 	mux := http.NewServeMux()
-	h := &handlers{cfg: cfg, videoClient: videoClient}
+	publisher := queue.NewPublisher(cfg.RabbitMQURL, cfg.RabbitMQQueue)
+	h := &handlers{cfg: cfg, videoClient: videoClient, publisher: publisher}
 
 	// API routes.
 	mux.HandleFunc("/api/posts", h.handlePosts)

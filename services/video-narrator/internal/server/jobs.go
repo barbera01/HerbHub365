@@ -14,6 +14,7 @@ import (
 
 	"HerbHub365/services/video-narrator/internal/concat"
 	"HerbHub365/services/video-narrator/internal/config"
+	"HerbHub365/services/video-narrator/internal/notify"
 	"HerbHub365/services/video-narrator/internal/post"
 	"HerbHub365/services/video-narrator/internal/preprocess"
 	"HerbHub365/services/video-narrator/internal/video"
@@ -298,6 +299,9 @@ downloadPhase:
 		jm.setVideoFile(id, outputFilename)
 		jm.update(id, "completed", 1.0, "")
 		log.Printf("[job %s] wrote raw video: %s (%d bytes)", id[:8], outputPath, len(mp4Bytes))
+		if err := notify.PublishCompletion(ctx, cfg, req.Slug, outputFilename); err != nil {
+			log.Printf("[job %s] publish completion: %v", id[:8], err)
+		}
 		return
 	}
 
@@ -353,6 +357,9 @@ downloadPhase:
 	jm.setVideoFile(id, outputFilename)
 	jm.update(id, "completed", 1.0, "")
 	log.Printf("[job %s] completed: %s (%.1f MB)", id[:8], outputPath, float64(size)/(1024*1024))
+	if err := notify.PublishCompletion(ctx, cfg, req.Slug, outputFilename); err != nil {
+		log.Printf("[job %s] publish completion: %v", id[:8], err)
+	}
 }
 
 // findPostBySlug searches postsDir for a post matching the slug fragment.

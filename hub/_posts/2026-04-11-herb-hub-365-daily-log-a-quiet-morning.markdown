@@ -7,6 +7,10 @@ audio_url: /assets/audio/blog/2026-04-11-herb-hub-365-daily-log-a-quiet-morning.
 ---
 
 ![Timelapse image for April 11, 2026](/assets/images/blog/2026-04-11-herb-hub-365-daily-log-a-quiet-morning.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/dH-G-jEWlPw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure" allowfullscreen></iframe>
+</div>
+
 
 The morning at Herb Hub 365 began with a gentle rise in light, starting at just 39 lux before climbing steadily as the sun took hold. By mid-morning, the greenhouse was bathed in nearly 300 lux, enough to signal the start of a productive day for our basil, chilli, and oregano.
 

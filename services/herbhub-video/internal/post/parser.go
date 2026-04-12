@@ -2,6 +2,7 @@
 package post
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -36,6 +37,7 @@ type OutputStatus struct {
 	HasVideo    bool
 	IsPublished bool
 	Filename    string
+	YouTubeURL  string
 }
 
 // postFileRe matches Jekyll post filenames: YYYY-MM-DD-slug.markdown / .md
@@ -141,10 +143,24 @@ func (p *Post) OutputStatus(outputDir string) OutputStatus {
 	for _, name := range p.CandidatePublishFilenames() {
 		path := filepath.Join(outputDir, name)
 		if _, err := os.Stat(path); err == nil {
-			return OutputStatus{IsPublished: true, Filename: name}
+			return OutputStatus{IsPublished: true, Filename: name, YouTubeURL: readYouTubeURL(path)}
 		}
 	}
 	return OutputStatus{}
+}
+
+func readYouTubeURL(path string) string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	var payload struct {
+		YouTubeURL string `json:"youtube_url"`
+	}
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return ""
+	}
+	return payload.YouTubeURL
 }
 
 // extractTitle pulls title from YAML front matter, or slugifies the slug.

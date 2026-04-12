@@ -30,6 +30,8 @@ func PublishCompletion(ctx context.Context, cfg config.Config, slug, outputFile 
 		"date":        parseDateFromFilename(outputFile),
 		"output_file": outputFile,
 		"status":      "completed",
+		"youtube_id":  "",
+		"youtube_url": "",
 		"timestamp":   time.Now().UTC().Format(time.RFC3339),
 	}
 

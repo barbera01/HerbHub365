@@ -144,10 +144,13 @@ const App = {
                 </div>
                 <div class="card-excerpt">${this.escapeHtml(post.excerpt)}</div>
                 <div class="card-footer">
-                    <span class="card-badge ${post.has_video ? 'has-video' : 'no-video'}">
+                    <span class="card-badge ${post.has_video ? 'has-video' : (post.published ? 'published' : 'no-video')}">
                         ${post.has_video
                             ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="20 6 9 17 4 12"></polyline></svg> Video ready'
-                            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> No video'
+                            : (post.published
+                                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 2 3.5 6.5v5.1c0 5 3.4 9.6 8.5 10.9 5.1-1.3 8.5-5.9 8.5-10.9V6.5L12 2z"></path><polyline points="9 12 12 15 16 9"></polyline></svg> Published'
+                                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> No video'
+                            )
                         }
                     </span>
                     <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); App.openGenerateModal('${post.slug}')">

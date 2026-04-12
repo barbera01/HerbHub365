@@ -29,6 +29,15 @@ type Post struct {
 	RawContent string `json:"-"`
 }
 
+// OutputStatus describes whether a post has a generated output asset.
+// HasVideo is true when an MP4 is present; IsPublished is true when only
+// a JSON marker exists (used when MP4s are not stored).
+type OutputStatus struct {
+	HasVideo    bool
+	IsPublished bool
+	Filename    string
+}
+
 // postFileRe matches Jekyll post filenames: YYYY-MM-DD-slug.markdown / .md
 var postFileRe = regexp.MustCompile(`^(\d{4}-\d{2}-\d{2})-(.+)\.(markdown|md)$`)
 
@@ -102,11 +111,40 @@ func (p *Post) VideoFilename() string {
 	return p.Date.Format("2006-01-02") + "-" + p.Slug + ".mp4"
 }
 
-// HasVideo checks whether a final MP4 already exists in outputDir.
-func (p *Post) HasVideo(outputDir string) bool {
-	path := filepath.Join(outputDir, p.VideoFilename())
-	_, err := os.Stat(path)
-	return err == nil
+// CandidateVideoFilenames returns possible MP4 output filenames for a post.
+// Some generators may write slug-only files (slug.mp4), so check both.
+func (p *Post) CandidateVideoFilenames() []string {
+	return []string{
+		p.VideoFilename(),
+		p.Slug + ".mp4",
+	}
+}
+
+// CandidatePublishFilenames returns possible JSON marker filenames for a post.
+func (p *Post) CandidatePublishFilenames() []string {
+	files := make([]string, 0, 2)
+	for _, name := range p.CandidateVideoFilenames() {
+		files = append(files, strings.TrimSuffix(name, ".mp4")+".json")
+	}
+	return files
+}
+
+// OutputStatus checks for MP4 or JSON marker files in outputDir.
+// MP4 wins when both are present.
+func (p *Post) OutputStatus(outputDir string) OutputStatus {
+	for _, name := range p.CandidateVideoFilenames() {
+		path := filepath.Join(outputDir, name)
+		if _, err := os.Stat(path); err == nil {
+			return OutputStatus{HasVideo: true, Filename: name}
+		}
+	}
+	for _, name := range p.CandidatePublishFilenames() {
+		path := filepath.Join(outputDir, name)
+		if _, err := os.Stat(path); err == nil {
+			return OutputStatus{IsPublished: true, Filename: name}
+		}
+	}
+	return OutputStatus{}
 }
 
 // extractTitle pulls title from YAML front matter, or slugifies the slug.

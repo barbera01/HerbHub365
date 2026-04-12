@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"regexp"
@@ -37,6 +40,17 @@ type Config struct {
 	PostsDir               string
 	BlogBaseURL            string
 	ContainsSyntheticMedia bool
+	Git                    GitConfig
+}
+
+type GitConfig struct {
+	PublishEnabled bool
+	RepoDir        string
+	RemoteName     string
+	PushBranch     string
+	PAT            string
+	AuthorName     string
+	AuthorEmail    string
 }
 
 type ProducedMessage struct {
@@ -78,6 +92,15 @@ func loadConfig() (Config, error) {
 		PostsDir:               getEnv("BLOG_POSTS_DIR", "/repo/hub/_posts"),
 		BlogBaseURL:            strings.TrimRight(os.Getenv("BLOG_BASE_URL"), "/"),
 		ContainsSyntheticMedia: getBoolEnv("YOUTUBE_CONTAINS_SYNTHETIC_MEDIA", true),
+		Git: GitConfig{
+			PublishEnabled: getBoolEnv("BLOG_POSTER_GIT_PUBLISH_ENABLED", false),
+			RepoDir:        getEnv("BLOG_POSTER_GIT_REPO_DIR", "/repo"),
+			RemoteName:     getEnv("BLOG_POSTER_GIT_REMOTE_NAME", "origin"),
+			PushBranch:     getEnv("BLOG_POSTER_GIT_PUSH_BRANCH", "main"),
+			PAT:            os.Getenv("BLOG_POSTER_GIT_PAT"),
+			AuthorName:     getEnv("BLOG_POSTER_GIT_AUTHOR_NAME", "Herb Hub Bot"),
+			AuthorEmail:    getEnv("BLOG_POSTER_GIT_AUTHOR_EMAIL", "bot@herbhub365.com"),
+		},
 	}
 	if tags := strings.TrimSpace(os.Getenv("YOUTUBE_TAGS")); tags != "" {
 		cfg.Tags = splitCSV(tags)
@@ -215,6 +238,13 @@ func handleMessage(ctx context.Context, cfg Config, uploader *youtube.Service, c
 	youtubeURL := "https://youtu.be/" + videoID
 	if err := updateMarker(cfg.OutputDir, outputFile, payload.Slug, videoID, youtubeURL); err != nil {
 		log.Printf("uploaded video %s but failed to update marker: %v", videoID, err)
+	}
+	if postPath, err := updatePostEmbed(cfg.PostsDir, payload, outputFile, videoID); err != nil {
+		log.Printf("embed update failed: %v", err)
+	} else if postPath != "" {
+		if err := publishPostUpdate(ctx, cfg.Git, postPath, payload); err != nil {
+			log.Printf("publish post update failed: %v", err)
+		}
 	}
 
 	if err := os.Remove(videoPath); err != nil {
@@ -608,6 +638,201 @@ func normalizeTags(tags []string) []string {
 		}
 	}
 	return out
+}
+
+func updatePostEmbed(postsDir string, payload ProducedMessage, outputFile, videoID string) (string, error) {
+	path := resolvePostPath(postsDir, payload, outputFile)
+	if path == "" {
+		return "", fmt.Errorf("post not found for slug=%s", payload.Slug)
+	}
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	raw := string(content)
+	if strings.Contains(raw, videoID) || strings.Contains(raw, "youtube.com/embed/") || strings.Contains(raw, "youtu.be/") {
+		return "", nil
+	}
+
+	front := frontMatterRe.FindString(raw)
+	body := strings.TrimPrefix(raw, front)
+	lines := strings.Split(body, "\n")
+
+	insertIdx := -1
+	mdImgRe := regexp.MustCompile(`!\[[^\]]*\]\([^\)]+\)`)
+	htmlImgRe := regexp.MustCompile(`(?i)<img\s[^>]*>`)
+	for i, line := range lines {
+		if mdImgRe.MatchString(line) || htmlImgRe.MatchString(line) {
+			insertIdx = i + 1
+			break
+		}
+	}
+
+	embed := buildEmbed(videoID)
+	if insertIdx == -1 {
+		lines = append(lines, "", embed)
+	} else {
+		lines = append(lines[:insertIdx], append([]string{embed, ""}, lines[insertIdx:]...)...)
+	}
+
+	updated := front + strings.Join(lines, "\n")
+	if updated == raw {
+		return "", nil
+	}
+	if err := os.WriteFile(path, []byte(updated), 0644); err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+func buildEmbed(videoID string) string {
+	return fmt.Sprintf(
+		"<div class=\"video-embed\">\n  <iframe src=\"https://www.youtube.com/embed/%s\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" allowfullscreen></iframe>\n</div>",
+		videoID,
+	)
+}
+
+func publishPostUpdate(ctx context.Context, cfg GitConfig, postPath string, payload ProducedMessage) error {
+	if !cfg.PublishEnabled {
+		return nil
+	}
+	if strings.TrimSpace(cfg.PAT) == "" {
+		return fmt.Errorf("BLOG_POSTER_GIT_PAT is required when BLOG_POSTER_GIT_PUBLISH_ENABLED=true")
+	}
+	repoDir, err := filepath.Abs(cfg.RepoDir)
+	if err != nil {
+		return fmt.Errorf("resolve repo dir: %w", err)
+	}
+	postAbs, err := filepath.Abs(postPath)
+	if err != nil {
+		return err
+	}
+	rel, err := filepath.Rel(repoDir, postAbs)
+	if err != nil || strings.HasPrefix(rel, "..") {
+		return fmt.Errorf("post path %s outside repo %s", postAbs, repoDir)
+	}
+
+	gitEnv := gitEnv(repoDir)
+	if err := runCmd(ctx, gitEnv, "git add post", "git", "-C", repoDir, "add", "--", rel); err != nil {
+		return err
+	}
+
+	changed, err := hasStagedChanges(ctx, repoDir, rel)
+	if err != nil {
+		return err
+	}
+	if !changed {
+		return nil
+	}
+
+	msg := fmt.Sprintf("Embed YouTube video for %s", payload.Slug)
+	if payload.Date != "" {
+		msg = fmt.Sprintf("Embed YouTube video for %s", payload.Date)
+	}
+	if err := runCmd(ctx, gitEnv, "git commit post",
+		"git", "-C", repoDir,
+		"-c", "user.name="+cfg.AuthorName,
+		"-c", "user.email="+cfg.AuthorEmail,
+		"commit", "-m", msg,
+	); err != nil {
+		return err
+	}
+
+	pushURL, authEnv, err := pushTarget(ctx, cfg, repoDir)
+	if err != nil {
+		return err
+	}
+	return runCmd(ctx, authEnv, "git push post", "git", "-C", repoDir, "push", pushURL, "HEAD:"+cfg.PushBranch)
+}
+
+func hasStagedChanges(ctx context.Context, repoDir string, relPaths ...string) (bool, error) {
+	args := []string{"-C", repoDir, "diff", "--cached", "--quiet", "--"}
+	args = append(args, relPaths...)
+	cmd := exec.CommandContext(ctx, "git", args...)
+	cmd.Env = append(cmd.Environ(), gitEnv(repoDir)...)
+	if err := cmd.Run(); err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
+			return true, nil
+		}
+		return false, fmt.Errorf("check staged changes: %w", err)
+	}
+	return false, nil
+}
+
+func pushTarget(ctx context.Context, cfg GitConfig, repoDir string) (string, []string, error) {
+	remoteURL, err := captureCmd(ctx, gitEnv(repoDir), "resolve git remote", "git", "-C", repoDir, "remote", "get-url", cfg.RemoteName)
+	if err != nil {
+		return "", nil, err
+	}
+	pushURL, err := normalizeGitHubURL(strings.TrimSpace(remoteURL))
+	if err != nil {
+		return "", nil, err
+	}
+	parsed, err := url.Parse(pushURL)
+	if err != nil {
+		return "", nil, fmt.Errorf("parse push url: %w", err)
+	}
+	headerKey := fmt.Sprintf("http.%s://%s/.extraheader", parsed.Scheme, parsed.Host)
+	token := base64.StdEncoding.EncodeToString([]byte("x-access-token:" + cfg.PAT))
+	authEnv := []string{
+		"GIT_TERMINAL_PROMPT=0",
+		"GIT_CONFIG_COUNT=2",
+		"GIT_CONFIG_KEY_0=safe.directory",
+		"GIT_CONFIG_VALUE_0=" + repoDir,
+		"GIT_CONFIG_KEY_1=" + headerKey,
+		"GIT_CONFIG_VALUE_1=AUTHORIZATION: basic " + token,
+	}
+	return pushURL, authEnv, nil
+}
+
+func normalizeGitHubURL(value string) (string, error) {
+	t := strings.TrimSpace(value)
+	if strings.HasPrefix(t, "git@github.com:") {
+		return "https://github.com/" + strings.TrimPrefix(t, "git@github.com:"), nil
+	}
+	if strings.HasPrefix(t, "ssh://git@github.com/") {
+		return "https://github.com/" + strings.TrimPrefix(t, "ssh://git@github.com/"), nil
+	}
+	if strings.HasPrefix(t, "https://github.com/") || strings.HasPrefix(t, "http://github.com/") {
+		return t, nil
+	}
+	return "", fmt.Errorf("unsupported git remote for PAT push: %s", t)
+}
+
+func gitEnv(repoDir string) []string {
+	return []string{
+		"GIT_CONFIG_COUNT=1",
+		"GIT_CONFIG_KEY_0=safe.directory",
+		"GIT_CONFIG_VALUE_0=" + repoDir,
+	}
+}
+
+func runCmd(ctx context.Context, extraEnv []string, description, name string, args ...string) error {
+	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Env = append(cmd.Environ(), extraEnv...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		msg := strings.TrimSpace(string(out))
+		if msg == "" {
+			msg = err.Error()
+		}
+		return fmt.Errorf("%s: %s", description, msg)
+	}
+	return nil
+}
+
+func captureCmd(ctx context.Context, extraEnv []string, description, name string, args ...string) (string, error) {
+	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Env = append(cmd.Environ(), extraEnv...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		msg := strings.TrimSpace(string(out))
+		if msg == "" {
+			msg = err.Error()
+		}
+		return "", fmt.Errorf("%s: %s", description, msg)
+	}
+	return strings.TrimSpace(string(out)), nil
 }
 
 func getEnv(key, fallback string) string {

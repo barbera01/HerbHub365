@@ -36,14 +36,15 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 // ── GET /api/posts ────────────────────────────────────────────────────────────
 
 type postListItem struct {
-	Slug      string `json:"slug"`
-	Title     string `json:"title"`
-	Date      string `json:"date"`
-	Excerpt   string `json:"excerpt"`
-	Filename  string `json:"filename"`
-	HasVideo  bool   `json:"has_video"`
-	Published bool   `json:"published"`
-	VideoFile string `json:"video_file,omitempty"`
+	Slug       string `json:"slug"`
+	Title      string `json:"title"`
+	Date       string `json:"date"`
+	Excerpt    string `json:"excerpt"`
+	Filename   string `json:"filename"`
+	HasVideo   bool   `json:"has_video"`
+	Published  bool   `json:"published"`
+	VideoFile  string `json:"video_file,omitempty"`
+	YouTubeURL string `json:"youtube_url,omitempty"`
 }
 
 func (h *handlers) handlePosts(w http.ResponseWriter, r *http.Request) {
@@ -66,14 +67,15 @@ func (h *handlers) handlePosts(w http.ResponseWriter, r *http.Request) {
 			videoFile = status.Filename
 		}
 		items = append(items, postListItem{
-			Slug:      p.Slug,
-			Title:     p.Title,
-			Date:      p.Date.Format("2006-01-02"),
-			Excerpt:   p.Excerpt,
-			Filename:  p.Filename,
-			HasVideo:  status.HasVideo,
-			Published: status.IsPublished,
-			VideoFile: videoFile,
+			Slug:       p.Slug,
+			Title:      p.Title,
+			Date:       p.Date.Format("2006-01-02"),
+			Excerpt:    p.Excerpt,
+			Filename:   p.Filename,
+			HasVideo:   status.HasVideo,
+			Published:  status.IsPublished,
+			VideoFile:  videoFile,
+			YouTubeURL: status.YouTubeURL,
 		})
 	}
 
@@ -109,14 +111,15 @@ func (h *handlers) handlePostBySlug(w http.ResponseWriter, r *http.Request) {
 		if p.Slug == slug {
 			status := p.OutputStatus(h.cfg.OutputDir)
 			writeJSON(w, http.StatusOK, map[string]any{
-				"slug":      p.Slug,
-				"title":     p.Title,
-				"date":      p.Date.Format("2006-01-02"),
-				"excerpt":   p.Excerpt,
-				"filename":  p.Filename,
-				"has_video": status.HasVideo,
-				"published": status.IsPublished,
-				"content":   p.RawContent,
+				"slug":        p.Slug,
+				"title":       p.Title,
+				"date":        p.Date.Format("2006-01-02"),
+				"excerpt":     p.Excerpt,
+				"filename":    p.Filename,
+				"has_video":   status.HasVideo,
+				"published":   status.IsPublished,
+				"youtube_url": status.YouTubeURL,
+				"content":     p.RawContent,
 			})
 			return
 		}

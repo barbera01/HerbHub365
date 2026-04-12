@@ -10,6 +10,8 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -31,6 +33,9 @@ type Config struct {
 	Privacy      string
 	CategoryID   string
 	Tags         []string
+	MadeForKids  bool
+	PostsDir     string
+	BlogBaseURL  string
 }
 
 type ProducedMessage struct {
@@ -70,6 +75,9 @@ func loadConfig() (Config, error) {
 		TokenPath:    os.Getenv("YOUTUBE_TOKEN"),
 		Privacy:      getEnv("YOUTUBE_PRIVACY", "unlisted"),
 		CategoryID:   getEnv("YOUTUBE_CATEGORY_ID", "22"),
+		MadeForKids:  getBoolEnv("YOUTUBE_MADE_FOR_KIDS", false),
+		PostsDir:     getEnv("BLOG_POSTS_DIR", "/repo/hub/_posts"),
+		BlogBaseURL:  strings.TrimRight(os.Getenv("BLOG_BASE_URL"), "/"),
 	}
 	if tags := strings.TrimSpace(os.Getenv("YOUTUBE_TAGS")); tags != "" {
 		cfg.Tags = splitCSV(tags)
@@ -164,11 +172,27 @@ func handleMessage(ctx context.Context, cfg Config, uploader *youtube.Service, c
 		title = strings.TrimSuffix(outputFile, filepath.Ext(outputFile))
 	}
 
-	videoID, err := uploadToYouTube(ctx, uploader, videoPath, title, cfg)
+	meta, err := loadPostMetadata(cfg.PostsDir, payload, outputFile)
+	if err != nil {
+		log.Printf("metadata: %v", err)
+	}
+	if meta.Title != "" {
+		title = meta.Title
+	}
+
+	description := buildDescription(title, meta.Excerpt, cfg.BlogBaseURL, payload.Date, payload.Slug)
+	tags := buildTags(cfg.Tags, payload.Slug, meta.Tags, meta.Categories)
+
+	videoID, err := uploadToYouTube(ctx, uploader, videoPath, title, description, tags, cfg)
 	if err != nil {
 		publishDLQ(ch, cfg.DLQName, msg.Body, fmt.Errorf("upload: %w", err))
 		msg.Ack(false)
 		return err
+	}
+
+	youtubeURL := "https://youtu.be/" + videoID
+	if err := updateMarker(cfg.OutputDir, outputFile, payload.Slug, videoID, youtubeURL); err != nil {
+		log.Printf("uploaded video %s but failed to update marker: %v", videoID, err)
 	}
 
 	if err := os.Remove(videoPath); err != nil {
@@ -196,6 +220,49 @@ func publishDLQ(ch *amqp.Channel, queue string, body []byte, err error) {
 		Timestamp:    time.Now().UTC(),
 		DeliveryMode: amqp.Persistent,
 	})
+}
+
+func updateMarker(outputDir, outputFile, slug, youtubeID, youtubeURL string) error {
+	markerName := markerFilename(outputFile, slug)
+	if markerName == "" {
+		return fmt.Errorf("marker filename not resolved")
+	}
+	path := filepath.Join(outputDir, markerName)
+
+	data := map[string]any{}
+	if existing, err := os.ReadFile(path); err == nil {
+		_ = json.Unmarshal(existing, &data)
+	}
+
+	data["slug"] = slug
+	if outputFile != "" {
+		data["output_file"] = outputFile
+	}
+	data["status"] = "completed"
+	data["youtube_id"] = youtubeID
+	data["youtube_url"] = youtubeURL
+	data["timestamp"] = time.Now().UTC().Format(time.RFC3339)
+
+	encoded, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	tmpPath := path + ".tmp"
+	if err := os.WriteFile(tmpPath, encoded, 0644); err != nil {
+		return err
+	}
+	return os.Rename(tmpPath, path)
+}
+
+func markerFilename(outputFile, slug string) string {
+	if outputFile != "" {
+		return strings.TrimSuffix(outputFile, ".mp4") + ".json"
+	}
+	if slug != "" {
+		return slug + ".json"
+	}
+	return ""
 }
 
 func newUploader(ctx context.Context, cfg Config) (*youtube.Service, error) {
@@ -240,7 +307,7 @@ func readToken(path string) (*oauth2.Token, error) {
 	return &tok, nil
 }
 
-func uploadToYouTube(ctx context.Context, service *youtube.Service, videoPath, title string, cfg Config) (string, error) {
+func uploadToYouTube(ctx context.Context, service *youtube.Service, videoPath, title, description string, tags []string, cfg Config) (string, error) {
 	file, err := os.Open(videoPath)
 	if err != nil {
 		return "", err
@@ -250,12 +317,14 @@ func uploadToYouTube(ctx context.Context, service *youtube.Service, videoPath, t
 	video := &youtube.Video{
 		Snippet: &youtube.VideoSnippet{
 			Title:       title,
-			Description: "",
+			Description: description,
 			CategoryId:  cfg.CategoryID,
-			Tags:        cfg.Tags,
+			Tags:        tags,
 		},
 		Status: &youtube.VideoStatus{
-			PrivacyStatus: cfg.Privacy,
+			PrivacyStatus:           cfg.Privacy,
+			MadeForKids:             cfg.MadeForKids,
+			SelfDeclaredMadeForKids: cfg.MadeForKids,
 		},
 	}
 
@@ -293,6 +362,206 @@ func splitCSV(value string) []string {
 		p = strings.TrimSpace(p)
 		if p != "" {
 			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func getBoolEnv(key string, fallback bool) bool {
+	if v := os.Getenv(key); v != "" {
+		parsed, err := strconv.ParseBool(v)
+		if err != nil {
+			return fallback
+		}
+		return parsed
+	}
+	return fallback
+}
+
+type PostMetadata struct {
+	Title      string
+	Excerpt    string
+	Tags       []string
+	Categories []string
+}
+
+var (
+	postFileRe         = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})-(.+)\.(markdown|md)$`)
+	frontMatterRe      = regexp.MustCompile(`(?s)^---\n.*?\n---\n?`)
+	frontMatterTitleRe = regexp.MustCompile(`(?m)^title:\s*["']?(.+?)["']?\s*$`)
+)
+
+func loadPostMetadata(postsDir string, payload ProducedMessage, outputFile string) (PostMetadata, error) {
+	var meta PostMetadata
+	path := resolvePostPath(postsDir, payload, outputFile)
+	if path == "" {
+		return meta, fmt.Errorf("post not found for slug=%s", payload.Slug)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return meta, err
+	}
+	raw := string(data)
+	meta.Title = extractTitle(raw, payload.Slug)
+	meta.Excerpt = extractExcerpt(raw)
+	meta.Tags = extractFrontMatterList(raw, "tags")
+	meta.Categories = extractFrontMatterList(raw, "categories")
+	return meta, nil
+}
+
+func resolvePostPath(postsDir string, payload ProducedMessage, outputFile string) string {
+	if payload.Date != "" && payload.Slug != "" {
+		candidate := filepath.Join(postsDir, payload.Date+"-"+payload.Slug+".md")
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
+		candidate = filepath.Join(postsDir, payload.Date+"-"+payload.Slug+".markdown")
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
+	}
+	if outputFile != "" {
+		name := strings.TrimSuffix(outputFile, ".mp4")
+		for _, ext := range []string{".md", ".markdown"} {
+			candidate := filepath.Join(postsDir, name+ext)
+			if _, err := os.Stat(candidate); err == nil {
+				return candidate
+			}
+		}
+	}
+	entries, err := os.ReadDir(postsDir)
+	if err != nil {
+		return ""
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		if !postFileRe.MatchString(e.Name()) {
+			continue
+		}
+		if payload.Slug != "" && strings.Contains(e.Name(), payload.Slug) {
+			return filepath.Join(postsDir, e.Name())
+		}
+	}
+	return ""
+}
+
+func extractTitle(raw, slug string) string {
+	if m := frontMatterTitleRe.FindStringSubmatch(raw); len(m) > 1 {
+		return strings.TrimSpace(m[1])
+	}
+	if slug == "" {
+		return ""
+	}
+	parts := strings.Split(slug, "-")
+	for i, p := range parts {
+		if len(p) > 0 {
+			parts[i] = strings.ToUpper(p[:1]) + p[1:]
+		}
+	}
+	return strings.Join(parts, " ")
+}
+
+func extractExcerpt(raw string) string {
+	body := frontMatterRe.ReplaceAllString(raw, "")
+	body = strings.TrimSpace(body)
+	if len(body) > 200 {
+		body = body[:200] + "..."
+	}
+	return body
+}
+
+func extractFrontMatterList(raw, key string) []string {
+	front := frontMatterRe.FindString(raw)
+	if front == "" {
+		return nil
+	}
+	lines := strings.Split(front, "\n")
+	var out []string
+	readingList := false
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+		if strings.HasPrefix(trim, key+":") {
+			readingList = true
+			value := strings.TrimSpace(strings.TrimPrefix(trim, key+":"))
+			if value != "" {
+				value = strings.Trim(value, "[]")
+				out = append(out, splitCSV(value)...)
+			}
+			continue
+		}
+		if readingList {
+			if strings.HasPrefix(trim, "-") {
+				item := strings.TrimSpace(strings.TrimPrefix(trim, "-"))
+				if item != "" {
+					out = append(out, item)
+				}
+				continue
+			}
+			if strings.Contains(trim, ":") {
+				readingList = false
+			}
+		}
+	}
+	return normalizeTags(out)
+}
+
+func buildDescription(title, excerpt, baseURL, date, slug string) string {
+	var b strings.Builder
+	if title != "" {
+		b.WriteString(title)
+		b.WriteString("\n\n")
+	}
+	if excerpt != "" {
+		b.WriteString(excerpt)
+		b.WriteString("\n\n")
+	}
+	if baseURL != "" && date != "" && slug != "" {
+		parts := strings.Split(date, "-")
+		if len(parts) == 3 {
+			b.WriteString("Read more: ")
+			b.WriteString(baseURL)
+			b.WriteString("/")
+			b.WriteString(parts[0])
+			b.WriteString("/")
+			b.WriteString(parts[1])
+			b.WriteString("/")
+			b.WriteString(parts[2])
+			b.WriteString("/")
+			b.WriteString(slug)
+		}
+	}
+	return strings.TrimSpace(b.String())
+}
+
+func buildTags(base []string, slug string, tags []string, categories []string) []string {
+	all := append([]string{}, base...)
+	if slug != "" {
+		all = append(all, strings.Split(slug, "-")...)
+	}
+	all = append(all, tags...)
+	all = append(all, categories...)
+	return normalizeTags(all)
+}
+
+func normalizeTags(tags []string) []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, t := range tags {
+		clean := strings.TrimSpace(strings.ToLower(t))
+		clean = strings.Trim(clean, "\"'")
+		if clean == "" {
+			continue
+		}
+		clean = strings.ReplaceAll(clean, " ", "-")
+		if seen[clean] {
+			continue
+		}
+		seen[clean] = true
+		out = append(out, clean)
+		if len(out) >= 15 {
+			break
 		}
 	}
 	return out

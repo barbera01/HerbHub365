@@ -153,9 +153,17 @@ const App = {
                             )
                         }
                     </span>
-                    <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); App.openGenerateModal('${post.slug}')">
-                        Generate
-                    </button>
+                    <div class="card-actions">
+                        ${post.youtube_url ? `
+                            <a class="btn btn-secondary btn-small" href="${post.youtube_url}" target="_blank" rel="noopener" onclick="event.stopPropagation();">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M14 3h7v7"></path><path d="M10 14L21 3"></path><path d="M21 14v7h-7"></path><path d="M3 10v11h11"></path></svg>
+                                YouTube
+                            </a>
+                        ` : ''}
+                        <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); App.openGenerateModal('${post.slug}')">
+                            Generate
+                        </button>
+                    </div>
                 </div>
             </div>
         `).join('');

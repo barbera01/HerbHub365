@@ -184,14 +184,18 @@ services:
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
       RABBITMQ_DLQ: ${RABBITMQ_DLQ:-video.produced.dlq}
       VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/output/video}
+      BLOG_POSTS_DIR: ${BLOG_POSTS_DIR:-/repo/hub/_posts}
+      BLOG_BASE_URL: ${BLOG_BASE_URL:-}
       YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-/secrets/youtube/client_secret.json}
       YOUTUBE_TOKEN: ${YOUTUBE_TOKEN:-/secrets/youtube/token.json}
       YOUTUBE_PRIVACY: ${YOUTUBE_PRIVACY:-unlisted}
+      YOUTUBE_MADE_FOR_KIDS: ${YOUTUBE_MADE_FOR_KIDS:-false}
       YOUTUBE_CATEGORY_ID: ${YOUTUBE_CATEGORY_ID:-22}
       YOUTUBE_TAGS: ${YOUTUBE_TAGS:-}
     volumes:
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video
       - /etc/youtube:/secrets/youtube
+      - ..:/repo
     depends_on:
       - rabbitmq
 

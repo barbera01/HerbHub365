@@ -14,6 +14,7 @@ import (
 
 	"HerbHub365/services/video-narrator/internal/concat"
 	"HerbHub365/services/video-narrator/internal/config"
+	"HerbHub365/services/video-narrator/internal/notify"
 	"HerbHub365/services/video-narrator/internal/post"
 	"HerbHub365/services/video-narrator/internal/preprocess"
 	"HerbHub365/services/video-narrator/internal/server"
@@ -296,6 +297,9 @@ func generatePost(
 			return fmt.Errorf("write video %s: %w", finalPath, err)
 		}
 		log.Printf("wrote %s (%d bytes)", finalPath, len(mp4Bytes))
+		if err := notify.PublishCompletion(ctx, cfg, p.Slug, p.VideoFilename()); err != nil {
+			log.Printf("publish completion for %s: %v", p.Slug, err)
+		}
 		return nil
 	}
 
@@ -325,6 +329,9 @@ func generatePost(
 		size = info.Size()
 	}
 	log.Printf("wrote %s (%.1f MB)", finalPath, float64(size)/(1024*1024))
+	if err := notify.PublishCompletion(ctx, cfg, p.Slug, p.VideoFilename()); err != nil {
+		log.Printf("publish completion for %s: %v", p.Slug, err)
+	}
 	return nil
 }
 

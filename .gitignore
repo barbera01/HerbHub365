@@ -120,7 +120,7 @@ logs/
 
 # Timelapse builder output
 /services/timelapse-builder/output/
-
+/services/video-narrator/resources/
 # Video assets (large files — not tracked in git)
 /Resources/video/
 

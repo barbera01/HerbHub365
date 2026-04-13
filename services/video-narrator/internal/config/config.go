@@ -103,6 +103,12 @@ type ConcatConfig struct {
 	// Preset is the libx264 encoding preset (default: "fast").
 	Preset string
 
+	// Threads limits the number of ffmpeg encoding threads (default: 2).
+	// Capping threads is the primary lever for controlling ffmpeg memory usage —
+	// each thread allocates full-frame buffers at 1920×1080, so an uncapped
+	// encode can easily exhaust available RAM and be killed by the OOM killer.
+	Threads int
+
 	// ChromaKey controls green-screen removal on the avatar segment.
 	ChromaKey ChromaKeyConfig
 }
@@ -188,6 +194,7 @@ func Load() Config {
 			FFmpegPath: getEnv("FFMPEG_PATH", "ffmpeg"),
 			CRF:        getIntEnv("CONCAT_CRF", 18),
 			Preset:     getEnv("CONCAT_PRESET", "fast"),
+			Threads:    getIntEnv("CONCAT_THREADS", 2),
 			ChromaKey: ChromaKeyConfig{
 				Enabled:    getBoolEnv("CHROMA_KEY_ENABLED", false),
 				Color:      getEnv("CHROMA_KEY_COLOR", "0x19AB3B"),

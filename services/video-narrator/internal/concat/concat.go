@@ -62,7 +62,7 @@ func buildArgs(cfg config.ConcatConfig, mainVideoPath, outputPath string) ([]str
 
 	threads := cfg.Threads
 	if threads <= 0 {
-		threads = 2
+		threads = 1
 	}
 	args := []string{"-y", "-threads", strconv.Itoa(threads)}
 

@@ -194,7 +194,7 @@ func Load() Config {
 			FFmpegPath: getEnv("FFMPEG_PATH", "ffmpeg"),
 			CRF:        getIntEnv("CONCAT_CRF", 18),
 			Preset:     getEnv("CONCAT_PRESET", "fast"),
-			Threads:    getIntEnv("CONCAT_THREADS", 2),
+			Threads:    getIntEnv("CONCAT_THREADS", 1),
 			ChromaKey: ChromaKeyConfig{
 				Enabled:    getBoolEnv("CHROMA_KEY_ENABLED", false),
 				Color:      getEnv("CHROMA_KEY_COLOR", "0x19AB3B"),

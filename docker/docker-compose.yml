@@ -169,7 +169,7 @@ services:
       CHROMA_KEY_ENABLED: ${CHROMA_KEY_ENABLED:-false}
       CHROMA_KEY_BG_PATH: ${CHROMA_KEY_BG_PATH:-}
       CHROMA_KEY_BG_COLOR: ${CHROMA_KEY_BG_COLOR:-0x1a1a2e}
-      CONCAT_THREADS: ${CONCAT_THREADS:-2}
+      CONCAT_THREADS: ${CONCAT_THREADS:-1}
     volumes:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video

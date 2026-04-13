@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Update: A Dry but Stable Morning"
 date: 2026-04-12 13:01:13 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-12-pm-greenhouse-update-a-dry-but-stable-morning.mp3
 ---
 
 ![Timelapse image for April 12, 2026](/assets/images/blog/2026-04-12-greenhouse-update-a-dry-but-stable-morning.jpg)

@@ -8,7 +8,7 @@ audio_url: /assets/audio/blog/2026-04-12-pm-herb-hub-365-greenhouse-update-a-dry
 
 ![Timelapse image for April 12, 2026](/assets/images/blog/2026-04-12-herb-hub-365-greenhouse-update-a-dry-and.jpg)
 <div class="video-embed">
-  <iframe src="https://www.youtube-nocookie.com/embed/y5t2MoiUe7s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure" allowfullscreen></iframe>
+  <iframe src="https://www.youtube.com/embed/y5t2MoiUe7s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>
 
 

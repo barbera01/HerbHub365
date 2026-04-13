@@ -8,7 +8,7 @@ audio_url: /assets/audio/blog/2026-04-11-herb-hub-365-daily-log-a-quiet-morning.
 
 ![Timelapse image for April 11, 2026](/assets/images/blog/2026-04-11-herb-hub-365-daily-log-a-quiet-morning.jpg)
 <div class="video-embed">
-  <iframe src="https://www.youtube.com/embed/dH-G-jEWlPw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure" allowfullscreen></iframe>
+  <iframe src="https://www.youtube.com/embed/dH-G-jEWlPw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>
 
 

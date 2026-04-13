@@ -60,7 +60,11 @@ func buildArgs(cfg config.ConcatConfig, mainVideoPath, outputPath string) ([]str
 		fps = "30000/1001" // 29.97 fps
 	)
 
-	args := []string{"-y"}
+	threads := cfg.Threads
+	if threads <= 0 {
+		threads = 1
+	}
+	args := []string{"-y", "-threads", strconv.Itoa(threads)}
 
 	// ── inputs ────────────────────────────────────────────────────────────────
 	// Inputs 0, 1, 2 are always intro / avatar / outro.

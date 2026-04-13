@@ -49,7 +49,9 @@ services:
       PROM_POST_RANGE: ${PROM_POST_RANGE:-24h}
       PROM_POST_STEP: ${PROM_POST_STEP:-5m}
       PROM_POST_TIMEOUT: ${PROM_POST_TIMEOUT:-30s}
-      PROM_POST_DRAFT: ${PROM_POST_DRAFT:-true}
+      PROM_POST_SCHEDULE: ${PROM_POST_SCHEDULE:-0 23 * * *}
+      PROM_POST_TARGET_DATE: ${PROM_POST_TARGET_DATE:-today}
+      PROM_POST_DRAFT: ${PROM_POST_DRAFT:-false}
       PROM_POST_CATEGORIES: ${PROM_POST_CATEGORIES:-Metrics Observability}
       PROM_POST_LAYOUT: ${PROM_POST_LAYOUT:-post}
       PROM_POST_EXPORT_DIR: ${PROM_POST_EXPORT_DIR:-/repo/hub/assets/data/prometheus}
@@ -167,6 +169,7 @@ services:
       CHROMA_KEY_ENABLED: ${CHROMA_KEY_ENABLED:-false}
       CHROMA_KEY_BG_PATH: ${CHROMA_KEY_BG_PATH:-}
       CHROMA_KEY_BG_COLOR: ${CHROMA_KEY_BG_COLOR:-0x1a1a2e}
+      CONCAT_THREADS: ${CONCAT_THREADS:-1}
     volumes:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-../services/herbhub-video/output}:/output/video

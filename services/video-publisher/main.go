@@ -701,7 +701,7 @@ func updatePostEmbed(postsDir string, payload ProducedMessage, outputFile, video
 
 func buildEmbed(videoID string) string {
 	return fmt.Sprintf(
-		"<div class=\"video-embed\">\n  <iframe src=\"https://www.youtube-nocookie.com/embed/%s\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure\" allowfullscreen></iframe>\n</div>",
+		"<div class=\"video-embed\">\n  <iframe src=\"https://www.youtube.com/embed/%s\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>\n</div>",
 		videoID,
 	)
 }

@@ -70,7 +70,7 @@ func runPromPost(ctx context.Context, cfg config.Config, generator *blog.Generat
 	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
 	defer cancel()
 
-	targetDate, err := cfg.ResolveTargetDate(time.Now())
+	targetDate, err := cfg.ResolveDate(cfg.PromPost.TargetDate, time.Now())
 	if err != nil {
 		return err
 	}
@@ -121,6 +121,21 @@ func runDaemon(ctx context.Context, cfg config.Config, client *llm.Client, store
 	}()
 
 	scheduler := cron.New()
+
+	if cfg.PromPost.Schedule != "" {
+		_, err := scheduler.AddFunc(cfg.PromPost.Schedule, func() {
+			jobCtx, cancel := context.WithTimeout(context.Background(), cfg.GenerateTimeout)
+			defer cancel()
+			if err := runPromPost(jobCtx, cfg, generator, publisher); err != nil {
+				log.Printf("prom-post failed: %v", err)
+			}
+		})
+		if err != nil {
+			return fmt.Errorf("configure prom-post scheduler: %w", err)
+		}
+		log.Printf("prom-post scheduled: %s", cfg.PromPost.Schedule)
+	}
+
 	_, err := scheduler.AddFunc(cfg.GenerateSchedule, func() {
 		jobCtx, cancel := context.WithTimeout(context.Background(), cfg.GenerateTimeout)
 		defer cancel()

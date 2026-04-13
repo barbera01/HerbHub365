@@ -104,6 +104,8 @@ type PromPostConfig struct {
 	Categories  string
 	Layout      string
 	ExportDir   string
+	Schedule    string
+	TargetDate  string
 }
 
 // SensorDataConfig controls writing of hub/_data/live_sensors.yml after each
@@ -241,6 +243,8 @@ func Load() Config {
 			Categories:  getEnv("PROM_POST_CATEGORIES", "Metrics Observability"),
 			Layout:      getEnv("PROM_POST_LAYOUT", "post"),
 			ExportDir:   getEnv("PROM_POST_EXPORT_DIR", filepath.Join(hubDir, "assets", "data", "prometheus")),
+			Schedule:   getEnv("PROM_POST_SCHEDULE", ""),
+			TargetDate: getEnv("PROM_POST_TARGET_DATE", "today"),
 		},
 		Git: GitConfig{
 			PublishEnabled: getBoolEnv("GIT_PUBLISH_ENABLED", false),
@@ -260,6 +264,23 @@ func Load() Config {
 			herbNames:        parseKVCSV(os.Getenv("SENSOR_HERB_NAMES")),
 			herbIcons:        parseKVCSV(os.Getenv("SENSOR_HERB_ICONS")),
 		},
+	}
+}
+
+func (c Config) ResolveDate(dateStr string, now time.Time) (time.Time, error) {
+	value := strings.TrimSpace(strings.ToLower(dateStr))
+	today := now.UTC()
+	switch value {
+	case "", "today":
+		return startOfDay(today), nil
+	case "yesterday":
+		return startOfDay(today.AddDate(0, 0, -1)), nil
+	default:
+		parsed, err := time.Parse("2006-01-02", value)
+		if err != nil {
+			return time.Time{}, fmt.Errorf("invalid date %q: use today, yesterday, or YYYY-MM-DD", dateStr)
+		}
+		return startOfDay(parsed.UTC()), nil
 	}
 }
 

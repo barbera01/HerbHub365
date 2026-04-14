@@ -130,6 +130,8 @@ func (h *handlers) handlePostBySlug(w http.ResponseWriter, r *http.Request) {
 
 // ── POST /api/generate ────────────────────────────────────────────────────────
 // Proxies the request to the video-narrator API.
+// Post content is resolved locally and sent inline so that the narrator
+// does not need access to the posts directory (supports remote/GPU deployments).
 
 func (h *handlers) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -146,6 +148,26 @@ func (h *handlers) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	if req.Slug == "" && req.Text == "" {
 		writeError(w, http.StatusBadRequest, "slug or text is required")
 		return
+	}
+
+	// Resolve post content locally so the remote narrator never needs the
+	// posts directory. Skip if the caller already supplied text.
+	if req.Text == "" && req.Slug != "" {
+		posts, err := post.FindAllPosts(h.cfg.Post.PostsDir)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, fmt.Sprintf("read posts: %v", err))
+			return
+		}
+		for _, p := range posts {
+			if p.Slug == req.Slug || strings.Contains(p.Slug, req.Slug) {
+				req.Text = p.RawContent
+				break
+			}
+		}
+		if req.Text == "" {
+			writeError(w, http.StatusNotFound, fmt.Sprintf("post not found for slug %q", req.Slug))
+			return
+		}
 	}
 
 	jobID, err := h.videoClient.SubmitJob(req)

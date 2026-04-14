@@ -1,0 +1,77 @@
+# docker-compose.gpu-narrator.yml
+#
+# Deploy ONLY the video-narrator service on a GPU machine.
+# The output directory is an NFS mount shared with the main server so
+# video-publisher can pick up finished MP4s without any file transfer step.
+# Traffic is routed via Traefik on 443 at video-narrator.lab.home-cloud.uk.
+#
+# Usage:
+#   docker compose -f docker-compose.gpu-narrator.yml up -d
+#
+# Required environment variables (set in .env or export before running):
+#   RABBITMQ_URL          AMQP URL on the main server (e.g. amqp://admin:pass@192.168.1.10:5672/)
+#   VIDEO_BASE_URL        URL of the MuseTalk API (e.g. http://localhost:8011)
+#   NFS_OUTPUT_MOUNT      Local path where the NFS share is mounted (default: /mnt/herbhub-video)
+
+services:
+  video-narrator:
+    build:
+      context: ../services/video-narrator
+      dockerfile: dockerfile
+    container_name: video-narrator
+    restart: unless-stopped
+    networks:
+      - aistack
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.video-narrator.rule=Host(`video-narrator.lab.home-cloud.uk`)"
+      - "traefik.http.routers.video-narrator.entrypoints=websecure"
+      - "traefik.http.routers.video-narrator.tls=true"
+      - "traefik.http.services.video-narrator.loadbalancer.server.port=8090"
+    environment:
+      VIDEO_MODE: ${VIDEO_MODE:-server}
+      SERVER_LISTEN_ADDR: ${VIDEO_SERVER_LISTEN_ADDR:-:8090}
+
+      # MuseTalk API — typically local on the GPU machine
+      VIDEO_BASE_URL: ${VIDEO_BASE_URL:-http://localhost:8011}
+      VIDEO_AVATAR: ${VIDEO_AVATAR:-rowan}
+      VIDEO_AVATARS: ${VIDEO_AVATARS:-rowan}
+      VIDEO_REQUEST_TIMEOUT: ${VIDEO_REQUEST_TIMEOUT:-120s}
+
+      # Posts dir not required — herbhub-video sends post text inline.
+      # Set to a dummy path; the server will simply not use it.
+      HUB_DIR: /dev/null
+      BLOG_POSTS_DIR: /dev/null
+
+      # Output: write finished MP4s to the NFS mount.
+      VIDEO_OUTPUT_DIR: /output/video
+
+      # ffmpeg concat
+      CONCAT_ENABLED: ${CONCAT_ENABLED:-true}
+      CONCAT_INTRO: ${CONCAT_INTRO:-/app/resources/video/intro.mp4}
+      CONCAT_OUTRO: ${CONCAT_OUTRO:-/app/resources/video/outro.mp4}
+      CONCAT_CRF: ${CONCAT_CRF:-18}
+      CONCAT_PRESET: ${CONCAT_PRESET:-fast}
+      CONCAT_THREADS: ${CONCAT_THREADS:-1}
+
+      # Chroma-key (disabled by default)
+      CHROMA_KEY_ENABLED: ${CHROMA_KEY_ENABLED:-false}
+      CHROMA_KEY_BG_PATH: ${CHROMA_KEY_BG_PATH:-}
+      CHROMA_KEY_BG_COLOR: ${CHROMA_KEY_BG_COLOR:-0x1a1a2e}
+
+      # RabbitMQ on the main server — for completion notifications to video-publisher
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
+
+    volumes:
+      # NFS mount: finished MP4s land here and are visible to video-publisher
+      # on the main server via the same NFS share.
+      - ${NFS_OUTPUT_MOUNT:-/mnt/herbhub-video}:/output/video
+
+      # Intro / outro resources — served from the NAS NFS mount.
+      - ${VIDEO_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video}:/app/resources/video:ro
+      - ${VIDEO_BG_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video_backgrounds}:/app/resources/video_backgrounds:ro
+
+networks:
+  aistack:
+    external: true

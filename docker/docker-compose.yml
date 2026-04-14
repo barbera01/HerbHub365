@@ -120,7 +120,7 @@ services:
       HERBHUB_VIDEO_SCHEDULE: ${HERBHUB_VIDEO_SCHEDULE:-0 9 * * *}
       HERBHUB_VIDEO_RUN_ON_START: ${HERBHUB_VIDEO_RUN_ON_START:-false}
       LISTEN_ADDR: ${LISTEN_ADDR:-:8080}
-      NARRATOR_URL: ${NARRATOR_URL:-http://video-narrator:8080}
+      NARRATOR_URL: ${NARRATOR_URL:-https://video-narrator.lab.home-cloud.uk}
       HUB_DIR: ${HUB_DIR:-/repo/hub}
       BLOG_POSTS_DIR: ${BLOG_POSTS_DIR:-/repo/hub/_posts}
       VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/output/video}

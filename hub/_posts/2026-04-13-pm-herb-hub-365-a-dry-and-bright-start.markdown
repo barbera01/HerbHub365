@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for April 13, 2026](/assets/images/blog/2026-04-13-herb-hub-365-a-dry-and-bright-start.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/5TnxgBBh4rw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The morning sun broke over the greenhouse around 6:00 AM, bringing a gradual climb in light levels that reached a bright 778 lux by midday. As the light intensified, the air inside the space warmed up steadily, rising from a comfortable 19°C to a peak of 22°C.
 

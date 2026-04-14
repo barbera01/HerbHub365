@@ -3,9 +3,14 @@ layout: post
 title: "Greenhouse Update: A Dry and Bright Day for Your Herbs"
 date: 2026-04-13 18:00:31 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-13-pm-greenhouse-update-a-dry-and-bright-day-for.mp3
 ---
 
 ![Timelapse image for April 13, 2026](/assets/images/blog/2026-04-13-greenhouse-update-a-dry-and-bright-day-for.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/JuRrLHgBa1k" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The sun shone brightly in the Herb Hub 365 greenhouse today, driving light levels from a quiet 85 lux in the morning to over 1,000 lux by mid-afternoon. As the day progressed, temperatures rose steadily from a comfortable 19°C to a pleasant 24°C before settling slightly as the sun began to set.
 

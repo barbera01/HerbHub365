@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Check-in: A Quiet Morning for Basil and Oregano"
 date: 2026-04-13 09:00:40 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-13-greenhouse-check-in-a-quiet-morning-for-basil-and.mp3
 ---
 
 ![Timelapse image for April 13, 2026](/assets/images/blog/2026-04-13-greenhouse-check-in-a-quiet-morning-for-basil-and.jpg)

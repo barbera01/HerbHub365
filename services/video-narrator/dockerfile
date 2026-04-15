@@ -13,10 +13,10 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/video-narra
 
 # ── Runtime ───────────────────────────────────────────────────────────────────
 # Ubuntu 24.04 ships ffmpeg 6.1 compiled with --enable-nvenc.
-# The NVIDIA container runtime (runtime: nvidia in compose) mounts the host
-# driver libraries (libnvidia-encode.so etc.) into the container at startup,
-# so no driver packages need to be installed here.
-FROM nvidia/cuda:12.4.1-base-ubuntu24.04
+# NVENC does not need the CUDA toolkit — the NVIDIA container runtime
+# (runtime: nvidia in compose) injects the host driver libraries
+# (libnvidia-encode.so etc.) at startup automatically.
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 

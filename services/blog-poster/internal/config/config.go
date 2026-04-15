@@ -177,7 +177,7 @@ func Load() Config {
 		Mode:             getEnv("BLOG_POSTER_MODE", "daemon"),
 		DataDir:          getEnv("DATA_DIR", "/data"),
 		GenerateSchedule: getEnv("BLOG_GENERATE_SCHEDULE", "5 0 * * *"),
-		GenerateTimeout:  getDurationEnv("BLOG_GENERATE_TIMEOUT", 2*time.Minute),
+		GenerateTimeout:  getDurationEnv("BLOG_GENERATE_TIMEOUT", 10*time.Minute),
 		Generation: GenerationConfig{
 			PeriodMode: getEnv("BLOG_GENERATE_PERIOD_MODE", "auto"),
 			SplitHour:  getIntEnv("BLOG_GENERATE_SPLIT_HOUR", 12),
@@ -200,7 +200,7 @@ func Load() Config {
 			TopP:            getFloatEnv("LLM_TOP_P", 0.9),
 			RepeatPenalty:   getFloatEnv("LLM_REPEAT_PENALTY", 1.1),
 			MaxTokens:       getIntEnv("LLM_MAX_TOKENS", 900),
-			RequestTimeout:  getDurationEnv("LLM_REQUEST_TIMEOUT", 90*time.Second),
+			RequestTimeout:  getDurationEnv("LLM_REQUEST_TIMEOUT", 3*time.Minute),
 			Debug:           getBoolEnv("LLM_DEBUG", false),
 			SystemPrompt:    getEnv("LLM_SYSTEM_PROMPT", defaultSystemPrompt()),
 			PromptPlantName: getEnv("PROMPT_PLANT_NAME", "Herb Hub 365"),

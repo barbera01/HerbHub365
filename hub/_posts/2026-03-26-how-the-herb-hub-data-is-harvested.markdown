@@ -112,3 +112,8 @@ This message bus integration forms the backbone of Herb Hub's real-time monitori
 <text x="620" y="514" text-anchor="middle" opacity="0.5" style="fill:rgb(194, 192, 182);font-family:system-ui,sans-serif;font-size:12px;">Configurable via env flag</text>
 </svg>
 </div>
+
+
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/MOcuq9n0Yfc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>

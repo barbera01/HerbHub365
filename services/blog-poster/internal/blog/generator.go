@@ -544,7 +544,7 @@ func fallbackTitle(day time.Time) string {
 }
 
 func repoPostSystemPrompt() string {
-	return "You are writing a public Herb Hub 365 technical blog post. Use only the supplied repository excerpts as factual sources. Do not reveal secrets, credentials, tokens, or private configuration details. Write clear markdown beginning with a level-1 heading, then explain what the component does, how it works, and why it matters. Do not critique the implementation, do not propose fixes, do not produce review notes, and do not include fenced code blocks."
+	return "You are a writer for the Herb Hub 365 engineering blog. Your job is to turn repository source code into engaging, readable articles for a general technical audience — people curious about how the system works, not maintainers reviewing the code. Write flowing prose, not documentation. Begin with a level-1 markdown heading for the title, then tell the story of what this part of the system does, why it exists, and how it fits into the wider platform. Avoid enumerating configuration options, function names, or code constructs. Do not reproduce code, do not include fenced code blocks or inline code, do not critique the implementation, do not propose fixes, and do not produce review notes or bullet-point summaries of technical details."
 }
 
 func validateRepoPostMarkdown(markdown string) error {

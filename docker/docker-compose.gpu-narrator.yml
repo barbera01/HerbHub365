@@ -47,7 +47,8 @@ services:
       # Output: write finished MP4s to the NFS mount.
       VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/mnt/herbhub-video/Video/Output}
 
-      # ffmpeg concat — NVENC hardware encoding
+      # ffmpeg concat — NVENC hardware encoding on RTX 3060.
+      # Preset p4 = balanced quality/speed. CRF maps to -cq for NVENC.
       CONCAT_ENABLED: ${CONCAT_ENABLED:-true}
       CONCAT_INTRO: ${CONCAT_INTRO:-/app/resources/video/intro.mp4}
       CONCAT_OUTRO: ${CONCAT_OUTRO:-/app/resources/video/outro.mp4}

@@ -38,6 +38,7 @@ services:
       VIDEO_AVATAR: ${VIDEO_AVATAR:-rowan}
       VIDEO_AVATARS: ${VIDEO_AVATARS:-rowan}
       VIDEO_REQUEST_TIMEOUT: ${VIDEO_REQUEST_TIMEOUT:-120s}
+      VIDEO_MAX_WAIT: ${VIDEO_MAX_WAIT:-40m}
 
       # Posts dir not required — herbhub-video sends post text inline.
       # Set to a dummy path; the server will simply not use it.
@@ -73,7 +74,6 @@ services:
       - ${NFS_OUTPUT_MOUNT:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
       - ${VIDEO_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video}:/app/resources/video:ro
       - ${VIDEO_BG_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video_backgrounds}:/app/resources/video_backgrounds:ro
-
 
 networks:
   aistack:

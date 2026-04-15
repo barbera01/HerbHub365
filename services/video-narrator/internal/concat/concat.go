@@ -60,11 +60,22 @@ func buildArgs(cfg config.ConcatConfig, mainVideoPath, outputPath string) ([]str
 		fps = "30000/1001" // 29.97 fps
 	)
 
+	codec := cfg.VideoCodec
+	if codec == "" {
+		codec = "libx264"
+	}
+	nvenc := strings.Contains(codec, "nvenc")
+
 	threads := cfg.Threads
 	if threads <= 0 {
 		threads = 1
 	}
-	args := []string{"-y", "-threads", strconv.Itoa(threads)}
+
+	// Global options: only cap threads for software encoders; NVENC manages its own.
+	args := []string{"-y"}
+	if !nvenc {
+		args = append(args, "-threads", strconv.Itoa(threads))
+	}
 
 	// ── inputs ────────────────────────────────────────────────────────────────
 	// Inputs 0, 1, 2 are always intro / avatar / outro.
@@ -101,15 +112,22 @@ func buildArgs(cfg config.ConcatConfig, mainVideoPath, outputPath string) ([]str
 
 	// ── filter_complex ────────────────────────────────────────────────────────
 	filterComplex := buildFilterComplex(cfg.ChromaKey, bgInputIndex, w, h, fps)
+
+	videoArgs := []string{"-c:v", codec, "-preset", cfg.Preset, "-pix_fmt", "yuv420p"}
+	if nvenc {
+		// NVENC uses -cq for constant quality mode with VBR rate control.
+		videoArgs = append(videoArgs, "-rc", "vbr", "-cq", strconv.Itoa(cfg.CRF))
+	} else {
+		videoArgs = append(videoArgs, "-crf", strconv.Itoa(cfg.CRF))
+	}
+
 	args = append(args,
 		"-filter_complex", filterComplex,
 		"-map", "[vout]",
 		"-map", "[aout]",
-		// Video encode
-		"-c:v", "libx264",
-		"-preset", cfg.Preset,
-		"-crf", strconv.Itoa(cfg.CRF),
-		"-pix_fmt", "yuv420p",
+	)
+	args = append(args, videoArgs...)
+	args = append(args,
 		// Audio encode
 		"-c:a", "aac",
 		"-b:a", "192k",

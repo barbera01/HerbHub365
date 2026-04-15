@@ -343,7 +343,10 @@ downloadPhase:
 
 	jm.update(id, "stitching", 0.88, "")
 
-	if err := concat.Stitch(ctx, concatCfg, tmpPath, outputPath); err != nil {
+	stitchCtx, stitchCancel := context.WithTimeout(context.Background(), concatCfg.StitchTimeout)
+	defer stitchCancel()
+
+	if err := concat.Stitch(stitchCtx, concatCfg, tmpPath, outputPath); err != nil {
 		jm.update(id, "failed", 0.88, fmt.Sprintf("ffmpeg stitch: %v", err))
 		return
 	}

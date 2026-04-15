@@ -112,6 +112,11 @@ type ConcatConfig struct {
 	// Only applies to software encoders (libx264). NVENC ignores this.
 	Threads int
 
+	// StitchTimeout is the maximum time allowed for the ffmpeg stitch step.
+	// Uses a fresh context independent of the MuseTalk polling timeout.
+	// Default: 30m (generous for CPU fallback; NVENC typically finishes in <1m).
+	StitchTimeout time.Duration
+
 	// ChromaKey controls green-screen removal on the avatar segment.
 	ChromaKey ChromaKeyConfig
 }
@@ -198,7 +203,8 @@ func Load() Config {
 			VideoCodec: getEnv("CONCAT_VIDEO_CODEC", "libx264"),
 			CRF:        getIntEnv("CONCAT_CRF", 18),
 			Preset:     getEnv("CONCAT_PRESET", "fast"),
-			Threads:    getIntEnv("CONCAT_THREADS", 1),
+			Threads:       getIntEnv("CONCAT_THREADS", 1),
+			StitchTimeout: getDurationEnv("CONCAT_STITCH_TIMEOUT", 30*time.Minute),
 			ChromaKey: ChromaKeyConfig{
 				Enabled:    getBoolEnv("CHROMA_KEY_ENABLED", false),
 				Color:      getEnv("CHROMA_KEY_COLOR", "0x19AB3B"),

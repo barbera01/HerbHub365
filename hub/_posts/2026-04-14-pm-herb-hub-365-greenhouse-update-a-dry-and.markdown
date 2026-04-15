@@ -3,6 +3,7 @@ layout: post
 title: "Herb Hub 365 Greenhouse Update: A Dry and Sunny Afternoon"
 date: 2026-04-14 18:00:36 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-14-pm-herb-hub-365-greenhouse-update-a-dry-and.mp3
 ---
 
 ![Timelapse image for April 14, 2026](/assets/images/blog/2026-04-14-herb-hub-365-greenhouse-update-a-dry-and.jpg)

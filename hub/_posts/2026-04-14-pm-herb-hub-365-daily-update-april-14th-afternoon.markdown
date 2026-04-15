@@ -3,6 +3,7 @@ layout: post
 title: "Herb Hub 365 Daily Update: April 14th Afternoon Warmth"
 date: 2026-04-14 13:00:27 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-14-pm-herb-hub-365-daily-update-april-14th-afternoon.mp3
 ---
 
 ![Timelapse image for April 14, 2026](/assets/images/blog/2026-04-14-herb-hub-365-daily-update-april-14th-afternoon.jpg)

@@ -28,6 +28,8 @@ type JobStatus struct {
 	VideoFile        string  `json:"video_file,omitempty"`
 	CreatedAt        string  `json:"created_at"`
 	UpdatedAt        string  `json:"updated_at"`
+	StartedAt        string  `json:"started_at,omitempty"`
+	CompletedAt      string  `json:"completed_at,omitempty"`
 	ConcatEnabled    bool    `json:"concat_enabled"`
 	ConcatIntro      string  `json:"concat_intro,omitempty"`
 	ConcatOutro      string  `json:"concat_outro,omitempty"`

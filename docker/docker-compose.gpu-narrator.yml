@@ -39,6 +39,7 @@ services:
       VIDEO_AVATARS: ${VIDEO_AVATARS:-rowan}
       VIDEO_REQUEST_TIMEOUT: ${VIDEO_REQUEST_TIMEOUT:-120s}
       VIDEO_MAX_WAIT: ${VIDEO_MAX_WAIT:-40m}
+      VIDEO_PIPELINE_BUFFER: ${VIDEO_PIPELINE_BUFFER:-15m}
 
       # Posts dir not required — herbhub-video sends post text inline.
       # Set to a dummy path; the server will simply not use it.

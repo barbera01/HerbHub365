@@ -97,16 +97,19 @@ type ConcatConfig struct {
 	// FFmpegPath is the ffmpeg binary (default: "ffmpeg").
 	FFmpegPath string
 
-	// CRF is the H.264 quality factor for the re-encode (default: 18).
+	// VideoCodec is the ffmpeg video encoder (default: "libx264").
+	// Use "h264_nvenc" on machines with an NVIDIA GPU for hardware acceleration.
+	VideoCodec string
+
+	// CRF is the H.264 quality factor for libx264 (default: 18).
+	// When VideoCodec is h264_nvenc this maps to -cq instead of -crf.
 	CRF int
 
-	// Preset is the libx264 encoding preset (default: "fast").
+	// Preset is the encoder preset (default: "fast" for libx264, "p4" for h264_nvenc).
 	Preset string
 
-	// Threads limits the number of ffmpeg encoding threads (default: 2).
-	// Capping threads is the primary lever for controlling ffmpeg memory usage —
-	// each thread allocates full-frame buffers at 1920×1080, so an uncapped
-	// encode can easily exhaust available RAM and be killed by the OOM killer.
+	// Threads limits the number of ffmpeg encoding threads (default: 1).
+	// Only applies to software encoders (libx264). NVENC ignores this.
 	Threads int
 
 	// ChromaKey controls green-screen removal on the avatar segment.
@@ -192,6 +195,7 @@ func Load() Config {
 			OutroPath:  getEnv("CONCAT_OUTRO", "/app/resources/video/outro.mp4"),
 			OutputDir:  getEnv("VIDEO_OUTPUT_DIR", "/output/video"),
 			FFmpegPath: getEnv("FFMPEG_PATH", "ffmpeg"),
+			VideoCodec: getEnv("CONCAT_VIDEO_CODEC", "libx264"),
 			CRF:        getIntEnv("CONCAT_CRF", 18),
 			Preset:     getEnv("CONCAT_PRESET", "fast"),
 			Threads:    getIntEnv("CONCAT_THREADS", 1),

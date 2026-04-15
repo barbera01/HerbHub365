@@ -20,6 +20,7 @@ services:
       dockerfile: dockerfile
     container_name: video-narrator
     restart: unless-stopped
+    runtime: nvidia
     networks:
       - aistack
     labels:
@@ -44,15 +45,18 @@ services:
       BLOG_POSTS_DIR: /dev/null
 
       # Output: write finished MP4s to the NFS mount.
-      VIDEO_OUTPUT_DIR: /output/video
+      VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/mnt/herbhub-video/Video/Output}
 
-      # ffmpeg concat
+      # ffmpeg concat — NVENC hardware encoding on RTX 3060.
+      # Preset p4 = balanced quality/speed. CRF maps to -cq for NVENC.
       CONCAT_ENABLED: ${CONCAT_ENABLED:-true}
       CONCAT_INTRO: ${CONCAT_INTRO:-/app/resources/video/intro.mp4}
       CONCAT_OUTRO: ${CONCAT_OUTRO:-/app/resources/video/outro.mp4}
+      CONCAT_VIDEO_CODEC: ${CONCAT_VIDEO_CODEC:-h264_nvenc}
       CONCAT_CRF: ${CONCAT_CRF:-18}
-      CONCAT_PRESET: ${CONCAT_PRESET:-fast}
-      CONCAT_THREADS: ${CONCAT_THREADS:-1}
+      CONCAT_PRESET: ${CONCAT_PRESET:-p4}
+      NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
+      NVIDIA_DRIVER_CAPABILITIES: video,compute,utility
 
       # Chroma-key (disabled by default)
       CHROMA_KEY_ENABLED: ${CHROMA_KEY_ENABLED:-false}
@@ -64,13 +68,11 @@ services:
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
 
     volumes:
-      # NFS mount: finished MP4s land here and are visible to video-publisher
-      # on the main server via the same NFS share.
-      - ${NFS_OUTPUT_MOUNT:-/mnt/herbhub-video}:/output/video
-
-      # Intro / outro resources — served from the NAS NFS mount.
+      # NFS submounts mounted directly — avoids Linux bind-mount/submount visibility issue.
+      - ${NFS_OUTPUT_MOUNT:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
       - ${VIDEO_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video}:/app/resources/video:ro
       - ${VIDEO_BG_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video_backgrounds}:/app/resources/video_backgrounds:ro
+
 
 networks:
   aistack:

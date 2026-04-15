@@ -11,12 +11,22 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/video-narrator ./cmd/video-narrator
 
-FROM alpine:3.20
+# ── Runtime ───────────────────────────────────────────────────────────────────
+# Ubuntu 24.04 ships ffmpeg 6.1 compiled with --enable-nvenc.
+# NVENC does not need the CUDA toolkit — the NVIDIA container runtime
+# (runtime: nvidia in compose) injects the host driver libraries
+# (libnvidia-encode.so etc.) at startup automatically.
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
-# ffmpeg is required for intro/outro stitching.
-RUN apk add --no-cache ca-certificates ffmpeg
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /out/video-narrator /usr/local/bin/video-narrator
 COPY config/tts-rules.json /app/config/tts-rules.json

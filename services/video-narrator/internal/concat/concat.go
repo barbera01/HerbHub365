@@ -115,8 +115,9 @@ func buildArgs(cfg config.ConcatConfig, mainVideoPath, outputPath string) ([]str
 
 	videoArgs := []string{"-c:v", codec, "-preset", cfg.Preset, "-pix_fmt", "yuv420p"}
 	if nvenc {
-		// NVENC uses -cq for constant quality mode with VBR rate control.
-		videoArgs = append(videoArgs, "-rc", "vbr", "-cq", strconv.Itoa(cfg.CRF))
+		// NVENC quality mode: VBR rate control with a constant quality target.
+		// -b:v 0 removes the bitrate cap so quality drives the output size.
+		videoArgs = append(videoArgs, "-rc:v", "vbr", "-cq:v", strconv.Itoa(cfg.CRF), "-b:v", "0")
 	} else {
 		videoArgs = append(videoArgs, "-crf", strconv.Itoa(cfg.CRF))
 	}

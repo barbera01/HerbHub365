@@ -264,25 +264,23 @@ func redactSensitive(content string) string {
 
 func formatPrompt(cfg config.Config, sources []Source) string {
 	var builder strings.Builder
-	builder.WriteString("Write a public-facing Herb Hub 365 technical blog post in markdown. Return markdown beginning with a level-1 heading for the title, followed by a short introduction and 3 to 6 concise sections or paragraphs.\n\n")
+	builder.WriteString("Write a blog article about this part of the Herb Hub 365 platform. The article should read like a magazine-style engineering post — engaging, narrative, and accessible to someone who has never seen the codebase. Use flowing prose paragraphs. Do not list configuration options, enumerate function names, quote code, or use bullet points to summarise technical details.\n\n")
 	if title := strings.TrimSpace(cfg.RepoPost.Title); title != "" {
 		builder.WriteString("Preferred title: ")
 		builder.WriteString(title)
 		builder.WriteString("\n\n")
 	}
-	builder.WriteString("User request:\n")
+	builder.WriteString("Topic:\n")
 	builder.WriteString(cfg.RepoPost.Prompt)
 	builder.WriteString("\n\n")
-	builder.WriteString("Constraints:\n")
-	builder.WriteString("- Use only the supplied repository excerpts as factual sources.\n")
-	builder.WriteString("- Do not mention or infer any secrets, credentials, tokens, or private configuration details.\n")
-	builder.WriteString("- Explain what the component does, how it works, and how it fits into the Herb Hub platform.\n")
-	builder.WriteString("- Favor clarity over code-level minutiae, but include enough implementation detail to be useful.\n\n")
-	builder.WriteString("- Write for readers of a public engineering blog, not for maintainers reviewing code.\n")
-	builder.WriteString("- Do not critique the implementation, propose fixes, list issues, or present corrected code.\n")
-	builder.WriteString("- Do not include fenced code blocks, diff-style output, or tables of issues.\n")
-	builder.WriteString("- Keep the article polished and explanatory, with prose-first sections.\n\n")
-	builder.WriteString("Repository excerpts:\n\n")
+	builder.WriteString("Guidelines:\n")
+	builder.WriteString("- Draw facts only from the repository excerpts below — do not invent details.\n")
+	builder.WriteString("- Explain what the component does and why it matters to the system, in plain language.\n")
+	builder.WriteString("- Describe the user or system experience, not the implementation mechanics.\n")
+	builder.WriteString("- Do not reproduce code, do not include inline code snippets, do not use fenced code blocks.\n")
+	builder.WriteString("- Do not mention secrets, credentials, tokens, or private configuration values.\n")
+	builder.WriteString("- Do not critique, review, or propose improvements to the code.\n\n")
+	builder.WriteString("Repository excerpts (for reference only — do not reproduce):\n\n")
 	for _, source := range sources {
 		builder.WriteString("Path: ")
 		builder.WriteString(source.Path)

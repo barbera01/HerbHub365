@@ -313,6 +313,7 @@ services:
       - ./scheduler/data:/opt/cronicle/data
       - ./scheduler/plugins:/opt/cronicle/plugins
       - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker:ro
     secrets:
       - source: scheduler_ssh_private_key
         target: scheduler_ssh_private_key

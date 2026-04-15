@@ -250,7 +250,8 @@ docker compose up -d herbhub-video video-publisher
 | `VIDEO_RESOURCES_PATH` | Intro/outro MP4s (on NAS) | `/mnt/herbhub-video/Resources/video` |
 | `VIDEO_BG_RESOURCES_PATH` | Background images (on NAS) | `/mnt/herbhub-video/Resources/video_backgrounds` |
 | `VIDEO_AVATAR` | Default avatar ID | `rowan` |
-| `CONCAT_THREADS` | ffmpeg thread limit (1 = minimum memory) | `1` |
-| `CONCAT_CRF` | H.264 quality (lower = larger file) | `18` |
-| `CONCAT_PRESET` | libx264 preset | `fast` |
+| `CONCAT_VIDEO_CODEC` | ffmpeg encoder (`h264_nvenc` for GPU, `libx264` for CPU) | `h264_nvenc` |
+| `CONCAT_CRF` | Quality factor (`-cq` for NVENC, `-crf` for libx264) | `18` |
+| `CONCAT_PRESET` | Encoder preset (`p1`–`p7` for NVENC, `fast`/`slow` etc for libx264) | `p4` |
+| `CONCAT_THREADS` | CPU thread limit (software encode only) | `1` |
 | `CHROMA_KEY_ENABLED` | Enable green-screen removal | `false` |

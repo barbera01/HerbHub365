@@ -68,14 +68,8 @@ services:
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
 
     volumes:
-      # NFS mount: mount the share at the same path as the host so VIDEO_OUTPUT_DIR
-      # is consistent across both the GPU machine and the main server.
-      - ${NFS_OUTPUT_MOUNT:-/mnt/herbhub-video}:/mnt/herbhub-video
-
-      # Intro / outro resources — served from the NAS NFS mount.
-      # VIDEO_RESOURCES_PATH and VIDEO_BG_RESOURCES_PATH are already accessible
-      # via the /mnt/herbhub-video bind above; these mounts map them to the paths
-      # the narrator expects inside the container.
+      # NFS submounts mounted directly — avoids Linux bind-mount/submount visibility issue.
+      - ${NFS_OUTPUT_MOUNT:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
       - ${VIDEO_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video}:/app/resources/video:ro
       - ${VIDEO_BG_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video_backgrounds}:/app/resources/video_backgrounds:ro
 

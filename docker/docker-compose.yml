@@ -134,7 +134,7 @@ services:
       REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-120s}
     volumes:
       - ..:/repo
-      - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video}:/mnt/herbhub-video
+      - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.herbhub-video.rule=Host(`video.herbhub365.com`)"
@@ -172,7 +172,7 @@ services:
       CONCAT_THREADS: ${CONCAT_THREADS:-1}
     volumes:
       - ..:/repo
-      - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video}:/mnt/herbhub-video
+      - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
       - ${VIDEO_RESOURCES_PATH:-../services/video-narrator/resources/video}:/app/resources/video:ro
       - ${VIDEO_BG_RESOURCES_PATH:-../services/video-narrator/resources/video_backgrounds}:/app/resources/video_backgrounds:ro
 
@@ -206,7 +206,7 @@ services:
       YOUTUBE_CATEGORY_ID: ${YOUTUBE_CATEGORY_ID:-22}
       YOUTUBE_TAGS: ${YOUTUBE_TAGS:-}
     volumes:
-      - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video}:/mnt/herbhub-video
+      - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
       - /etc/youtube:/secrets/youtube
       - ..:/repo
     depends_on:

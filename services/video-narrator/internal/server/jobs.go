@@ -33,15 +33,17 @@ import (
 
 // Job represents a video generation job tracked by the server.
 type Job struct {
-	ID        string  `json:"id"`
-	Slug      string  `json:"slug"`
-	AvatarID  string  `json:"avatar_id"`
-	Phase     string  `json:"phase"` // queued, preprocessing, submitting, generating, downloading, stitching, completed, failed
-	Progress  float64 `json:"progress"`
-	Error     string  `json:"error,omitempty"`
-	VideoFile string  `json:"video_file,omitempty"`
-	CreatedAt string  `json:"created_at"`
-	UpdatedAt string  `json:"updated_at"`
+	ID          string  `json:"id"`
+	Slug        string  `json:"slug"`
+	AvatarID    string  `json:"avatar_id"`
+	Phase       string  `json:"phase"` // queued, preprocessing, submitting, generating, downloading, stitching, completed, failed
+	Progress    float64 `json:"progress"`
+	Error       string  `json:"error,omitempty"`
+	VideoFile   string  `json:"video_file,omitempty"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
+	StartedAt   string  `json:"started_at,omitempty"`   // set when preprocessing begins
+	CompletedAt string  `json:"completed_at,omitempty"` // set on completed or failed
 
 	// Generation options (per-request overrides).
 	ConcatEnabled    bool   `json:"concat_enabled"`
@@ -102,11 +104,18 @@ func (jm *JobManager) Job(id string) (*Job, bool) {
 func (jm *JobManager) update(id, phase string, progress float64, errMsg string) {
 	jm.mu.Lock()
 	defer jm.mu.Unlock()
+	now := time.Now().UTC().Format(time.RFC3339)
 	if j, ok := jm.jobs[id]; ok {
 		j.Phase = phase
 		j.Progress = progress
 		j.Error = errMsg
-		j.UpdatedAt = time.Now().UTC().Format(time.RFC3339)
+		j.UpdatedAt = now
+		if phase == "preprocessing" && j.StartedAt == "" {
+			j.StartedAt = now
+		}
+		if phase == "completed" || phase == "failed" {
+			j.CompletedAt = now
+		}
 	}
 }
 
@@ -176,7 +185,7 @@ func (jm *JobManager) runPipeline(
 	req GenerateRequest,
 	postContent string,
 ) {
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Video.MaxWait+10*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.Video.MaxWait+cfg.Video.PipelineBuffer)
 	defer cancel()
 
 	avatarID := req.AvatarID

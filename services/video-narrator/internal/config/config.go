@@ -73,8 +73,13 @@ type VideoConfig struct {
 	// PollInterval is how often to check job status (default: 10s).
 	PollInterval time.Duration
 
-	// MaxWait is the longest we will wait for a single job to complete (default: 20m).
+	// MaxWait is the longest we will wait for a single MuseTalk job to complete (default: 40m).
 	MaxWait time.Duration
+
+	// PipelineBuffer is extra time added to MaxWait for the overall pipeline context,
+	// covering download + stitch after MuseTalk finishes (default: 10m).
+	PipelineBuffer time.Duration
+
 	// Note: resolution and fps are NOT sent to the API — MuseTalk preserves the
 	// source avatar resolution (e.g. 1280×720 for a 720p green-screen loop) and
 	// ignores any resolution/fps hint. Upscaling is handled by ffmpeg in concat.
@@ -187,11 +192,12 @@ func Load() Config {
 		RabbitMQQueue:    getEnv("RABBITMQ_QUEUE", "video.produced"),
 
 		Video: VideoConfig{
-			BaseURL:      getEnv("VIDEO_BASE_URL", "http://172.16.106.81:8011"),
-			AvatarID:     getEnv("VIDEO_AVATAR", "eve"),
-			AvatarIDs:    getCSVEnv("VIDEO_AVATARS"),
-			PollInterval: getDurationEnv("VIDEO_POLL_INTERVAL", 10*time.Second),
-			MaxWait:      getDurationEnv("VIDEO_MAX_WAIT", 20*time.Minute),
+			BaseURL:        getEnv("VIDEO_BASE_URL", "http://172.16.106.81:8011"),
+			AvatarID:       getEnv("VIDEO_AVATAR", "eve"),
+			AvatarIDs:      getCSVEnv("VIDEO_AVATARS"),
+			PollInterval:   getDurationEnv("VIDEO_POLL_INTERVAL", 10*time.Second),
+			MaxWait:        getDurationEnv("VIDEO_MAX_WAIT", 40*time.Minute),
+			PipelineBuffer: getDurationEnv("VIDEO_PIPELINE_BUFFER", 10*time.Minute),
 		},
 
 		Concat: ConcatConfig{

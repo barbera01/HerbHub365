@@ -7,6 +7,10 @@ audio_url: /assets/audio/blog/2026-03-29-pm-greenhouse-update-a-sunny-afternoon-
 ---
 
 ![Timelapse image for March 29, 2026](/assets/images/blog/2026-03-29-greenhouse-update-a-sunny-afternoon-on-march-29th.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/h1mo52gHaVc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The midday sun climbed over the Herb Hub greenhouse, shifting our environment noticeably before late afternoon light levels peaked at an impressive 852 lux. Inside, temperatures rose steadily from a comfortable start of nearly 19 degrees Celsius to reach their highest point of just over 21 degrees by noon.
 

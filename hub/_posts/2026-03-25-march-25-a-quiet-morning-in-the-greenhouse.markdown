@@ -13,3 +13,8 @@ Inside the grow area, temperatures remained comfortably consistent across all pl
 Light levels told an interesting story of a passing cloud or shifting angle; readings dipped from nearly 936 lux down to about 425 lux over twenty minutes. Despite these fluctuations in illumination intensity, pressure remained constant at 1002 hPa, suggesting steady weather outside our glass walls.
 
 Soil moisture levels offer perhaps the most interesting comparison today. Basil is soaking wet with readings above 91%, which keeps its roots cool and hydrated for rapid growth. In contrast, chilli sits comfortably in the mid-57% range, while oregano maintains a drier environment around 50%. These distinct zones remind us that each herb has its own unique thirst level even when sharing the same room.
+
+
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/doPX3_qXEtk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>

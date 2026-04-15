@@ -196,7 +196,10 @@ func runGenerate(ctx context.Context, cfg config.Config, client *llm.Client, gen
 
 	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
 	defer cancel()
-	if warmErr := client.WarmModel(jobCtx); warmErr != nil {
+
+	warmCtx, warmCancel := context.WithTimeout(context.Background(), cfg.LLM.RequestTimeout)
+	defer warmCancel()
+	if warmErr := client.WarmModel(warmCtx); warmErr != nil {
 		log.Printf("model warm-up failed (continuing): %v", warmErr)
 	}
 
@@ -258,6 +261,12 @@ func runRepoPost(ctx context.Context, cfg config.Config, generator *blog.Generat
 	targetDate, err := cfg.ResolveTargetDate(time.Now())
 	if err != nil {
 		return err
+	}
+
+	warmCtx, warmCancel := context.WithTimeout(context.Background(), cfg.LLM.RequestTimeout)
+	defer warmCancel()
+	if warmErr := client.WarmModel(warmCtx); warmErr != nil {
+		log.Printf("model warm-up failed (continuing): %v", warmErr)
 	}
 
 	result, err := generator.GenerateRepoPost(jobCtx, targetDate, request.Prompt, cfg.RepoPost.Title, cfg.RepoPost.Draft, cfg.RepoPost.Categories)

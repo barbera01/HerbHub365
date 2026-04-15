@@ -301,16 +301,18 @@ services:
 
   scheduler:
     image: cronicle/edge:v1.14.2
-    command: ["manager"]
+    command: manager
     hostname: main
     restart: always
     container_name: scheduler
+    privileged: true
     networks:
       - herbhub
     volumes:
       - ./scheduler/config:/opt/cronicle/config
       - ./scheduler/data:/opt/cronicle/data
       - ./scheduler/plugins:/opt/cronicle/plugins
+      - /var/run/docker.sock:/var/run/docker.sock
     secrets:
       - source: scheduler_ssh_private_key
         target: scheduler_ssh_private_key

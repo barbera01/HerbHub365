@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for April 10, 2026](/assets/images/blog/2026-04-10-herb-hub-365-afternoon-update-a-dry-and.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/EBFQtDeZlK0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The afternoon sun shifted the greenhouse conditions noticeably. By late afternoon, the ambient temperature had climbed to a comfortable 24.14°C, warming the basil plants to nearly 23°C. However, the air grew quite dry, with humidity levels dropping significantly from the morning start of 42.6% down to 32.7% by day's end.
 

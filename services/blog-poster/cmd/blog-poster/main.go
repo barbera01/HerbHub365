@@ -50,7 +50,7 @@ func main() {
 			log.Fatal(err)
 		}
 	case "repo-post":
-		if err := runRepoPost(ctx, cfg, generator, publisher); err != nil {
+		if err := runRepoPost(ctx, cfg, client, generator, publisher); err != nil {
 			log.Fatal(err)
 		}
 	case "prom-post":
@@ -249,7 +249,7 @@ func runDraft(ctx context.Context, cfg config.Config, generator *blog.Generator)
 	return nil
 }
 
-func runRepoPost(ctx context.Context, cfg config.Config, generator *blog.Generator, publisher *gitpublish.Publisher) error {
+func runRepoPost(ctx context.Context, cfg config.Config, client *llm.Client, generator *blog.Generator, publisher *gitpublish.Publisher) error {
 	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
 	defer cancel()
 

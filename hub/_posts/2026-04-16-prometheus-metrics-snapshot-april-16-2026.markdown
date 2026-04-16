@@ -19,6 +19,10 @@ prometheus_charts: true
 ---
 
 ![Timelapse image for April 16, 2026](/assets/images/blog/2026-04-16-prometheus-metrics-snapshot-april-16-2026.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/vL5H1ygzaYA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 This metrics post was generated automatically from Prometheus exports for April 16, 2026.
 

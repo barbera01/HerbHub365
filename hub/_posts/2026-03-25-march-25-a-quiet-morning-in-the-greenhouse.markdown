@@ -18,3 +18,7 @@ Soil moisture levels offer perhaps the most interesting comparison today. Basil 
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/doPX3_qXEtk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>
+
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/sRKysE7WPVE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>

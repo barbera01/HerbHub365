@@ -3,9 +3,14 @@ layout: post
 title: "Herb Hub 365 Daily Update: A Stable and Sunny Afternoon"
 date: 2026-04-16 18:00:51 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-16-pm-herb-hub-365-daily-update-a-stable-and.mp3
 ---
 
 ![Timelapse image for April 16, 2026](/assets/images/blog/2026-04-16-herb-hub-365-daily-update-a-stable-and.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/nDSZZifqgnU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The afternoon sun shifted the greenhouse atmosphere noticeably today. As the day progressed, temperatures climbed steadily to a peak of 23.68°C before settling into a comfortable 22.44°C as evening approached. This gentle warming was reflected in our crops, with basil reaching 21.5°C and chilli plants warming to 20.5°C.
 

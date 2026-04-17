@@ -6,6 +6,10 @@ categories: Platform Update
 ---
 
 ![Timelapse image for April 17, 2026](/assets/images/blog/2026-04-17-introducing-prometheus-metrics-posts-on-herb-hub-365.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/NyEWS6MApNI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 Herb Hub 365 has always been dedicated to sharing the story of our greenhouse, but keeping the site fast and reliable while presenting rich data has been a constant balancing act. Today, we are proud to introduce a new capability that bridges the gap between our real-time monitoring systems and our public blog: the Prometheus Metrics Post feature. This addition allows us to seamlessly integrate high-fidelity data visualizations directly into our Jekyll-based website without compromising the static performance that readers expect.
 

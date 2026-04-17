@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Introducing the Team"
-date: 2026-04-17 20:00:00 +0000
+date: 2026-04-17 18:00:00 +0000
 categories: Platform Update
 ---
 
@@ -23,7 +23,7 @@ At Herb Hub 365, Rowan is the voice of the growing journal — the daily greenho
 
 Outside the greenhouse, Rowan still spends part of his time in Shropshire, where he grows herbs, soft fruit and a substantial kitchen garden. He is slowly restoring a walled garden near Ludlow — a project he describes as a fifteen-year plan.
 
-*"The sensor tells you the number. The number tells you something is happening. But you still have to know what that something means for the plant — and that takes time and attention that no sensor can replace. The interesting work is in the gap between the two."*
+_"The sensor tells you the number. The number tells you something is happening. But you still have to know what that something means for the plant — and that takes time and attention that no sensor can replace. The interesting work is in the gap between the two."_
 
 ---
 
@@ -41,7 +41,7 @@ At Herb Hub 365, Eve owns the platform — the edge devices, the data harvest sc
 
 Outside work, Eve keeps an allotment on the edge of Bedminster, runs three times a week, and reads widely across systems thinking, ecology, and mid-century British architecture. She has a dog called Euler.
 
-*"The pipeline doesn't care whether it's routing sensor data or invoices. What matters is that it's reliable, observable, and recoverable. The interesting part is what you do with the data once it arrives."*
+_"The pipeline doesn't care whether it's routing sensor data or invoices. What matters is that it's reliable, observable, and recoverable. The interesting part is what you do with the data once it arrives."_
 
 ---
 

@@ -144,6 +144,7 @@ services:
       BLOG_SITE_NAME: ${BLOG_SITE_NAME:-HerbHub365}
       BLOG_SITE_URL: ${BLOG_SITE_URL:-https://herbhub365.com}
       BLOG_PLANT_NAME: ${BLOG_PLANT_NAME:-herbs}
+      TIMELAPSE_SERVICE_URL: ${TIMELAPSE_SERVICE_URL:-http://timelapse-builder:8082}
     volumes:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
@@ -229,21 +230,28 @@ services:
       context: ..
       dockerfile: services/timelapse-builder/dockerfile
     container_name: timelapse-builder
+    restart: unless-stopped
+    networks:
+      - herbhub
     environment:
-      TIMELAPSE_MODE: ${TIMELAPSE_MODE:-once}
-      TIMELAPSE_INTERVAL_SECONDS: ${TIMELAPSE_INTERVAL_SECONDS:-3600}
-      TIMELAPSE_FROM: ${TIMELAPSE_FROM:-}
-      TIMELAPSE_TO: ${TIMELAPSE_TO:-}
+      TIMELAPSE_MODE: ${TIMELAPSE_MODE:-server}
+      LISTEN_ADDR: ${TIMELAPSE_LISTEN_ADDR:-:8082}
       INPUT_DIR: /input
       OUTPUT_DIR: /output
-      OUTPUT_NAME: ${TIMELAPSE_OUTPUT_NAME:-}
       INPUT_FPS: ${TIMELAPSE_INPUT_FPS:-8}
       OUTPUT_FPS: ${TIMELAPSE_OUTPUT_FPS:-30}
       CRF: ${TIMELAPSE_CRF:-23}
       MIN_BRIGHTNESS: ${TIMELAPSE_MIN_BRIGHTNESS:-0}
+      BUILD_TIMEOUT: ${TIMELAPSE_BUILD_TIMEOUT:-2h}
     volumes:
       - ${TIMELAPSE_INPUT_PATH:-/home/andy/Pictures/timelapse}:/input:ro
       - ${TIMELAPSE_OUTPUT_PATH:-../services/timelapse-builder/output}:/output
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.timelapse-builder.rule=Host(`timelapse.herbhub365.com`)"
+      - "traefik.http.routers.timelapse-builder.entrypoints=websecure"
+      - "traefik.http.routers.timelapse-builder.tls=true"
+      - "traefik.http.services.timelapse-builder.loadbalancer.server.port=8082"
 
   rabbitmq:
     image: rabbitmq:3-management

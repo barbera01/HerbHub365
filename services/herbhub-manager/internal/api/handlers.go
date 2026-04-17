@@ -13,13 +13,15 @@ import (
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
 	"HerbHub365/services/herbhub-manager/internal/post"
+	"HerbHub365/services/herbhub-manager/internal/timelapse"
 	"HerbHub365/services/herbhub-manager/internal/video"
 )
 
 type handlers struct {
-	cfg         config.Config
-	videoClient *video.Client
-	blogClient  *blogpost.Client
+	cfg              config.Config
+	videoClient      *video.Client
+	blogClient       *blogpost.Client
+	timelapseClient  *timelapse.Client
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -501,6 +503,81 @@ func (h *handlers) handleBlogConfig(w http.ResponseWriter, r *http.Request) {
 		"plant_name":      h.cfg.Blog.PlantName,
 		"system_prompt":   h.cfg.Blog.SystemPrompt,
 	})
+}
+
+// ── Timelapse proxy handlers ──────────────────────────────────────────────────
+// These are thin proxies to the timelapse-builder HTTP API.
+
+func (h *handlers) handleTimelapseProxy(w http.ResponseWriter, r *http.Request) {
+	if h.timelapseClient == nil {
+		writeError(w, http.StatusServiceUnavailable, "timelapse-builder not configured")
+		return
+	}
+
+	// Route to the appropriate client method.
+	switch {
+	case r.Method == http.MethodPost && r.URL.Path == "/api/timelapse/build":
+		var req timelapse.BuildRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err.Error() != "EOF" {
+			writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid request: %v", err))
+			return
+		}
+		jobID, err := h.timelapseClient.Build(req)
+		if err != nil {
+			log.Printf("timelapse build error: %v", err)
+			writeError(w, http.StatusBadGateway, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusAccepted, map[string]string{"job_id": jobID, "status": "queued"})
+
+	case r.Method == http.MethodGet && r.URL.Path == "/api/timelapse/jobs":
+		raw, err := h.timelapseClient.Jobs()
+		if err != nil {
+			writeError(w, http.StatusBadGateway, err.Error())
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(raw)
+
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/timelapse/jobs/"):
+		id := strings.TrimPrefix(r.URL.Path, "/api/timelapse/jobs/")
+		raw, err := h.timelapseClient.Job(id)
+		if err != nil {
+			writeError(w, http.StatusBadGateway, err.Error())
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(raw)
+
+	case r.Method == http.MethodGet && r.URL.Path == "/api/timelapse/videos":
+		raw, err := h.timelapseClient.Videos()
+		if err != nil {
+			writeError(w, http.StatusBadGateway, err.Error())
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(raw)
+
+	case r.Method == http.MethodGet && r.URL.Path == "/api/timelapse/config":
+		raw, err := h.timelapseClient.Config()
+		if err != nil {
+			writeJSON(w, http.StatusOK, map[string]any{"online": false})
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(raw)
+
+	case r.Method == http.MethodGet && r.URL.Path == "/api/timelapse/health":
+		online := h.timelapseClient.Health()
+		writeJSON(w, http.StatusOK, map[string]any{"online": online})
+
+	default:
+		writeError(w, http.StatusNotFound, "unknown timelapse route")
+	}
 }
 
 // publishCompletedJobs emits RabbitMQ messages for completed jobs.

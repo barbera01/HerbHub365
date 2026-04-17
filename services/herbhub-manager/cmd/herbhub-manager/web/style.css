@@ -1281,3 +1281,53 @@ body {
     resize: vertical;
     min-height: 400px;
 }
+
+/* ── Timelapse View ────────────────────────────────────────────────────────── */
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-family: var(--font-mono, 'Roboto Mono', monospace);
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    font-weight: 500;
+}
+.status-pill.online   { color: #22c55e; }
+.status-pill.degraded { color: #f59e0b; }
+.status-pill.offline  { color: #71717a; }
+
+.tl-video-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tl-video-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border-color, #e4e4e7);
+    border-radius: 0.375rem;
+    background: var(--bg-input, #fafafa);
+    gap: 1rem;
+}
+
+.tl-video-name {
+    font-family: var(--font-mono, 'Roboto Mono', monospace);
+    font-size: 0.8rem;
+    color: var(--text-primary, #09090b);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tl-video-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted, #71717a);
+    white-space: nowrap;
+    flex-shrink: 0;
+}

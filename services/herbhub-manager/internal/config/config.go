@@ -14,6 +14,7 @@ type Config struct {
 	PollInterval   time.Duration
 	RequestTimeout time.Duration
 	Blog           BlogConfig
+	Timelapse      TimelapseConfig
 }
 
 // PostConfig describes where Jekyll posts live.
@@ -31,6 +32,12 @@ type BlogConfig struct {
 	PlantName     string
 }
 
+// TimelapseConfig holds settings for calling timelapse-builder.
+type TimelapseConfig struct {
+	ServiceURL string
+	Timeout    time.Duration
+}
+
 // Load reads configuration from environment variables with sensible defaults.
 func Load() Config {
 	hubDir := getEnv("HUB_DIR", "/repo/hub")
@@ -45,6 +52,11 @@ func Load() Config {
 
 		Post: PostConfig{
 			PostsDir: postsDir,
+		},
+
+		Timelapse: TimelapseConfig{
+			ServiceURL: getEnv("TIMELAPSE_SERVICE_URL", "http://timelapse-builder:8082"),
+			Timeout:    getDurationEnv("TIMELAPSE_SERVICE_TIMEOUT", 30*time.Second),
 		},
 
 		Blog: BlogConfig{

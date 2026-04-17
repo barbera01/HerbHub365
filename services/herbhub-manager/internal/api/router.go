@@ -5,13 +5,14 @@ import (
 
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
+	"HerbHub365/services/herbhub-manager/internal/timelapse"
 	"HerbHub365/services/herbhub-manager/internal/video"
 )
 
 // NewRouter builds the HTTP mux with all API routes and static file serving.
-func NewRouter(cfg config.Config, videoClient *video.Client, blogClient *blogpost.Client, webFS http.FileSystem) http.Handler {
+func NewRouter(cfg config.Config, videoClient *video.Client, blogClient *blogpost.Client, timelapseClient *timelapse.Client, webFS http.FileSystem) http.Handler {
 	mux := http.NewServeMux()
-	h := &handlers{cfg: cfg, videoClient: videoClient, blogClient: blogClient}
+	h := &handlers{cfg: cfg, videoClient: videoClient, blogClient: blogClient, timelapseClient: timelapseClient}
 
 	// Video API routes.
 	mux.HandleFunc("/api/posts", h.handlePosts)
@@ -29,6 +30,14 @@ func NewRouter(cfg config.Config, videoClient *video.Client, blogClient *blogpos
 	mux.HandleFunc("/api/blog/generate", h.handleBlogGenerate)
 	mux.HandleFunc("/api/blog/save", h.handleBlogSave)
 	mux.HandleFunc("/api/blog/config", h.handleBlogConfig)
+
+	// Timelapse proxy routes.
+	mux.HandleFunc("/api/timelapse/", h.handleTimelapseProxy)
+	mux.HandleFunc("/api/timelapse/build", h.handleTimelapseProxy)
+	mux.HandleFunc("/api/timelapse/jobs", h.handleTimelapseProxy)
+	mux.HandleFunc("/api/timelapse/videos", h.handleTimelapseProxy)
+	mux.HandleFunc("/api/timelapse/config", h.handleTimelapseProxy)
+	mux.HandleFunc("/api/timelapse/health", h.handleTimelapseProxy)
 
 	// Static frontend files — serve index.html for all non-API routes (SPA).
 	fileServer := http.FileServer(webFS)

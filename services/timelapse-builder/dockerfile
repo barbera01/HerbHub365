@@ -1,3 +1,19 @@
+FROM golang:1.23-alpine AS builder
+
+WORKDIR /src
+
+ARG TARGETOS=linux
+ARG TARGETARCH
+
+COPY services/timelapse-builder/go.mod ./
+RUN go mod download
+
+COPY services/timelapse-builder/ .
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -o /out/timelapse-builder ./cmd/timelapse-builder
+
+# ── Runtime ────────────────────────────────────────────────────────────────────
+
 FROM alpine:3.20
 
 WORKDIR /app
@@ -11,7 +27,16 @@ RUN apk add --no-cache \
 
 COPY scripts/make-timelapse.sh /usr/local/bin/make-timelapse.sh
 COPY services/timelapse-builder/entrypoint.sh /usr/local/bin/timelapse-entrypoint.sh
+COPY --from=builder /out/timelapse-builder /usr/local/bin/timelapse-builder
 
-RUN chmod +x /usr/local/bin/make-timelapse.sh /usr/local/bin/timelapse-entrypoint.sh
+RUN chmod +x /usr/local/bin/make-timelapse.sh \
+             /usr/local/bin/timelapse-entrypoint.sh \
+             /usr/local/bin/timelapse-builder
 
-ENTRYPOINT ["/usr/local/bin/timelapse-entrypoint.sh"]
+ENV LISTEN_ADDR=":8082"
+ENV INPUT_DIR="/input"
+ENV OUTPUT_DIR="/output"
+
+EXPOSE 8082
+
+ENTRYPOINT ["/usr/local/bin/timelapse-builder"]

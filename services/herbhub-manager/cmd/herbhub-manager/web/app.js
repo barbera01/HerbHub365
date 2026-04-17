@@ -23,6 +23,8 @@ const App = {
     pollTimer: null,
     blogConfig: null,
     blogPendingFilename: null,
+    tlPollTimer: null,
+    tlJobs: [],
 
     // ── Initialization ────────────────────────────────────────────────────────
 
@@ -65,6 +67,10 @@ const App = {
         switch (view) {
             case 'posts': this.loadPosts(); break;
             case 'blog': /* no reload needed */ break;
+            case 'timelapse':
+                this.timelapseLoadAll();
+                this.startTLPolling();
+                break;
             case 'jobs': this.loadJobs(); break;
             case 'videos': this.loadVideos(); break;
             case 'settings': this.loadConfig(); break;
@@ -693,6 +699,178 @@ const App = {
         document.getElementById('blog-preview-editor').value = '';
         document.getElementById('blog-preview-content').classList.add('hidden');
         document.getElementById('blog-preview-empty').classList.remove('hidden');
+    },
+
+    // ── Timelapse ─────────────────────────────────────────────────────────────
+
+    async timelapseLoadAll() {
+        await Promise.all([
+            this.timelapseLoadHealth(),
+            this.timelapseLoadConfig(),
+            this.timelapseLoadJobs(),
+            this.timelapseLoadVideos(),
+        ]);
+    },
+
+    async timelapseLoadHealth() {
+        const badge = document.getElementById('timelapse-status-badge');
+        if (!badge) return;
+        try {
+            const res = await fetch('/api/timelapse/health');
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            if (data.online === false) throw new Error();
+            badge.textContent = data.building ? 'Building...' : 'Online';
+            badge.className = 'status-pill ' + (data.building ? 'degraded' : 'online');
+        } catch {
+            badge.textContent = 'Offline';
+            badge.className = 'status-pill offline';
+        }
+    },
+
+    async timelapseLoadConfig() {
+        const container = document.getElementById('tl-config-content');
+        if (!container) return;
+        try {
+            const res = await fetch('/api/timelapse/config');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const c = await res.json();
+            container.innerHTML = [
+                ['Input dir',    c.input_dir],
+                ['Output dir',   c.output_dir],
+                ['Input FPS',    c.input_fps],
+                ['Output FPS',   c.output_fps],
+                ['CRF',          c.crf],
+                ['Min brightness', c.min_brightness],
+                ['Build timeout', c.build_timeout],
+            ].map(([label, val]) => `
+                <div class="setting-card">
+                    <div class="setting-label">${label}</div>
+                    <div class="setting-value">${this.escapeHtml(String(val ?? 'N/A'))}</div>
+                </div>
+            `).join('');
+        } catch {
+            container.innerHTML = '<div class="error-state" style="padding:0.5rem 0">Timelapse service offline</div>';
+        }
+    },
+
+    async timelapseLoadJobs() {
+        const container = document.getElementById('tl-jobs-list');
+        if (!container) return;
+        try {
+            const res = await fetch('/api/timelapse/jobs');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            this.tlJobs = data.jobs || [];
+            this.renderTLJobs();
+        } catch (err) {
+            container.innerHTML = `<div class="error-state">Failed to load jobs: ${this.escapeHtml(err.message)}</div>`;
+        }
+    },
+
+    renderTLJobs() {
+        const container = document.getElementById('tl-jobs-list');
+        if (!container) return;
+        if (!this.tlJobs.length) {
+            container.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><p>No builds yet.</p></div>`;
+            return;
+        }
+        container.innerHTML = this.tlJobs.map(j => {
+            const statusClass = { completed: 'phase-completed', failed: 'phase-failed', running: 'phase-active', queued: 'phase-queued' }[j.status] || '';
+            return `
+                <div class="job-card ${statusClass}">
+                    <div class="job-header">
+                        <div class="job-title">${this.escapeHtml(j.output_file || j.id.slice(0, 12) + '...')}</div>
+                        <span class="job-phase ${statusClass}">${j.status}</span>
+                    </div>
+                    <div class="job-meta">
+                        <span>ID: ${j.id.slice(0, 12)}...</span>
+                        <span>${this.timeAgo(j.updated_at || j.created_at)}</span>
+                    </div>
+                    ${j.params.from || j.params.to ? `<div class="job-options"><span class="job-option-tag">${this.escapeHtml(j.params.from || '')} → ${this.escapeHtml(j.params.to || 'now')}</span></div>` : ''}
+                    ${j.status === 'failed' && j.error ? `<div class="job-error">${this.escapeHtml(j.error)}</div>` : ''}
+                </div>`;
+        }).join('');
+    },
+
+    async timelapseLoadVideos() {
+        const container = document.getElementById('tl-videos-list');
+        if (!container) return;
+        try {
+            const res = await fetch('/api/timelapse/videos');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const videos = data.videos || [];
+            if (!videos.length) {
+                container.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><p>No timelapse videos yet.</p></div>`;
+                return;
+            }
+            container.innerHTML = `<div class="tl-video-list">${videos.map(v => `
+                <div class="tl-video-row">
+                    <div class="tl-video-name">${this.escapeHtml(v.name)}</div>
+                    <div class="tl-video-meta">${this.escapeHtml(v.size_mb)} &middot; ${this.escapeHtml(v.modified)}</div>
+                </div>
+            `).join('')}</div>`;
+        } catch (err) {
+            container.innerHTML = `<div class="error-state">Failed to load videos: ${this.escapeHtml(err.message)}</div>`;
+        }
+    },
+
+    async timelapseSubmit() {
+        const btn = document.getElementById('tl-build-btn');
+        const from      = document.getElementById('tl-from').value.trim();
+        const to        = document.getElementById('tl-to').value.trim();
+        const outName   = document.getElementById('tl-output-name').value.trim();
+        const inputFPS  = document.getElementById('tl-input-fps').value;
+        const outputFPS = document.getElementById('tl-output-fps').value;
+        const crf       = document.getElementById('tl-crf').value;
+        const brightness = document.getElementById('tl-brightness').value;
+
+        const body = {};
+        if (from)       body.from = from;
+        if (to)         body.to = to;
+        if (outName)    body.output_name = outName;
+        if (inputFPS)   body.input_fps = parseInt(inputFPS, 10);
+        if (outputFPS)  body.output_fps = parseInt(outputFPS, 10);
+        if (crf)        body.crf = parseInt(crf, 10);
+        if (brightness) body.min_brightness = parseFloat(brightness);
+
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+        try {
+            const res = await fetch('/api/timelapse/build', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || `HTTP ${res.status}`);
+            }
+            const data = await res.json();
+            this.toast(`Build queued (Job: ${data.job_id.slice(0, 8)}...)`, 'success');
+            this.timelapseLoadJobs();
+            this.startTLPolling();
+        } catch (err) {
+            this.toast(`Build failed: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Build Timelapse';
+        }
+    },
+
+    startTLPolling() {
+        if (this.tlPollTimer) clearInterval(this.tlPollTimer);
+        this.tlPollTimer = setInterval(() => {
+            const hasActive = this.tlJobs.some(j => ['queued', 'running'].includes(j.status));
+            if (hasActive || this.currentView === 'timelapse') {
+                this.timelapseLoadJobs();
+                this.timelapseLoadHealth();
+                if (!hasActive) {
+                    this.timelapseLoadVideos();
+                }
+            }
+        }, 5000);
     },
 };
 

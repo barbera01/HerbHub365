@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HerbHub365 — Architecture &amp; Traffic Flow</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 32px 24px;
+      color: #1a202c;
+    }
+    header {
+      max-width: 1300px;
+      margin: 0 auto 28px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+    header p {
+      margin: 0;
+      color: #4a5568;
+      font-size: 0.95rem;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      max-width: 1300px;
+      margin: 0 auto 24px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #2d3748;
+    }
+    .legend-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid;
+      flex-shrink: 0;
+    }
+    .diagram-wrapper {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 32px 24px;
+      max-width: 1300px;
+      margin: 0 auto;
+      overflow-x: auto;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+    footer {
+      max-width: 1300px;
+      margin: 20px auto 0;
+      font-size: 0.8rem;
+      color: #718096;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>HerbHub365 — Architecture &amp; Traffic Flow</h1>
+  <p>feat/llm-split branch &nbsp;·&nbsp; Generated 2026-04-17</p>
+</header>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#f5f5f5;border-color:#666666;"></div>
+    External / IoT
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#d5e8d4;border-color:#82b366;"></div>
+    Infrastructure (RabbitMQ, Traefik)
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#dae8fc;border-color:#6c8ebf;"></div>
+    HerbHub Service
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#d5e8d4;border-color:#007700;"></div>
+    ★ llm-service (new — feat/llm-split)
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#fff2cc;border-color:#d6b656;"></div>
+    External API
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#ffe6cc;border-color:#d79b00;"></div>
+    Shared Storage
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#e1d5e7;border-color:#9673a6;"></div>
+    CI/CD &amp; Azure Hosting
+  </div>
+  <div class="legend-item" style="gap:4px;">
+    <span style="font-size:1.1rem;color:#555;">- -</span>
+    Scheduled / monitoring trigger
+  </div>
+</div>
+
+<div class="diagram-wrapper">
+  <div class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "14px", "lineColor": "#555555"}, "flowchart": {"curve": "basis", "padding": 20}}}%%
+graph TD
+
+  subgraph EXT["  External / IoT  "]
+    IoT["IoT Sensors"]
+    User["User / Browser"]
+    Sched["Scheduler\n(Cronicle)"]
+    NodeExp["Node Exporter\nhh-02:9100"]
+  end
+
+  subgraph INFRA["  Infrastructure  "]
+    RMQ[("RabbitMQ")]
+    Traefik["Traefik\n(reverse proxy)"]
+  end
+
+  subgraph CONTENT["  Content Pipeline  "]
+    Blog["blog-poster"]
+    LLM["★ llm-service"]
+    TTS["tts-narrator"]
+    Water["watering"]
+    Timelapse["timelapse-builder"]
+  end
+
+  subgraph VIDEO["  Video Pipeline  "]
+    HVid["herbhub-video\n(:8080)"]
+    VidNar["video-narrator\n(:8090)"]
+    VidPub["video-publisher"]
+  end
+
+  subgraph STORE["  Shared Storage  "]
+    Repo[("/repo\n(shared volume)")]
+    Mnt[("/mnt/herbhub-video\n(shared volume)")]
+  end
+
+  subgraph APIS["  External APIs  "]
+    Ollama["Ollama /\nOpenAI-compat"]
+    Kokoro["Kokoro TTS API"]
+    GH["GitHub\n(origin/main)"]
+    MuseTalk["MuseTalk API\n(avatar video)"]
+    YT["YouTube"]
+    Prom["Prometheus"]
+  end
+
+  subgraph CICD["  CI/CD &amp; Azure Hosting  "]
+    GHActions["GitHub Actions\nAzure Static Web Apps CI/CD"]
+    Jekyll["Jekyll Build\nhub/ → _site/"]
+    AzureSWA["Azure Static Web Apps\nwonderful-ocean-0a19a7903"]
+    Visitor["Public Visitor\nherbhub365.com"]
+  end
+
+  IoT       -->|"sensor.snapshots"| RMQ
+  RMQ       -->|"consume"| Blog
+  Blog      -->|"POST /generate"| LLM
+  LLM       -->|"HTTP"| Ollama
+  Blog      -->|"write _posts"| Repo
+  Blog      -->|"git push"| GH
+  Repo      -->|"read _posts"| TTS
+  TTS       -->|"write audio"| Repo
+  TTS       -->|"HTTP TTS"| Kokoro
+  TTS       -.->|"git push"| GH
+  User      -->|"HTTPS"| Traefik
+  Traefik   -->|":8080"| HVid
+  HVid      -->|"read _posts"| Repo
+  HVid      -->|"POST /video/generate"| VidNar
+  VidNar    -->|"HTTP lip-sync"| MuseTalk
+  VidNar    -->|"video.produced"| RMQ
+  RMQ       -->|"consume"| VidPub
+  VidPub    -->|"OAuth upload"| YT
+  VidPub    -->|"update YAML"| Repo
+  VidNar    -->|"write MP4"| Mnt
+  VidPub    -->|"read MP4"| Mnt
+  NodeExp   -->|"scrape metrics"| Water
+  Water     -->|"watering signals"| RMQ
+  Sched     -.->|"cron (0 9,16 * * *)"| Blog
+  Sched     -.->|"cron trigger"| TTS
+  Prom      -.->|"scrape :8787"| Water
+
+  GH        -->|"push to origin/main\ntriggers workflow"| GHActions
+  GHActions -->|"checkout submodules\n+ jekyll build"| Jekyll
+  Jekyll    -->|"static-web-apps-deploy@v1\n+ API token secret"| AzureSWA
+  AzureSWA  -->|"serves static site\n(HTTPS)"| Visitor
+  VidPub    -.->|"git push\n(youtube_url frontmatter)"| GH
+
+  classDef service   fill:#dae8fc,stroke:#6c8ebf,color:#1a202c
+  classDef newSvc    fill:#d5e8d4,stroke:#007700,color:#005500,font-weight:bold
+  classDef infra     fill:#d5e8d4,stroke:#82b366,color:#1a202c
+  classDef external  fill:#f5f5f5,stroke:#888888,color:#2d3748
+  classDef api       fill:#fff2cc,stroke:#d6b656,color:#1a202c
+  classDef storage   fill:#ffe6cc,stroke:#d79b00,color:#1a202c
+  classDef cicd      fill:#e1d5e7,stroke:#9673a6,color:#1a202c
+
+  class Blog,TTS,Water,Timelapse,HVid,VidNar,VidPub service
+  class LLM newSvc
+  class RMQ,Traefik infra
+  class IoT,User,Sched,NodeExp external
+  class Ollama,Kokoro,GH,MuseTalk,YT,Prom api
+  class Repo,Mnt storage
+  class GHActions,Jekyll,AzureSWA,Visitor cicd
+  </div>
+</div>
+
+<footer>HerbHub365 · docs/architecture.html</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      fontSize: '14px',
+      lineColor: '#555555',
+      primaryColor: '#dae8fc',
+      primaryBorderColor: '#6c8ebf',
+    },
+    flowchart: {
+      curve: 'basis',
+      padding: 20,
+      htmlLabels: true,
+    }
+  });
+</script>
+
+</body>
+</html>

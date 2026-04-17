@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"HerbHub365/services/llm-service/internal/config"
 	"HerbHub365/services/llm-service/internal/llm"
@@ -18,20 +19,23 @@ func main() {
 
 	cfg := config.Load()
 	client := llm.NewClient(cfg.LLM)
-	handler := server.NewHandler(client, cfg.LLM.RequestTimeout)
+	handler := server.NewHandler(client, cfg.LLM.RequestTimeout, cfg.MaxConcurrent)
 
 	mux := http.NewServeMux()
 	handler.Register(mux)
 
 	httpServer := &http.Server{
-		Addr:    cfg.ListenAddr,
-		Handler: mux,
+		Addr:              cfg.ListenAddr,
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	go func() {
 		<-ctx.Done()
 		log.Printf("shutting down")
-		_ = httpServer.Shutdown(context.Background())
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
+		defer cancel()
+		_ = httpServer.Shutdown(shutdownCtx)
 	}()
 
 	log.Printf("llm-service listening on %s (model: %s provider: %s)", cfg.ListenAddr, cfg.LLM.Model, cfg.LLM.Provider)

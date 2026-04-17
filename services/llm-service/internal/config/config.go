@@ -9,37 +9,43 @@ import (
 )
 
 type Config struct {
-	ListenAddr string
-	LLM        LLMConfig
+	ListenAddr      string
+	ShutdownTimeout time.Duration
+	MaxConcurrent   int
+	LLM             LLMConfig
 }
 
 type LLMConfig struct {
-	Provider       string
-	BaseURL        string
-	APIKey         string
-	Model          string
-	Temperature    float64
-	TopP           float64
-	RepeatPenalty  float64
-	MaxTokens      int
-	RequestTimeout time.Duration
-	Debug          bool
+	Provider              string
+	BaseURL               string
+	APIKey                string
+	Model                 string
+	Temperature           float64
+	TopP                  float64
+	RepeatPenalty         float64
+	MaxTokens             int
+	RequestTimeout        time.Duration
+	ResponseHeaderTimeout time.Duration // how long to wait for the LLM to send the first byte
+	Debug                 bool
 }
 
 func Load() Config {
 	return Config{
-		ListenAddr: getEnv("LLM_SERVICE_LISTEN_ADDR", ":8080"),
+		ListenAddr:      getEnv("LLM_SERVICE_LISTEN_ADDR", ":8080"),
+		ShutdownTimeout: getDurationEnv("LLM_SERVICE_SHUTDOWN_TIMEOUT", 25*time.Minute),
+		MaxConcurrent:   getIntEnv("LLM_SERVICE_MAX_CONCURRENT", 1),
 		LLM: LLMConfig{
-			Provider:       getEnv("LLM_PROVIDER", "auto"),
-			BaseURL:        getEnv("LLM_BASE_URL", "http://ollama.la.home-cloud.uk"),
-			APIKey:         os.Getenv("LLM_API_KEY"),
-			Model:          getEnv("LLM_MODEL", "qwen2.5:latest"),
-			Temperature:    getFloatEnv("LLM_TEMPERATURE", 0.6),
-			TopP:           getFloatEnv("LLM_TOP_P", 0.9),
-			RepeatPenalty:  getFloatEnv("LLM_REPEAT_PENALTY", 1.1),
-			MaxTokens:      getIntEnv("LLM_MAX_TOKENS", 900),
-			RequestTimeout: getDurationEnv("LLM_REQUEST_TIMEOUT", 3*time.Minute),
-			Debug:          getBoolEnv("LLM_DEBUG", false),
+			Provider:              getEnv("LLM_PROVIDER", "auto"),
+			BaseURL:               getEnv("LLM_BASE_URL", "http://ollama.la.home-cloud.uk"),
+			APIKey:                os.Getenv("LLM_API_KEY"),
+			Model:                 getEnv("LLM_MODEL", "qwen2.5:latest"),
+			Temperature:           getFloatEnv("LLM_TEMPERATURE", 0.6),
+			TopP:                  getFloatEnv("LLM_TOP_P", 0.9),
+			RepeatPenalty:         getFloatEnv("LLM_REPEAT_PENALTY", 1.1),
+			MaxTokens:             getIntEnv("LLM_MAX_TOKENS", 900),
+			RequestTimeout:        getDurationEnv("LLM_REQUEST_TIMEOUT", 20*time.Minute),
+			ResponseHeaderTimeout: getDurationEnv("LLM_RESPONSE_HEADER_TIMEOUT", 60*time.Second),
+			Debug:                 getBoolEnv("LLM_DEBUG", false),
 		},
 	}
 }

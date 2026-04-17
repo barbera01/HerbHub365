@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"HerbHub365/services/llm-service/internal/config"
 )
@@ -70,8 +72,19 @@ type ollamaResponse struct {
 }
 
 func NewClient(cfg config.LLMConfig) *Client {
+	// No Timeout on the http.Client — long Ollama streaming responses are
+	// cancelled via the request context instead. ResponseHeaderTimeout on the
+	// transport catches a dead/unresponsive LLM host without cutting off a
+	// legitimate slow generation mid-stream.
+	transport := &http.Transport{
+		ResponseHeaderTimeout: cfg.ResponseHeaderTimeout,
+		DialContext: (&net.Dialer{
+			Timeout:   10 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+	}
 	return &Client{
-		httpClient: &http.Client{Timeout: cfg.RequestTimeout},
+		httpClient: &http.Client{Transport: transport},
 		config:     cfg,
 	}
 }
@@ -83,7 +96,7 @@ func (c *Client) Generate(ctx context.Context, systemPrompt, userPrompt string) 
 		if err == nil {
 			return content, nil
 		}
-		if !shouldTryOllamaFallback(err) {
+		if !shouldTryOllamaFallback(ctx, err) {
 			return "", err
 		}
 
@@ -311,12 +324,38 @@ func ollamaChatURL(base string) string {
 	return trimmed + "/api/chat"
 }
 
-func shouldTryOllamaFallback(err error) bool {
+func shouldTryOllamaFallback(ctx context.Context, err error) bool {
 	if err == nil {
 		return false
 	}
+	// Never fall back if the context is already done — Ollama will fail
+	// immediately for the same reason and produce confusing duplicate errors.
+	if ctx.Err() != nil {
+		return false
+	}
 	message := strings.ToLower(err.Error())
-	return strings.Contains(message, "404") || strings.Contains(message, "not found") || strings.Contains(message, "deadline exceeded") || errors.Is(err, context.DeadlineExceeded)
+	return strings.Contains(message, "404") || strings.Contains(message, "not found")
+}
+
+// IsAvailabilityError returns true for errors that indicate the LLM host is
+// unreachable or overloaded (connection refused, network timeout, etc.) as
+// opposed to errors caused by the request content or response parsing.
+func IsAvailabilityError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return false // timeout is reported separately
+	}
+	var netErr net.Error
+	if errors.As(err, &netErr) {
+		return true
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "connection refused") ||
+		strings.Contains(msg, "no such host") ||
+		strings.Contains(msg, "dial ") ||
+		strings.Contains(msg, "EOF")
 }
 
 func flattenContent(content any) string {

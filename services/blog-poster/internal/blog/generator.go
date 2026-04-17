@@ -35,7 +35,7 @@ type markdownGenerator interface {
 
 type Generator struct {
 	blogConfig   config.BlogConfig
-	llmConfig    config.LLMConfig
+	promptConfig config.PromptConfig
 	store        *archive.Store
 	llm          markdownGenerator
 	sensorWriter *sensordata.Writer
@@ -54,8 +54,8 @@ type writeOptions struct {
 	extras     map[string]any
 }
 
-func NewGenerator(blogCfg config.BlogConfig, llmCfg config.LLMConfig, store *archive.Store, llm markdownGenerator, sensorWriter *sensordata.Writer) *Generator {
-	return &Generator{blogConfig: blogCfg, llmConfig: llmCfg, store: store, llm: llm, sensorWriter: sensorWriter}
+func NewGenerator(blogCfg config.BlogConfig, promptCfg config.PromptConfig, store *archive.Store, llm markdownGenerator, sensorWriter *sensordata.Writer) *Generator {
+	return &Generator{blogConfig: blogCfg, promptConfig: promptCfg, store: store, llm: llm, sensorWriter: sensorWriter}
 }
 
 type measurement struct {
@@ -153,7 +153,7 @@ func (g *Generator) generateFromSnapshots(ctx context.Context, plan GeneratePlan
 		return PostResult{}, err
 	}
 
-	markdown, err := g.generateWithRetry(ctx, g.llmConfig.SystemPrompt, prompt, validateDailyPostMarkdown)
+	markdown, err := g.generateWithRetry(ctx, g.promptConfig.SystemPrompt, prompt, validateDailyPostMarkdown)
 	if err != nil {
 		return PostResult{}, err
 	}
@@ -232,9 +232,9 @@ func (g *Generator) buildPrompt(plan GeneratePlan, summaryPayload []byte) (strin
 	return fmt.Sprintf(
 		"Write a %s blog post for %s (%s). The site URL is %s. Focus only on the data captured between %s and %s UTC. Use the JSON summary below as the only factual source. Mention noteworthy changes in moisture, water level, temperature, light, or warnings when present. Keep it readable for a public blog and do not use bullet lists unless clearly helpful.\n\n%s",
 		plan.PromptLabel,
-		g.llmConfig.PromptPlantName,
-		g.llmConfig.PromptSiteName,
-		g.llmConfig.PromptSiteURL,
+		g.promptConfig.PromptPlantName,
+		g.promptConfig.PromptSiteName,
+		g.promptConfig.PromptSiteURL,
 		plan.WindowStart.Format(time.RFC3339),
 		plan.WindowEnd.Format(time.RFC3339),
 		string(summaryPayload),

@@ -3,6 +3,7 @@ layout: post
 title: "Herb Hub 365 Afternoon Update: A Dry and Bright Start"
 date: 2026-04-16 13:00:44 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-04-16-pm-herb-hub-365-afternoon-update-a-dry-and.mp3
 ---
 
 ![Timelapse image for April 16, 2026](/assets/images/blog/2026-04-16-herb-hub-365-afternoon-update-a-dry-and.jpg)

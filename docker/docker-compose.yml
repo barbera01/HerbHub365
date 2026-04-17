@@ -1,4 +1,25 @@
 services:
+  llm-service:
+    build:
+      context: ../services/llm-service
+      dockerfile: dockerfile
+    container_name: llm-service
+    restart: unless-stopped
+    networks:
+      - herbhub
+    environment:
+      LLM_SERVICE_LISTEN_ADDR: ${LLM_SERVICE_LISTEN_ADDR:-:8080}
+      LLM_PROVIDER: ${LLM_PROVIDER:-auto}
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://ollama.la.home-cloud.uk}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:latest}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.6}
+      LLM_TOP_P: ${LLM_TOP_P:-0.9}
+      LLM_REPEAT_PENALTY: ${LLM_REPEAT_PENALTY:-1.1}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-10000}
+      LLM_REQUEST_TIMEOUT: ${LLM_REQUEST_TIMEOUT:-20m}
+      LLM_DEBUG: ${LLM_DEBUG:-false}
+
   blog-poster:
     build:
       context: ../services/blog-poster
@@ -15,16 +36,8 @@ services:
       BLOG_TARGET_DATE: ${BLOG_TARGET_DATE:-yesterday}
       RABBITMQ_URL: ${BLOG_POSTER_RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672/}
       RABBITMQ_QUEUE: ${BLOG_POSTER_RABBITMQ_QUEUE:-sensor.snapshots}
-      LLM_PROVIDER: ${BLOG_POSTER_LLM_PROVIDER:-auto}
-      LLM_BASE_URL: ${BLOG_POSTER_LLM_BASE_URL:-http://ollama.la.home-cloud.uk}
-      LLM_API_KEY: ${BLOG_POSTER_LLM_API_KEY:-}
-      LLM_MODEL: ${BLOG_POSTER_LLM_MODEL:-qwen2.5:latest}
-      LLM_TEMPERATURE: ${BLOG_POSTER_LLM_TEMPERATURE:-0.6}
-      LLM_TOP_P: ${BLOG_POSTER_LLM_TOP_P:-0.9}
-      LLM_REPEAT_PENALTY: ${BLOG_POSTER_LLM_REPEAT_PENALTY:-1.1}
-      LLM_MAX_TOKENS: ${BLOG_POSTER_LLM_MAX_TOKENS:-10000}
-      LLM_REQUEST_TIMEOUT: ${BLOG_POSTER_LLM_REQUEST_TIMEOUT:-20m}
-      LLM_DEBUG: ${BLOG_POSTER_LLM_DEBUG:-false}
+      LLM_SERVICE_URL: ${BLOG_POSTER_LLM_SERVICE_URL:-http://llm-service:8080}
+      LLM_SERVICE_TIMEOUT: ${BLOG_POSTER_LLM_SERVICE_TIMEOUT:-20m}
       GIT_PUBLISH_ENABLED: ${BLOG_POSTER_GIT_PUBLISH_ENABLED:-false}
       GIT_REPO_DIR: /repo
       GIT_REMOTE_NAME: ${BLOG_POSTER_GIT_REMOTE_NAME:-origin}
@@ -71,6 +84,8 @@ services:
       - ..:/repo
       - ../services/blog-poster/data:/data
       - ${BLOG_POSTER_IMAGE_SOURCE_PATH:-/mnt/hh01-timelapse}:/timelapse:ro
+    depends_on:
+      - llm-service
 
   tts-narrator:
     build:

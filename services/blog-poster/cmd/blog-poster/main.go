@@ -15,7 +15,7 @@ import (
 	"HerbHub365/services/blog-poster/internal/blog"
 	"HerbHub365/services/blog-poster/internal/config"
 	"HerbHub365/services/blog-poster/internal/gitpublish"
-	"HerbHub365/services/blog-poster/internal/llm"
+	"HerbHub365/services/blog-poster/internal/llmclient"
 	"HerbHub365/services/blog-poster/internal/model"
 	"HerbHub365/services/blog-poster/internal/prompost"
 	"HerbHub365/services/blog-poster/internal/rabbitmq"
@@ -31,9 +31,9 @@ func main() {
 	cfg := config.Load()
 	mode := resolveMode(cfg.Mode)
 	store := archive.NewStore(cfg.DataDir)
-	client := llm.NewClient(cfg.LLM)
+	client := llmclient.NewClient(cfg.LLMService.BaseURL, cfg.LLMService.Timeout)
 	sensorWriter := sensordata.NewWriter(cfg.SensorData)
-	generator := blog.NewGenerator(cfg.Blog, cfg.LLM, store, client, sensorWriter)
+	generator := blog.NewGenerator(cfg.Blog, cfg.Prompt, store, client, sensorWriter)
 	publisher := gitpublish.NewPublisher(cfg.Git)
 
 	switch mode {
@@ -75,7 +75,7 @@ func runPromPost(ctx context.Context, cfg config.Config, generator *blog.Generat
 		return err
 	}
 
-	export, err := prompost.Generate(targetDate, cfg.PromPost, cfg.LLM.PromptSiteName)
+	export, err := prompost.Generate(targetDate, cfg.PromPost, cfg.Prompt.PromptSiteName)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func resolveMode(defaultMode string) string {
 	return strings.ToLower(strings.TrimSpace(defaultMode))
 }
 
-func runDaemon(ctx context.Context, cfg config.Config, client *llm.Client, store *archive.Store, generator *blog.Generator, publisher *gitpublish.Publisher) error {
+func runDaemon(ctx context.Context, cfg config.Config, client *llmclient.Client, store *archive.Store, generator *blog.Generator, publisher *gitpublish.Publisher) error {
 	errCh := make(chan error, 1)
 	go func() {
 		errCh <- runCollectorLoop(ctx, cfg, store)
@@ -188,7 +188,7 @@ func runDaemon(ctx context.Context, cfg config.Config, client *llm.Client, store
 	}
 }
 
-func runGenerate(ctx context.Context, cfg config.Config, client *llm.Client, generator *blog.Generator, publisher *gitpublish.Publisher) error {
+func runGenerate(ctx context.Context, cfg config.Config, client *llmclient.Client, generator *blog.Generator, publisher *gitpublish.Publisher) error {
 	plan, err := blog.ResolveGeneratePlan(cfg, time.Now())
 	if err != nil {
 		return err
@@ -197,7 +197,7 @@ func runGenerate(ctx context.Context, cfg config.Config, client *llm.Client, gen
 	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
 	defer cancel()
 
-	warmCtx, warmCancel := context.WithTimeout(context.Background(), cfg.LLM.RequestTimeout)
+	warmCtx, warmCancel := context.WithTimeout(context.Background(), cfg.LLMService.Timeout)
 	defer warmCancel()
 	if warmErr := client.WarmModel(warmCtx); warmErr != nil {
 		log.Printf("model warm-up failed (continuing): %v", warmErr)
@@ -249,7 +249,7 @@ func runDraft(ctx context.Context, cfg config.Config, generator *blog.Generator)
 	return nil
 }
 
-func runRepoPost(ctx context.Context, cfg config.Config, client *llm.Client, generator *blog.Generator, publisher *gitpublish.Publisher) error {
+func runRepoPost(ctx context.Context, cfg config.Config, client *llmclient.Client, generator *blog.Generator, publisher *gitpublish.Publisher) error {
 	jobCtx, cancel := context.WithTimeout(ctx, cfg.GenerateTimeout)
 	defer cancel()
 
@@ -263,7 +263,7 @@ func runRepoPost(ctx context.Context, cfg config.Config, client *llm.Client, gen
 		return err
 	}
 
-	warmCtx, warmCancel := context.WithTimeout(context.Background(), cfg.LLM.RequestTimeout)
+	warmCtx, warmCancel := context.WithTimeout(context.Background(), cfg.LLMService.Timeout)
 	defer warmCancel()
 	if warmErr := client.WarmModel(warmCtx); warmErr != nil {
 		log.Printf("model warm-up failed (continuing): %v", warmErr)

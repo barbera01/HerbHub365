@@ -9,7 +9,7 @@ COPY go.mod ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/herbhub-video ./cmd/herbhub-video
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/herbhub-manager ./cmd/herbhub-manager
 
 FROM alpine:3.20
 
@@ -17,7 +17,7 @@ WORKDIR /app
 
 RUN apk add --no-cache ca-certificates
 
-COPY --from=builder /out/herbhub-video /usr/local/bin/herbhub-video
+COPY --from=builder /out/herbhub-manager /usr/local/bin/herbhub-manager
 
 # Default env vars — override at runtime.
 ENV LISTEN_ADDR=":8080"
@@ -26,4 +26,4 @@ ENV VIDEO_OUTPUT_DIR="/output/video"
 
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/local/bin/herbhub-video"]
+ENTRYPOINT ["/usr/local/bin/herbhub-manager"]

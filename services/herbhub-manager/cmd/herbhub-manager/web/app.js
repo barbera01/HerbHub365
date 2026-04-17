@@ -1,6 +1,4 @@
-// HerbHub Video — Frontend Application
-// Vanilla JS SPA for the herbhub-video web interface.
-// Proxies all generation through the video-narrator API for full pipeline support.
+// HerbHub Manager — Frontend Application
 
 const PHASES = ['preprocessing', 'submitting', 'generating', 'downloading', 'stitching'];
 
@@ -23,6 +21,8 @@ const App = {
     resources: null,
     selectedSlug: null,
     pollTimer: null,
+    blogConfig: null,
+    blogPendingFilename: null,
 
     // ── Initialization ────────────────────────────────────────────────────────
 
@@ -35,6 +35,7 @@ const App = {
             this.loadConfig(),
             this.loadJobs(),
             this.loadResources(),
+            this.loadBlogConfig(),
         ]);
         this.startJobPolling();
     },
@@ -63,6 +64,7 @@ const App = {
 
         switch (view) {
             case 'posts': this.loadPosts(); break;
+            case 'blog': /* no reload needed */ break;
             case 'jobs': this.loadJobs(); break;
             case 'videos': this.loadVideos(); break;
             case 'settings': this.loadConfig(); break;
@@ -597,6 +599,101 @@ const App = {
         if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
         if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
         return `${Math.floor(seconds / 86400)}d ago`;
+    },
+};
+
+    // ── Blog Poster ───────────────────────────────────────────────────────────
+
+    async loadBlogConfig() {
+        try {
+            const res = await fetch('/api/blog/config');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            this.blogConfig = await res.json();
+            const sysPromptEl = document.getElementById('blog-system-prompt');
+            if (sysPromptEl && this.blogConfig.system_prompt) {
+                sysPromptEl.placeholder = this.blogConfig.system_prompt;
+            }
+        } catch (err) {
+            console.warn('Failed to load blog config:', err.message);
+        }
+    },
+
+    async blogGenerate() {
+        const topic = document.getElementById('blog-topic').value.trim();
+        const systemPrompt = document.getElementById('blog-system-prompt').value.trim();
+        const categories = document.getElementById('blog-categories').value.trim() || 'Daily Update';
+        const btn = document.getElementById('blog-generate-btn');
+
+        const userPrompt = topic || `Write a daily herb garden update blog post for ${this.blogConfig?.site_name || 'HerbHub365'}.`;
+
+        btn.disabled = true;
+        btn.textContent = 'Generating...';
+        document.getElementById('blog-preview-empty').classList.remove('hidden');
+        document.getElementById('blog-preview-content').classList.add('hidden');
+
+        try {
+            const res = await fetch('/api/blog/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_prompt: userPrompt, system_prompt: systemPrompt, categories }),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || `HTTP ${res.status}`);
+            }
+            const data = await res.json();
+
+            this.blogPendingFilename = data.filename;
+            document.getElementById('blog-preview-filename').textContent = data.filename;
+            document.getElementById('blog-preview-title').textContent = data.title;
+            document.getElementById('blog-preview-editor').value = data.content;
+            document.getElementById('blog-preview-empty').classList.add('hidden');
+            document.getElementById('blog-preview-content').classList.remove('hidden');
+
+            this.toast('Post generated — review and save when ready.', 'success');
+        } catch (err) {
+            this.toast(`Generate failed: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Generate';
+        }
+    },
+
+    async blogSave() {
+        const filename = this.blogPendingFilename;
+        const content = document.getElementById('blog-preview-editor').value;
+        if (!filename || !content.trim()) return;
+
+        const btn = document.getElementById('blog-save-btn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        try {
+            const res = await fetch('/api/blog/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename, content }),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || `HTTP ${res.status}`);
+            }
+            this.toast(`Post saved: ${filename}`, 'success');
+            this.blogDiscard();
+            this.loadPosts();
+        } catch (err) {
+            this.toast(`Save failed: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Save to Posts';
+        }
+    },
+
+    blogDiscard() {
+        this.blogPendingFilename = null;
+        document.getElementById('blog-preview-editor').value = '';
+        document.getElementById('blog-preview-content').classList.add('hidden');
+        document.getElementById('blog-preview-empty').classList.remove('hidden');
     },
 };
 

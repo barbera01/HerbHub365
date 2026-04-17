@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"HerbHub365/services/herbhub-video/internal/config"
+	"HerbHub365/services/herbhub-manager/internal/config"
 )
 
 // ── Job tracking (mirrors video-narrator server.Job) ─────────────────────────

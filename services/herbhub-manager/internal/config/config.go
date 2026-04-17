@@ -5,31 +5,30 @@ import (
 	"time"
 )
 
-// Config holds all runtime configuration for herbhub-video.
+// Config holds all runtime configuration for herbhub-manager.
 type Config struct {
-	// ListenAddr is the HTTP server address (default: ":8080").
-	ListenAddr string
-
-	// NarratorURL is the video-narrator API base URL (default: "http://localhost:8090").
-	NarratorURL string
-
-	// Post describes where Jekyll posts live.
-	Post PostConfig
-
-	// OutputDir is where generated MP4 files are stored.
-	OutputDir string
-
-	// PollInterval is how often to poll the narrator for job status.
-	PollInterval time.Duration
-
-	// RequestTimeout caps HTTP calls to the narrator.
+	ListenAddr     string
+	NarratorURL    string
+	Post           PostConfig
+	OutputDir      string
+	PollInterval   time.Duration
 	RequestTimeout time.Duration
+	Blog           BlogConfig
 }
 
 // PostConfig describes where Jekyll posts live.
 type PostConfig struct {
-	// PostsDir is the Jekyll _posts directory.
 	PostsDir string
+}
+
+// BlogConfig holds settings for calling llm-service to generate blog posts.
+type BlogConfig struct {
+	LLMServiceURL string
+	LLMTimeout    time.Duration
+	SystemPrompt  string
+	SiteName      string
+	SiteURL       string
+	PlantName     string
 }
 
 // Load reads configuration from environment variables with sensible defaults.
@@ -46,6 +45,15 @@ func Load() Config {
 
 		Post: PostConfig{
 			PostsDir: postsDir,
+		},
+
+		Blog: BlogConfig{
+			LLMServiceURL: getEnv("LLM_SERVICE_URL", "http://llm-service:8080"),
+			LLMTimeout:    getDurationEnv("LLM_SERVICE_TIMEOUT", 25*time.Minute),
+			SystemPrompt:  os.Getenv("BLOG_SYSTEM_PROMPT"),
+			SiteName:      getEnv("BLOG_SITE_NAME", "HerbHub365"),
+			SiteURL:       getEnv("BLOG_SITE_URL", "https://herbhub365.com"),
+			PlantName:     getEnv("BLOG_PLANT_NAME", "herbs"),
 		},
 	}
 }

@@ -8,15 +8,18 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
-	"HerbHub365/services/herbhub-video/internal/config"
-	"HerbHub365/services/herbhub-video/internal/post"
-	"HerbHub365/services/herbhub-video/internal/video"
+	"HerbHub365/services/herbhub-manager/internal/blogpost"
+	"HerbHub365/services/herbhub-manager/internal/config"
+	"HerbHub365/services/herbhub-manager/internal/post"
+	"HerbHub365/services/herbhub-manager/internal/video"
 )
 
 type handlers struct {
 	cfg         config.Config
 	videoClient *video.Client
+	blogClient  *blogpost.Client
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -378,6 +381,125 @@ func (h *handlers) handleHealth(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"status":          status,
 		"narrator_online": narratorOK,
+	})
+}
+
+// ── POST /api/blog/generate ───────────────────────────────────────────────────
+// Calls llm-service to generate blog post content and returns it for preview.
+
+type blogGenerateRequest struct {
+	UserPrompt   string `json:"user_prompt"`
+	SystemPrompt string `json:"system_prompt,omitempty"`
+	Categories   string `json:"categories,omitempty"`
+}
+
+type blogGenerateResponse struct {
+	Content  string `json:"content"`
+	Filename string `json:"filename"`
+	Slug     string `json:"slug"`
+	Title    string `json:"title"`
+}
+
+func (h *handlers) handleBlogGenerate(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var req blogGenerateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid request: %v", err))
+		return
+	}
+	if strings.TrimSpace(req.UserPrompt) == "" {
+		writeError(w, http.StatusBadRequest, "user_prompt is required")
+		return
+	}
+
+	log.Printf("blog generate start (prompt_len=%d)", len(req.UserPrompt))
+
+	content, err := h.blogClient.Generate(req.SystemPrompt, req.UserPrompt)
+	if err != nil {
+		log.Printf("blog generate error: %v", err)
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("generate: %v", err))
+		return
+	}
+
+	meta := blogpost.DeriveFilename(content, time.Now().UTC())
+	content = blogpost.InjectFrontMatter(content, meta, req.Categories)
+
+	log.Printf("blog generate ok (filename=%s)", meta.Filename)
+	writeJSON(w, http.StatusOK, blogGenerateResponse{
+		Content:  content,
+		Filename: meta.Filename,
+		Slug:     meta.Slug,
+		Title:    meta.Title,
+	})
+}
+
+// ── POST /api/blog/save ───────────────────────────────────────────────────────
+// Saves provided content as a Jekyll post file in the posts directory.
+
+type blogSaveRequest struct {
+	Filename string `json:"filename"`
+	Content  string `json:"content"`
+}
+
+func (h *handlers) handleBlogSave(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var req blogSaveRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid request: %v", err))
+		return
+	}
+
+	if strings.TrimSpace(req.Filename) == "" || strings.TrimSpace(req.Content) == "" {
+		writeError(w, http.StatusBadRequest, "filename and content are required")
+		return
+	}
+
+	// Safety: only allow simple Jekyll-style filenames, no path traversal.
+	if strings.Contains(req.Filename, "/") || strings.Contains(req.Filename, "..") {
+		writeError(w, http.StatusBadRequest, "invalid filename")
+		return
+	}
+	if !strings.HasSuffix(req.Filename, ".markdown") && !strings.HasSuffix(req.Filename, ".md") {
+		writeError(w, http.StatusBadRequest, "filename must end in .markdown or .md")
+		return
+	}
+
+	dest := filepath.Join(h.cfg.Post.PostsDir, req.Filename)
+	if err := os.WriteFile(dest, []byte(req.Content), 0644); err != nil {
+		log.Printf("blog save error: %v", err)
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("save post: %v", err))
+		return
+	}
+
+	log.Printf("blog post saved: %s", dest)
+	writeJSON(w, http.StatusOK, map[string]string{
+		"filename": req.Filename,
+		"path":     dest,
+	})
+}
+
+// ── GET /api/blog/config ──────────────────────────────────────────────────────
+// Returns blog generation config so the frontend can pre-fill prompts.
+
+func (h *handlers) handleBlogConfig(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"llm_service_url": h.cfg.Blog.LLMServiceURL,
+		"site_name":       h.cfg.Blog.SiteName,
+		"site_url":        h.cfg.Blog.SiteURL,
+		"plant_name":      h.cfg.Blog.PlantName,
+		"system_prompt":   h.cfg.Blog.SystemPrompt,
 	})
 }
 

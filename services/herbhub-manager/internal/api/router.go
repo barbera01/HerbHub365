@@ -3,16 +3,17 @@ package api
 import (
 	"net/http"
 
-	"HerbHub365/services/herbhub-video/internal/config"
-	"HerbHub365/services/herbhub-video/internal/video"
+	"HerbHub365/services/herbhub-manager/internal/blogpost"
+	"HerbHub365/services/herbhub-manager/internal/config"
+	"HerbHub365/services/herbhub-manager/internal/video"
 )
 
 // NewRouter builds the HTTP mux with all API routes and static file serving.
-func NewRouter(cfg config.Config, videoClient *video.Client, webFS http.FileSystem) http.Handler {
+func NewRouter(cfg config.Config, videoClient *video.Client, blogClient *blogpost.Client, webFS http.FileSystem) http.Handler {
 	mux := http.NewServeMux()
-	h := &handlers{cfg: cfg, videoClient: videoClient}
+	h := &handlers{cfg: cfg, videoClient: videoClient, blogClient: blogClient}
 
-	// API routes.
+	// Video API routes.
 	mux.HandleFunc("/api/posts", h.handlePosts)
 	mux.HandleFunc("/api/posts/", h.handlePostBySlug)
 	mux.HandleFunc("/api/generate", h.handleGenerate)
@@ -23,6 +24,11 @@ func NewRouter(cfg config.Config, videoClient *video.Client, webFS http.FileSyst
 	mux.HandleFunc("/api/config", h.handleConfig)
 	mux.HandleFunc("/api/resources", h.handleResources)
 	mux.HandleFunc("/api/health", h.handleHealth)
+
+	// Blog poster API routes.
+	mux.HandleFunc("/api/blog/generate", h.handleBlogGenerate)
+	mux.HandleFunc("/api/blog/save", h.handleBlogSave)
+	mux.HandleFunc("/api/blog/config", h.handleBlogConfig)
 
 	// Static frontend files — serve index.html for all non-API routes (SPA).
 	fileServer := http.FileServer(webFS)

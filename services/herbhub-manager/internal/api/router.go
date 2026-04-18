@@ -31,6 +31,10 @@ func NewRouter(cfg config.Config, videoClient *video.Client, blogClient *blogpos
 	mux.HandleFunc("/api/blog/save", h.handleBlogSave)
 	mux.HandleFunc("/api/blog/config", h.handleBlogConfig)
 
+	// Timelapse publish routes (must be registered before the catch-all proxy).
+	mux.HandleFunc("/api/timelapse/publish", h.handleTimelapsePublish)
+	mux.HandleFunc("/api/timelapse/narrate/", h.handleTimelapseNarrateJob)
+
 	// Timelapse proxy routes.
 	mux.HandleFunc("/api/timelapse/", h.handleTimelapseProxy)
 	mux.HandleFunc("/api/timelapse/build", h.handleTimelapseProxy)

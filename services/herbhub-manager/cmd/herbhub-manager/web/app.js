@@ -25,6 +25,7 @@ const App = {
     blogPendingFilename: null,
     tlPollTimer: null,
     tlJobs: [],
+    tlPublishJobs: [],
 
     // ── Initialization ────────────────────────────────────────────────────────
 
@@ -709,6 +710,7 @@ const App = {
             this.timelapseLoadConfig(),
             this.timelapseLoadJobs(),
             this.timelapseLoadVideos(),
+            this.timelapsePublishInit(),
         ]);
     },
 
@@ -883,7 +885,136 @@ const App = {
                     this.timelapseLoadVideos();
                 }
             }
+            const hasPubActive = this.tlPublishJobs.some(j => !['completed', 'failed'].includes(j.phase));
+            if (hasPubActive) {
+                this.timelapseLoadPublishJobs();
+            }
         }, 5000);
+    },
+
+    // ── Timelapse Publish ─────────────────────────────────────────────────────
+
+    async timelapsePublishInit() {
+        await Promise.all([
+            this.timelapsePublishLoadVideos(),
+            this.timelapsePublishLoadResources(),
+        ]);
+    },
+
+    async timelapsePublishLoadVideos() {
+        const sel = document.getElementById('tl-pub-video');
+        if (!sel) return;
+        try {
+            const res = await fetch('/api/timelapse/videos');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const videos = data.videos || [];
+            const opts = videos.map(v => `<option value="${this.escapeHtml(v.name)}">${this.escapeHtml(v.name)} (${this.escapeHtml(v.size_mb)})</option>`).join('');
+            sel.innerHTML = '<option value="">— select a built timelapse —</option>' + opts;
+        } catch {
+            // non-fatal: leave default option
+        }
+    },
+
+    async timelapsePublishLoadResources() {
+        try {
+            const res = await fetch('/api/resources');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const introSel = document.getElementById('tl-pub-intro');
+            const outroSel = document.getElementById('tl-pub-outro');
+            if (!introSel || !outroSel) return;
+            const intros = data.intros || [];
+            const outros = data.outros || [];
+            introSel.innerHTML = '<option value="">— none —</option>' + intros.map(i => `<option value="${this.escapeHtml(i)}">${this.escapeHtml(i)}</option>`).join('');
+            outroSel.innerHTML = '<option value="">— none —</option>' + outros.map(o => `<option value="${this.escapeHtml(o)}">${this.escapeHtml(o)}</option>`).join('');
+        } catch {
+            // non-fatal
+        }
+    },
+
+    async timelapsePublishSubmit() {
+        const btn = document.getElementById('tl-pub-btn');
+        const timelapse_file = document.getElementById('tl-pub-video').value;
+        const title          = document.getElementById('tl-pub-title').value.trim();
+        const from_date      = document.getElementById('tl-pub-from').value;
+        const to_date        = document.getElementById('tl-pub-to').value;
+        const tts_text       = document.getElementById('tl-pub-text').value.trim();
+        const intro          = document.getElementById('tl-pub-intro').value;
+        const outro          = document.getElementById('tl-pub-outro').value;
+
+        if (!timelapse_file) { this.toast('Select a timelapse video first', 'error'); return; }
+        if (!tts_text)       { this.toast('Narration script is required', 'error'); return; }
+        if (!to_date)        { this.toast('To date is required', 'error'); return; }
+
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+        try {
+            const res = await fetch('/api/timelapse/publish', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ timelapse_file, title, from_date, to_date, tts_text, intro, outro }),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || `HTTP ${res.status}`);
+            }
+            const data = await res.json();
+            this.toast('Publish job queued (' + data.job_id.slice(0, 8) + '...)', 'success');
+            this.tlPublishJobs.unshift({ id: data.job_id, slug: data.slug, phase: 'queued', progress: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+            this.renderTLPublishJobs();
+        } catch (err) {
+            this.toast('Publish failed: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Publish to YouTube';
+        }
+    },
+
+    async timelapseLoadPublishJobs() {
+        if (!this.tlPublishJobs.length) return;
+        const active = this.tlPublishJobs.filter(j => !['completed', 'failed'].includes(j.phase));
+        await Promise.all(active.map(async j => {
+            try {
+                const res = await fetch('/api/timelapse/narrate/' + j.id);
+                if (!res.ok) return;
+                const data = await res.json();
+                const idx = this.tlPublishJobs.findIndex(x => x.id === j.id);
+                if (idx !== -1) this.tlPublishJobs[idx] = data;
+            } catch { /* transient */ }
+        }));
+        this.renderTLPublishJobs();
+    },
+
+    renderTLPublishJobs() {
+        const container = document.getElementById('tl-publish-jobs-list');
+        if (!container) return;
+        if (!this.tlPublishJobs.length) {
+            container.innerHTML = '<div class="empty-state"><p>No publish jobs yet.</p></div>';
+            return;
+        }
+        const tlPhaseLabels = {
+            queued: 'Queued', preprocessing: 'Preprocessing', submitting: 'Submitting',
+            generating: 'Generating', narrating: 'Narrating', stitching: 'Stitching',
+            completed: 'Completed', failed: 'Failed',
+        };
+        container.innerHTML = this.tlPublishJobs.map(j => {
+            const sc = { completed: 'phase-completed', failed: 'phase-failed', queued: 'phase-queued' }[j.phase] || 'phase-active';
+            const pct = Math.round((j.progress || 0) * 100);
+            const progressBar = (j.phase !== 'completed' && j.phase !== 'failed')
+                ? '<div class="progress-bar" style="margin-top:0.5rem"><div class="progress-fill" style="width:' + pct + '%"></div></div>'
+                : '';
+            const errorLine = j.error ? '<div class="job-error">' + this.escapeHtml(j.error) + '</div>' : '';
+            const videoLine = (j.phase === 'completed' && j.video_file)
+                ? '<div class="job-actions"><span class="job-option-tag">' + this.escapeHtml(j.video_file) + '</span></div>'
+                : '';
+            return '<div class="job-card ' + sc + '">'
+                + '<div class="job-header"><div class="job-title">' + this.escapeHtml(j.slug || j.id.slice(0, 12) + '...') + '</div>'
+                + '<span class="job-phase ' + sc + '">' + (tlPhaseLabels[j.phase] || j.phase) + '</span></div>'
+                + '<div class="job-meta"><span>ID: ' + j.id.slice(0, 12) + '...</span>'
+                + '<span>' + this.timeAgo(j.updated_at || j.created_at) + '</span></div>'
+                + progressBar + errorLine + videoLine + '</div>';
+        }).join('');
     },
 };
 

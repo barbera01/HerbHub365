@@ -220,6 +220,61 @@
                                 <div class="loading-state" style="padding:0.5rem 0">Loading...</div>
                             </div>
                         </div>
+
+                        <!-- Publish Card -->
+                        <div class="panel-card">
+                            <h3>Publish to YouTube</h3>
+
+                            <div class="form-group">
+                                <label for="tl-pub-video">Timelapse video</label>
+                                <select id="tl-pub-video" class="form-input">
+                                    <option value="">— select a built timelapse —</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tl-pub-title">Title</label>
+                                <input type="text" id="tl-pub-title" class="form-input" placeholder="Herb Garden Timelapse – April 2026">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label for="tl-pub-from">From date</label>
+                                    <input type="date" id="tl-pub-from" class="form-input">
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label for="tl-pub-to">To date</label>
+                                    <input type="date" id="tl-pub-to" class="form-input">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tl-pub-text">Narration script (TTS)</label>
+                                <textarea id="tl-pub-text" class="form-input" rows="5" placeholder="Describe what's happening in this timelapse…"></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label for="tl-pub-intro">Intro</label>
+                                    <select id="tl-pub-intro" class="form-input">
+                                        <option value="">— none —</option>
+                                    </select>
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label for="tl-pub-outro">Outro</label>
+                                    <select id="tl-pub-outro" class="form-input">
+                                        <option value="">— none —</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button class="btn btn-primary" id="tl-pub-btn" onclick="App.timelapsePublishSubmit()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    Publish to YouTube
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Right: Jobs + Videos -->
@@ -246,6 +301,19 @@
                                 <div class="empty-state">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                                     <p>No timelapse videos yet.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-card">
+                            <div class="preview-header" style="margin-bottom:1rem">
+                                <h3 style="margin:0">Publish Jobs</h3>
+                                <button class="btn btn-secondary btn-small" onclick="App.timelapseLoadPublishJobs()">Refresh</button>
+                            </div>
+                            <div id="tl-publish-jobs-list">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    <p>No publish jobs yet.</p>
                                 </div>
                             </div>
                         </div>

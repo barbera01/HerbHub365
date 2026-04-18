@@ -203,6 +203,85 @@ func (c *Client) Resources() (*Resources, error) {
 	return &res, nil
 }
 
+// ── Timelapse narration ───────────────────────────────────────────────────────
+
+// TimelapseNarrateRequest is the payload sent to /api/timelapse/narrate.
+type TimelapseNarrateRequest struct {
+	Text          string `json:"text"`
+	TimelapseFile string `json:"timelapse_file"`
+	Intro         string `json:"intro,omitempty"`
+	Outro         string `json:"outro,omitempty"`
+	Slug          string `json:"slug"`
+	Date          string `json:"date"`
+}
+
+// TimelapseNarrateJob mirrors video-narrator's TimelapseJob.
+type TimelapseNarrateJob struct {
+	ID          string  `json:"id"`
+	Slug        string  `json:"slug"`
+	Phase       string  `json:"phase"`
+	Progress    float64 `json:"progress"`
+	Error       string  `json:"error,omitempty"`
+	VideoFile   string  `json:"video_file,omitempty"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
+	CompletedAt string  `json:"completed_at,omitempty"`
+}
+
+// NarrateTimelapse submits a timelapse narration job and returns the job ID.
+func (c *Client) NarrateTimelapse(req TimelapseNarrateRequest) (string, error) {
+	encoded, err := json.Marshal(req)
+	if err != nil {
+		return "", fmt.Errorf("marshal request: %w", err)
+	}
+
+	resp, err := c.httpClient.Post(
+		c.baseURL+"/api/timelapse/narrate",
+		"application/json",
+		bytes.NewReader(encoded),
+	)
+	if err != nil {
+		return "", fmt.Errorf("POST /api/timelapse/narrate: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusAccepted && resp.StatusCode != http.StatusOK {
+		snippet, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		return "", fmt.Errorf("POST /api/timelapse/narrate returned %d: %s", resp.StatusCode, string(snippet))
+	}
+
+	var result struct {
+		JobID string `json:"job_id"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("decode response: %w", err)
+	}
+	return result.JobID, nil
+}
+
+// GetTimelapseNarrateJob fetches the status of a timelapse narration job.
+func (c *Client) GetTimelapseNarrateJob(id string) (*TimelapseNarrateJob, error) {
+	resp, err := c.httpClient.Get(c.baseURL + "/api/timelapse/narrate/" + id)
+	if err != nil {
+		return nil, fmt.Errorf("GET /api/timelapse/narrate/%s: %w", id, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("job %s not found", id)
+	}
+	if resp.StatusCode != http.StatusOK {
+		snippet, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		return nil, fmt.Errorf("GET /api/timelapse/narrate/%s returned %d: %s", id, resp.StatusCode, string(snippet))
+	}
+
+	var job TimelapseNarrateJob
+	if err := json.NewDecoder(resp.Body).Decode(&job); err != nil {
+		return nil, fmt.Errorf("decode job: %w", err)
+	}
+	return &job, nil
+}
+
 // Health checks if the video-narrator API is reachable.
 func (c *Client) Health() bool {
 	client := &http.Client{Timeout: 3 * time.Second}

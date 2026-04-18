@@ -3,7 +3,6 @@ layout: post
 title: "Greenhouse Update: March 25th – A Quiet Day for the Plants"
 date: 2026-03-25 17:31:18 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-25-greenhouse-update-march-25th-a-quiet-day.mp3
 ---
 
 The morning at Herb Hub 365 was remarkably steady, with temperatures hovering comfortably in the low twenties. The ambient air settled around 24°C, while our basil felt slightly cooler and oregano just a fraction warmer nearby. It is that familiar calm rhythm of early growth where nothing urgent demands attention yet everything remains vibrant.

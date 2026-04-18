@@ -3,7 +3,6 @@ layout: post
 title: "Greenhouse Update: A Bright March Morning"
 date: 2026-03-27 13:00:46 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-27-pm-greenhouse-update-a-bright-march-morning.mp3
 ---
 
 The afternoon sun has fully claimed our greenhouse today at Herb Hub 365. Our sensors captured a lively morning, with light levels climbing from just over 64 lux in the early hours to a bright peak of nearly 935 lux by midday before settling back down toward evening. The ambient temperature followed suit, warming steadily from a cool start around 21°C up to a comfortable high of roughly 25°C as the day progressed.

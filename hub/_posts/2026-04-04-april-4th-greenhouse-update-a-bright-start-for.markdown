@@ -3,7 +3,6 @@ layout: post
 title: "April 4th Greenhouse Update: A Bright Start for Basil and Chilli"
 date: 2026-04-04 09:00:54 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-04-april-4th-greenhouse-update-a-bright-start-for.mp3
 ---
 
 ![Timelapse image for April 4, 2026](/assets/images/blog/2026-04-04-april-4th-greenhouse-update-a-bright-start-for.jpg)

@@ -3,7 +3,6 @@ layout: post
 title: "Herb Hub 365: A Sunny Start to Our Greenhouse Day"
 date: 2026-04-04 13:00:52 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-04-pm-herb-hub-365-a-sunny-start-to-our.mp3
 ---
 
 ![Timelapse image for April 4, 2026](/assets/images/blog/2026-04-04-herb-hub-365-a-sunny-start-to-our.jpg)

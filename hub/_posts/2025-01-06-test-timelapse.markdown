@@ -3,7 +3,6 @@ layout: post
 title: "Time Lapse"
 date: 2025-01-06 20:36:44 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2025-01-06-test-timelapse.mp3
 ---
 
 A quick test of creating the timelapse from the automagically created still images

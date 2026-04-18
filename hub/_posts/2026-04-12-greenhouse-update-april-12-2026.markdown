@@ -3,7 +3,6 @@ layout: post
 title: "Greenhouse Update: April 12, 2026"
 date: 2026-04-12 09:01:17 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-12-greenhouse-update-april-12-2026.mp3
 ---
 
 ![Timelapse image for April 12, 2026](/assets/images/blog/2026-04-12-greenhouse-update-april-12-2026.jpg)

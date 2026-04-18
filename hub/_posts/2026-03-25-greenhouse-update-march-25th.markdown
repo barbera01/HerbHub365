@@ -3,7 +3,6 @@ layout: post
 title: "Greenhouse Update: March 25th"
 date: 2026-03-25 20:00:00 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-25-greenhouse-update-march-25th.mp3
 ---
 
 The day began with bright light levels peaking over 935 lux before fading as evening approached, though the air started slightly cooler than usual for this time of year. By late afternoon, temperatures settled into a comfortable range around 21.6°C after beginning near 24°C in the morning.

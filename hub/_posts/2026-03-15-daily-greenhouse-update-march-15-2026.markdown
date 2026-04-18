@@ -3,7 +3,6 @@ layout: post
 title: "Daily Greenhouse Update: March 15, 2026"
 date: 2026-03-15 17:30:00 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-15-daily-greenhouse-update-march-15-2026.mp3
 ---
 
 Welcome back to the greenhouse logs for another quiet day on the Hub. We captured two snapshots between 3:21 PM and 3:37 PM today, and the environment remained remarkably stable throughout the short observation window. Light levels did shift noticeably over this period, dropping from a bright 621.7 lux down to 242.5 lux as the afternoon light softened.

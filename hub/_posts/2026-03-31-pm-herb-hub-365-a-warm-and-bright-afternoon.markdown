@@ -3,7 +3,6 @@ layout: post
 title: "Herb Hub 365: A Warm and Bright Afternoon Update"
 date: 2026-03-31 18:00:42 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-31-pm-herb-hub-365-a-warm-and-bright-afternoon.mp3
 ---
 
 ![Timelapse image for March 31, 2026](/assets/images/blog/2026-03-31-herb-hub-365-a-warm-and-bright-afternoon.jpg)

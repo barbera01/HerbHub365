@@ -3,7 +3,6 @@ layout: post
 title: "Herb Hub 365: A Sunny and Stable Afternoon"
 date: 2026-04-17 13:00:27 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-17-pm-herb-hub-365-a-sunny-and-stable-afternoon.mp3
 ---
 
 ![Timelapse image for April 17, 2026](/assets/images/blog/2026-04-17-herb-hub-365-a-sunny-and-stable-afternoon.jpg)

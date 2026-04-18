@@ -1,16 +1,15 @@
 package api
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -86,61 +85,155 @@ func (h *handlers) handleBuild(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// imageTimestamp tries to extract a timestamp from the filename (YYYYMMDD_HHMMSS)
+// and falls back to the file's modification time.
+var filenameTS = regexp.MustCompile(`(\d{8})_(\d{6})`)
+
+func imageTimestamp(path string, info os.FileInfo) time.Time {
+	base := filepath.Base(path)
+	if m := filenameTS.FindStringSubmatch(base); m != nil {
+		t, err := time.ParseInLocation("20060102_150405", m[1]+"_"+m[2], time.Local)
+		if err == nil {
+			return t
+		}
+	}
+	return info.ModTime()
+}
+
 func (h *handlers) runBuild(jobID string, p job.Params) {
 	defer func() { <-h.sem }()
 
 	h.tracker.MarkRunning(jobID)
 	log.Printf("timelapse build start (job=%s)", jobID[:8])
 
+	if err := os.MkdirAll(h.cfg.OutputDir, 0755); err != nil {
+		msg := fmt.Sprintf("create output dir: %v", err)
+		log.Printf("timelapse (job=%s): %s", jobID[:8], msg)
+		h.tracker.MarkFailed(jobID, msg, "")
+		return
+	}
+
+	// Parse optional time range.
+	var fromT, toT time.Time
+	layouts := []string{
+		"2006-01-02 15:04:05",
+		"2006-01-02T15:04:05",
+		"2006-01-02 15:04",
+		"2006-01-02",
+	}
+	parseTime := func(s string) (time.Time, error) {
+		for _, l := range layouts {
+			if t, err := time.ParseInLocation(l, s, time.Local); err == nil {
+				return t, nil
+			}
+		}
+		return time.Time{}, fmt.Errorf("cannot parse time %q", s)
+	}
+	if p.From != "" {
+		t, err := parseTime(p.From)
+		if err != nil {
+			h.tracker.MarkFailed(jobID, err.Error(), "")
+			return
+		}
+		fromT = t
+	}
+	if p.To != "" {
+		t, err := parseTime(p.To)
+		if err != nil {
+			h.tracker.MarkFailed(jobID, err.Error(), "")
+			return
+		}
+		toT = t
+	}
+
+	// Collect and sort image files.
+	var imageExts = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true}
+	type frame struct {
+		path string
+		ts   time.Time
+	}
+	var frames []frame
+
+	err := filepath.Walk(h.cfg.InputDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return err
+		}
+		if !imageExts[strings.ToLower(filepath.Ext(path))] {
+			return nil
+		}
+		ts := imageTimestamp(path, info)
+		if !fromT.IsZero() && ts.Before(fromT) {
+			return nil
+		}
+		if !toT.IsZero() && ts.After(toT) {
+			return nil
+		}
+		frames = append(frames, frame{path: path, ts: ts})
+		return nil
+	})
+	if err != nil {
+		msg := fmt.Sprintf("walk input dir: %v", err)
+		log.Printf("timelapse (job=%s): %s", jobID[:8], msg)
+		h.tracker.MarkFailed(jobID, msg, "")
+		return
+	}
+
+	if len(frames) == 0 {
+		msg := fmt.Sprintf("no images found in %s (range: %q – %q)", h.cfg.InputDir, p.From, p.To)
+		log.Printf("timelapse (job=%s): %s", jobID[:8], msg)
+		h.tracker.MarkFailed(jobID, msg, "")
+		return
+	}
+
+	sort.Slice(frames, func(i, j int) bool { return frames[i].ts.Before(frames[j].ts) })
+	log.Printf("timelapse (job=%s): %d frames selected", jobID[:8], len(frames))
+
+	// Write ffmpeg concat list to a temp file.
+	tmp, err := os.CreateTemp("", "timelapse-*.txt")
+	if err != nil {
+		h.tracker.MarkFailed(jobID, fmt.Sprintf("create temp file: %v", err), "")
+		return
+	}
+	defer os.Remove(tmp.Name())
+
+	frameDuration := 1.0 / float64(p.InputFPS)
+	for _, f := range frames {
+		fmt.Fprintf(tmp, "file '%s'\nduration %f\n", f.path, frameDuration)
+	}
+	// ffmpeg concat demuxer requires the last file listed twice.
+	fmt.Fprintf(tmp, "file '%s'\n", frames[len(frames)-1].path)
+	tmp.Close()
+
 	outputName := p.OutputName
 	if outputName == "" {
 		outputName = fmt.Sprintf("timelapse-%s.mp4", time.Now().UTC().Format("20060102-150405"))
 	}
-	if err := os.MkdirAll(h.cfg.OutputDir, 0755); err != nil {
-		log.Printf("timelapse: cannot create output dir: %v", err)
-		h.tracker.MarkFailed(jobID, fmt.Sprintf("create output dir: %v", err), "")
-		return
-	}
-
 	outputPath := filepath.Join(h.cfg.OutputDir, outputName)
-
-	scriptArgs := []string{"/usr/local/bin/make-timelapse.sh"}
-	if p.From != "" {
-		scriptArgs = append(scriptArgs, "--from", p.From)
-	}
-	if p.To != "" {
-		scriptArgs = append(scriptArgs, "--to", p.To)
-	}
-	scriptArgs = append(scriptArgs, h.cfg.InputDir, outputPath)
-
-	log.Printf("timelapse exec: bash %v", scriptArgs)
 
 	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.BuildTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "bash", scriptArgs...)
-	cmd.Env = append(os.Environ(),
-		fmt.Sprintf("INPUT_FPS=%d", p.InputFPS),
-		fmt.Sprintf("OUTPUT_FPS=%d", p.OutputFPS),
-		fmt.Sprintf("CRF=%d", p.CRF),
-		fmt.Sprintf("MIN_BRIGHTNESS=%g", p.MinBrightness),
+	cmd := exec.CommandContext(ctx, "ffmpeg", "-y",
+		"-f", "concat", "-safe", "0", "-i", tmp.Name(),
+		"-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p",
+		"-r", fmt.Sprintf("%d", p.OutputFPS),
+		"-c:v", "libx264",
+		"-crf", fmt.Sprintf("%d", p.CRF),
+		"-movflags", "+faststart",
+		outputPath,
 	)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = io.MultiWriter(os.Stdout, &stdout)
-	cmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
-
-	err := cmd.Run()
-	logOutput := stdout.String() + stderr.String()
-
-	if err != nil {
-		log.Printf("timelapse build failed (job=%s): %v", jobID[:8], err)
-		h.tracker.MarkFailed(jobID, err.Error(), logOutput)
+	log.Printf("timelapse (job=%s): running ffmpeg → %s", jobID[:8], outputName)
+	if err := cmd.Run(); err != nil {
+		log.Printf("timelapse (job=%s): ffmpeg failed: %v", jobID[:8], err)
+		h.tracker.MarkFailed(jobID, fmt.Sprintf("ffmpeg: %v", err), "")
 		return
 	}
 
-	log.Printf("timelapse build ok (job=%s output=%s)", jobID[:8], outputName)
-	h.tracker.MarkCompleted(jobID, outputName, logOutput)
+	log.Printf("timelapse build ok (job=%s): %s", jobID[:8], outputName)
+	h.tracker.MarkCompleted(jobID, outputName, "")
 }
 
 // ── GET /api/jobs ─────────────────────────────────────────────────────────────

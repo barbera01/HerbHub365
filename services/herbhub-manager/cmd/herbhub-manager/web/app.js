@@ -789,6 +789,13 @@ const App = {
                     </div>
                     ${j.params.from || j.params.to ? `<div class="job-options"><span class="job-option-tag">${this.escapeHtml(j.params.from || '')} → ${this.escapeHtml(j.params.to || 'now')}</span></div>` : ''}
                     ${j.status === 'failed' && j.error ? `<div class="job-error">${this.escapeHtml(j.error)}</div>` : ''}
+                    ${j.status === 'completed' && j.output_file ? `
+                        <div class="job-actions">
+                            <a class="btn btn-primary btn-small" href="/api/timelapse/videos/${this.escapeHtml(j.output_file)}" download>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Download
+                            </a>
+                        </div>` : ''}
                 </div>`;
         }).join('');
     },

@@ -816,10 +816,16 @@ const App = {
         }
     },
 
+    datetimeLocalToScript(val) {
+        if (!val) return '';
+        // datetime-local gives "YYYY-MM-DDTHH:MM", script wants "YYYY-MM-DD HH:MM:SS"
+        return val.replace('T', ' ') + ':00';
+    },
+
     async timelapseSubmit() {
         const btn = document.getElementById('tl-build-btn');
-        const from      = document.getElementById('tl-from').value.trim();
-        const to        = document.getElementById('tl-to').value.trim();
+        const from      = this.datetimeLocalToScript(document.getElementById('tl-from').value);
+        const to        = this.datetimeLocalToScript(document.getElementById('tl-to').value);
         const outName   = document.getElementById('tl-output-name').value.trim();
         const inputFPS  = document.getElementById('tl-input-fps').value;
         const outputFPS = document.getElementById('tl-output-fps').value;

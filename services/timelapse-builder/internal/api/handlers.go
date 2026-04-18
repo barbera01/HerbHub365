@@ -125,12 +125,12 @@ func (h *handlers) runBuild(jobID string, p job.Params) {
 	logOutput := buf.String()
 
 	if err != nil {
-		log.Printf("timelapse build failed (job=%s): %v", jobID[:8], err)
+		log.Printf("timelapse build failed (job=%s): %v\n--- script output ---\n%s--- end ---", jobID[:8], err, logOutput)
 		h.tracker.MarkFailed(jobID, err.Error(), logOutput)
 		return
 	}
 
-	log.Printf("timelapse build ok (job=%s output=%s)", jobID[:8], outputName)
+	log.Printf("timelapse build ok (job=%s output=%s)\n%s", jobID[:8], outputName, logOutput)
 	h.tracker.MarkCompleted(jobID, outputName, logOutput)
 }
 

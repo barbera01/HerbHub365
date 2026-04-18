@@ -57,6 +57,10 @@ type Config struct {
 
 	// RabbitMQQueue is the queue name for completion notifications.
 	RabbitMQQueue string
+
+	// TimelapseOutputDir is the directory where timelapse-builder writes its MP4s.
+	// The timelapse narration pipeline reads source files from here.
+	TimelapseOutputDir string
 }
 
 // VideoConfig holds avatar video API settings.
@@ -188,8 +192,9 @@ func Load() Config {
 		RulesFile:        getEnv("VIDEO_RULES_FILE", "/app/config/tts-rules.json"),
 		SkipPatterns:     getCSVEnv("VIDEO_SKIP_PATTERN"),
 		RequestTimeout:   getDurationEnv("VIDEO_REQUEST_TIMEOUT", 120*time.Second),
-		RabbitMQURL:      os.Getenv("RABBITMQ_URL"),
-		RabbitMQQueue:    getEnv("RABBITMQ_QUEUE", "video.produced"),
+		RabbitMQURL:        os.Getenv("RABBITMQ_URL"),
+		RabbitMQQueue:      getEnv("RABBITMQ_QUEUE", "video.produced"),
+		TimelapseOutputDir: getEnv("TIMELAPSE_OUTPUT_DIR", "/output/timelapse"),
 
 		Video: VideoConfig{
 			BaseURL:        getEnv("VIDEO_BASE_URL", "http://172.16.106.81:8011"),

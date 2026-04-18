@@ -590,4 +590,112 @@ func (h *handlers) handleTimelapseProxy(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+// ── POST /api/timelapse/publish ───────────────────────────────────────────────
+
+type timelapsePublishRequest struct {
+	TimelapseFile string `json:"timelapse_file"` // filename of the built timelapse MP4
+	TTSText       string `json:"tts_text"`       // narration script
+	Title         string `json:"title"`          // YouTube / blog post title
+	FromDate      string `json:"from_date"`      // YYYY-MM-DD, for blog post body
+	ToDate        string `json:"to_date"`        // YYYY-MM-DD, used for slug + post date
+	Intro         string `json:"intro"`          // intro filename
+	Outro         string `json:"outro"`          // outro filename
+}
+
+func (h *handlers) handleTimelapsePublish(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var req timelapsePublishRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid request: %v", err))
+		return
+	}
+	if strings.TrimSpace(req.TimelapseFile) == "" {
+		writeError(w, http.StatusBadRequest, "timelapse_file is required")
+		return
+	}
+	if strings.TrimSpace(req.TTSText) == "" {
+		writeError(w, http.StatusBadRequest, "tts_text is required")
+		return
+	}
+	if strings.TrimSpace(req.ToDate) == "" {
+		writeError(w, http.StatusBadRequest, "to_date is required")
+		return
+	}
+
+	slug := "timelapse-" + req.ToDate
+
+	if err := h.createTimelapsePost(req, slug); err != nil {
+		log.Printf("timelapse publish: create post failed (non-fatal): %v", err)
+	}
+
+	jobID, err := h.videoClient.NarrateTimelapse(video.TimelapseNarrateRequest{
+		Text:          req.TTSText,
+		TimelapseFile: req.TimelapseFile,
+		Intro:         req.Intro,
+		Outro:         req.Outro,
+		Slug:          slug,
+		Date:          req.ToDate,
+	})
+	if err != nil {
+		writeError(w, http.StatusBadGateway, fmt.Sprintf("narrate timelapse: %v", err))
+		return
+	}
+
+	writeJSON(w, http.StatusAccepted, map[string]string{
+		"job_id": jobID,
+		"slug":   slug,
+		"phase":  "queued",
+	})
+}
+
+func (h *handlers) createTimelapsePost(req timelapsePublishRequest, slug string) error {
+	title := strings.TrimSpace(req.Title)
+	if title == "" {
+		title = "Timelapse " + req.ToDate
+	}
+
+	datePrefix := req.ToDate
+
+	var body strings.Builder
+	if req.FromDate != "" {
+		fmt.Fprintf(&body, "Timelapse from %s to %s.\n\n", req.FromDate, req.ToDate)
+	}
+	body.WriteString(req.TTSText)
+
+	content := fmt.Sprintf("---\nlayout: post\ntitle: %q\ndate: %s 12:00:00 +0000\ncategories: [timelapse]\ntags: [timelapse, herbhub365]\n---\n\n%s\n",
+		title, datePrefix, body.String())
+
+	filename := datePrefix + "-" + slug + ".markdown"
+	dest := filepath.Join(h.cfg.Post.PostsDir, filename)
+	return os.WriteFile(dest, []byte(content), 0644)
+}
+
+// ── GET /api/timelapse/narrate/{id} ──────────────────────────────────────────
+
+func (h *handlers) handleTimelapseNarrateJob(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	id := strings.TrimPrefix(r.URL.Path, "/api/timelapse/narrate/")
+	id = strings.TrimSuffix(id, "/")
+	if id == "" {
+		writeError(w, http.StatusBadRequest, "job id is required")
+		return
+	}
+
+	job, err := h.videoClient.GetTimelapseNarrateJob(id)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "job not found")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, job)
+}
+
 // publishCompletedJobs emits RabbitMQ messages for completed jobs.

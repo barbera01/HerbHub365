@@ -241,6 +241,62 @@ func (h *handlers) handleHealth(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
+// ── POST /api/timelapse/narrate ───────────────────────────────────────────────
+
+func (h *handlers) handleTimelapseNarrate(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	var req TimelapseNarrateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid request: %v", err))
+		return
+	}
+
+	jobID, err := h.server.timelapseJobManager.SubmitJob(
+		h.server.cfg,
+		h.server.ruleSet,
+		h.server.videoClient,
+		req,
+	)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	writeJSON(w, http.StatusAccepted, map[string]string{
+		"job_id": jobID,
+		"phase":  "queued",
+	})
+}
+
+// ── GET /api/timelapse/narrate/{id} ──────────────────────────────────────────
+
+func (h *handlers) handleTimelapseNarrateJob(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	id := strings.TrimPrefix(r.URL.Path, "/api/timelapse/narrate/")
+	id = strings.TrimSuffix(id, "/")
+
+	if id == "" {
+		writeError(w, http.StatusBadRequest, "job id is required")
+		return
+	}
+
+	job, ok := h.server.timelapseJobManager.Job(id)
+	if !ok {
+		writeError(w, http.StatusNotFound, "job not found")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, job)
+}
+
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 // listMP4s lists .mp4 files in dir whose name contains the given substring.

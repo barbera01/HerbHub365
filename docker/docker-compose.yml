@@ -183,11 +183,13 @@ services:
       CHROMA_KEY_BG_PATH: ${CHROMA_KEY_BG_PATH:-}
       CHROMA_KEY_BG_COLOR: ${CHROMA_KEY_BG_COLOR:-0x1a1a2e}
       CONCAT_THREADS: ${CONCAT_THREADS:-1}
+      TIMELAPSE_OUTPUT_DIR: ${TIMELAPSE_OUTPUT_DIR:-/input/timelapse}
     volumes:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
       - ${VIDEO_RESOURCES_PATH:-../services/video-narrator/resources/video}:/app/resources/video:ro
       - ${VIDEO_BG_RESOURCES_PATH:-../services/video-narrator/resources/video_backgrounds}:/app/resources/video_backgrounds:ro
+      - ${TIMELAPSE_OUTPUT_PATH:-../services/timelapse-builder/output}:/input/timelapse:ro
 
   video-publisher:
     build:

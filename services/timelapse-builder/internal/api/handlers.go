@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -125,20 +126,20 @@ func (h *handlers) runBuild(jobID string, p job.Params) {
 		fmt.Sprintf("MIN_BRIGHTNESS=%g", p.MinBrightness),
 	)
 
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = io.MultiWriter(os.Stdout, &stdout)
+	cmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
 
 	err := cmd.Run()
-	logOutput := buf.String()
+	logOutput := stdout.String() + stderr.String()
 
 	if err != nil {
-		log.Printf("timelapse build failed (job=%s): %v\n--- script output ---\n%s--- end ---", jobID[:8], err, logOutput)
+		log.Printf("timelapse build failed (job=%s): %v", jobID[:8], err)
 		h.tracker.MarkFailed(jobID, err.Error(), logOutput)
 		return
 	}
 
-	log.Printf("timelapse build ok (job=%s output=%s)\n%s", jobID[:8], outputName, logOutput)
+	log.Printf("timelapse build ok (job=%s output=%s)", jobID[:8], outputName)
 	h.tracker.MarkCompleted(jobID, outputName, logOutput)
 }
 

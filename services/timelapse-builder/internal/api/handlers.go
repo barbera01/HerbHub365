@@ -95,21 +95,29 @@ func (h *handlers) runBuild(jobID string, p job.Params) {
 	if outputName == "" {
 		outputName = fmt.Sprintf("timelapse-%s.mp4", time.Now().UTC().Format("20060102-150405"))
 	}
+	if err := os.MkdirAll(h.cfg.OutputDir, 0755); err != nil {
+		log.Printf("timelapse: cannot create output dir: %v", err)
+		h.tracker.MarkFailed(jobID, fmt.Sprintf("create output dir: %v", err), "")
+		return
+	}
+
 	outputPath := filepath.Join(h.cfg.OutputDir, outputName)
 
-	args := []string{}
+	scriptArgs := []string{"/usr/local/bin/make-timelapse.sh"}
 	if p.From != "" {
-		args = append(args, "--from", p.From)
+		scriptArgs = append(scriptArgs, "--from", p.From)
 	}
 	if p.To != "" {
-		args = append(args, "--to", p.To)
+		scriptArgs = append(scriptArgs, "--to", p.To)
 	}
-	args = append(args, h.cfg.InputDir, outputPath)
+	scriptArgs = append(scriptArgs, h.cfg.InputDir, outputPath)
+
+	log.Printf("timelapse exec: bash %v", scriptArgs)
 
 	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.BuildTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "/usr/local/bin/make-timelapse.sh", args...)
+	cmd := exec.CommandContext(ctx, "bash", scriptArgs...)
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("INPUT_FPS=%d", p.InputFPS),
 		fmt.Sprintf("OUTPUT_FPS=%d", p.OutputFPS),

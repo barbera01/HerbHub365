@@ -3,7 +3,6 @@ layout: post
 title: "Greenhouse Diaries: A Quiet Start to March in the Herb Hub"
 date: 2026-03-30 09:00:47 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-30-greenhouse-diaries-a-quiet-start-to-march-in.mp3
 ---
 
 ![Timelapse image for March 30, 2026](/assets/images/blog/2026-03-30-greenhouse-diaries-a-quiet-start-to-march-in.jpg)

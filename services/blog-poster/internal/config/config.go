@@ -19,7 +19,8 @@ type Config struct {
 	ReconnectDelay     time.Duration
 	TargetDate         string
 	RabbitMQ           RabbitMQConfig
-	LLM                LLMConfig
+	LLMService         LLMServiceConfig
+	Prompt             PromptConfig
 	Blog               BlogConfig
 	RepoPost           RepoPostConfig
 	PromPost           PromPostConfig
@@ -39,17 +40,15 @@ type GenerationConfig struct {
 	SplitHour  int
 }
 
-type LLMConfig struct {
-	Provider        string
-	BaseURL         string
-	APIKey          string
-	Model           string
-	Temperature     float64
-	TopP            float64
-	RepeatPenalty   float64
-	MaxTokens       int
-	RequestTimeout  time.Duration
-	Debug           bool
+// LLMServiceConfig holds connection details for the llm-service HTTP API.
+type LLMServiceConfig struct {
+	BaseURL string
+	Timeout time.Duration
+}
+
+// PromptConfig holds the prompt content values used when building LLM requests.
+// These stay in blog-poster because it is responsible for constructing prompts.
+type PromptConfig struct {
 	SystemPrompt    string
 	PromptPlantName string
 	PromptSiteName  string
@@ -191,17 +190,11 @@ func Load() Config {
 			ConsumerTag: getEnv("RABBITMQ_CONSUMER_TAG", "blog-poster"),
 			Prefetch:    getIntEnv("RABBITMQ_PREFETCH", 25),
 		},
-		LLM: LLMConfig{
-			Provider:        getEnv("LLM_PROVIDER", "auto"),
-			BaseURL:         getEnv("LLM_BASE_URL", "http://ollama.la.home-cloud.uk"),
-			APIKey:          os.Getenv("LLM_API_KEY"),
-			Model:           getEnv("LLM_MODEL", "qwen2.5:latest"),
-			Temperature:     getFloatEnv("LLM_TEMPERATURE", 0.6),
-			TopP:            getFloatEnv("LLM_TOP_P", 0.9),
-			RepeatPenalty:   getFloatEnv("LLM_REPEAT_PENALTY", 1.1),
-			MaxTokens:       getIntEnv("LLM_MAX_TOKENS", 900),
-			RequestTimeout:  getDurationEnv("LLM_REQUEST_TIMEOUT", 3*time.Minute),
-			Debug:           getBoolEnv("LLM_DEBUG", false),
+		LLMService: LLMServiceConfig{
+			BaseURL: getEnv("LLM_SERVICE_URL", "http://llm-service:8080"),
+			Timeout: getDurationEnv("LLM_SERVICE_TIMEOUT", 20*time.Minute),
+		},
+		Prompt: PromptConfig{
 			SystemPrompt:    getEnv("LLM_SYSTEM_PROMPT", defaultSystemPrompt()),
 			PromptPlantName: getEnv("PROMPT_PLANT_NAME", "Herb Hub 365"),
 			PromptSiteName:  getEnv("PROMPT_SITE_NAME", "Herb Hub 365"),

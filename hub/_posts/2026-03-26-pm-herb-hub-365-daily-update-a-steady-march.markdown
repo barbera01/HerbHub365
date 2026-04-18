@@ -3,7 +3,6 @@ layout: post
 title: "Herb Hub 365 Daily Update: A Steady March Day in the Greenhouse"
 date: 2026-03-26 18:00:45 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-26-pm-herb-hub-365-daily-update-a-steady-march.mp3
 ---
 
 The morning sun broke over our greenhouse on this Tuesday, bringing a gentle start to day two of March. Temperatures began their usual climb from around twenty degrees Celsius at dawn, settling into a comfortable range that hovered near nineteen and a half by midday before dipping slightly toward evening. It was a stable thermal environment where basil felt just right in the warmer air while chilli and oregano settled comfortably beneath it all.

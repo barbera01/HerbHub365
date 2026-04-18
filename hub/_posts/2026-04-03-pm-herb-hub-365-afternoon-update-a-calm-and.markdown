@@ -3,7 +3,6 @@ layout: post
 title: "Herb Hub 365 Afternoon Update: A Calm and Stable Greenhouse"
 date: 2026-04-03 18:00:53 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-03-pm-herb-hub-365-afternoon-update-a-calm-and.mp3
 ---
 
 ![Timelapse image for April 3, 2026](/assets/images/blog/2026-04-03-herb-hub-365-afternoon-update-a-calm-and.jpg)

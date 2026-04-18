@@ -3,7 +3,6 @@ layout: post
 title: "Greenhouse Snapshot: A Quiet Evening on April 3rd, 2026"
 date: 2026-04-03 17:55:15 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-03-greenhouse-snapshot-a-quiet-evening-on-april-3rd.mp3
 ---
 
 ![Timelapse image for April 3, 2026](/assets/images/blog/2026-04-03-greenhouse-snapshot-a-quiet-evening-on-april-3rd.jpg)

@@ -3,7 +3,6 @@ layout: post
 title: "Greenhouse Update: A Cool and Steady Start to April 6th"
 date: 2026-04-06 13:00:58 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-06-pm-greenhouse-update-a-cool-and-steady-start-to.mp3
 ---
 
 ![Timelapse image for April 6, 2026](/assets/images/blog/2026-04-06-greenhouse-update-a-cool-and-steady-start-to.jpg)

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HerbHub Manager</title>
+      <!-- HerbHub365 Design System Fonts: Exo + Roboto Mono -->
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Exo:wght@300;400;500;600;700&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span class="logo-text">HerbHub Manager</span>
+            </div>
+
+            <div class="nav-section">
+                <button class="nav-item active" data-view="posts">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Posts</span>
+                </button>
+                <button class="nav-item" data-view="blog">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    <span>Blog Poster</span>
+                </button>
+                <button class="nav-item" data-view="jobs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span>Jobs</span>
+                    <span id="active-jobs-badge" class="badge hidden">0</span>
+                </button>
+                <button class="nav-item" data-view="timelapse">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Timelapse</span>
+                </button>
+                <button class="nav-item" data-view="videos">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <span>Videos</span>
+                </button>
+                <button class="nav-item" data-view="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Settings</span>
+                </button>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="api-status" id="api-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking...</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main id="content">
+            <!-- Posts View -->
+            <div id="view-posts" class="view active">
+                <div class="view-header">
+                    <div>
+                        <h1>Blog Posts</h1>
+                        <p class="subtitle">Select a post to generate a narrated video</p>
+                    </div>
+                    <div class="header-actions">
+                        <input type="text" id="post-search" class="search-input" placeholder="Search posts...">
+                    </div>
+                </div>
+                <div id="posts-list" class="card-grid">
+                    <div class="loading-state">Loading posts...</div>
+                </div>
+            </div>
+
+            <!-- Blog Poster View -->
+            <div id="view-blog" class="view">
+                <div class="view-header">
+                    <div>
+                        <h1>Blog Poster</h1>
+                        <p class="subtitle">Generate and publish new platform posts via LLM</p>
+                    </div>
+                </div>
+
+                <div class="blog-layout">
+                    <!-- Left: Generation Form -->
+                    <div class="blog-form-panel">
+                        <div class="panel-card">
+                            <h3>Generate Post</h3>
+
+                            <div class="form-group">
+                                <label for="blog-topic">Topic / Prompt</label>
+                                <textarea id="blog-topic" class="form-textarea" rows="3"
+                                    placeholder="e.g. A rainy morning check-in on the herb garden — basil is thriving but mint looks stressed..."></textarea>
+                                <div class="form-hint">Describe what to write about. Leave blank for a general daily update.</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="blog-categories">Categories</label>
+                                <input type="text" id="blog-categories" class="form-input" value="Daily Update"
+                                    placeholder="Daily Update">
+                            </div>
+
+                            <details class="form-details">
+                                <summary>Advanced: System Prompt</summary>
+                                <div class="form-group" style="margin-top:0.75rem">
+                                    <textarea id="blog-system-prompt" class="form-textarea form-textarea-mono" rows="6"
+                                        placeholder="Leave blank to use the default system prompt from config..."></textarea>
+                                </div>
+                            </details>
+
+                            <div class="form-actions">
+                                <button class="btn btn-primary" id="blog-generate-btn" onclick="App.blogGenerate()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    Generate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Preview + Save -->
+                    <div class="blog-preview-panel">
+                        <div class="panel-card" id="blog-preview-card">
+                            <div id="blog-preview-empty" class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                <p>Generated content will appear here.</p>
+                            </div>
+
+                            <div id="blog-preview-content" class="hidden">
+                                <div class="preview-header">
+                                    <div>
+                                        <div class="preview-filename" id="blog-preview-filename"></div>
+                                        <div class="preview-title" id="blog-preview-title"></div>
+                                    </div>
+                                    <div class="preview-actions">
+                                        <button class="btn btn-secondary btn-small" onclick="App.blogDiscard()">Discard</button>
+                                        <button class="btn btn-primary btn-small" id="blog-save-btn" onclick="App.blogSave()">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                                            Save to Posts
+                                        </button>
+                                    </div>
+                                </div>
+                                <textarea id="blog-preview-editor" class="form-textarea form-textarea-mono blog-editor" rows="28"
+                                    placeholder="Generated content..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timelapse View -->
+            <div id="view-timelapse" class="view">
+                <div class="view-header">
+                    <div>
+                        <h1>Timelapse Builder</h1>
+                        <p class="subtitle">Build MP4 timelapses from greenhouse camera images</p>
+                    </div>
+                    <div id="timelapse-status-badge" class="status-pill offline">Checking...</div>
+                </div>
+
+                <div class="blog-layout">
+                    <!-- Left: Build Form -->
+                    <div class="blog-form-panel">
+                        <div class="panel-card">
+                            <h3>New Build</h3>
+
+                            <div class="form-group">
+                                <label for="tl-from">From (optional)</label>
+                                <input type="datetime-local" id="tl-from" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="tl-to">To (optional)</label>
+                                <input type="datetime-local" id="tl-to" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tl-output-name">Output filename (optional)</label>
+                                <input type="text" id="tl-output-name" class="form-input" placeholder="timelapse-today.mp4">
+                            </div>
+
+                            <details class="form-details">
+                                <summary>Advanced encoding options</summary>
+                                <div style="margin-top:0.75rem">
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="tl-input-fps">Input FPS</label>
+                                            <input type="number" id="tl-input-fps" class="form-input" placeholder="8">
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="tl-output-fps">Output FPS</label>
+                                            <input type="number" id="tl-output-fps" class="form-input" placeholder="30">
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="tl-crf">CRF quality</label>
+                                            <input type="number" id="tl-crf" class="form-input" placeholder="23" min="0" max="51">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="tl-brightness">Min brightness filter (0 = disabled)</label>
+                                        <input type="number" id="tl-brightness" class="form-input" placeholder="0" min="0" max="1" step="0.05">
+                                    </div>
+                                </div>
+                            </details>
+
+                            <div class="form-actions">
+                                <button class="btn btn-primary" id="tl-build-btn" onclick="App.timelapseSubmit()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    Build Timelapse
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Config Card -->
+                        <div class="panel-card" id="tl-config-card">
+                            <h3>Service Config</h3>
+                            <div id="tl-config-content" class="settings-grid" style="margin-top:0.5rem">
+                                <div class="loading-state" style="padding:0.5rem 0">Loading...</div>
+                            </div>
+                        </div>
+
+                        <!-- Publish Card -->
+                        <div class="panel-card">
+                            <h3>Publish to YouTube</h3>
+
+                            <div class="form-group">
+                                <label for="tl-pub-video">Timelapse video</label>
+                                <select id="tl-pub-video" class="form-input">
+                                    <option value="">— select a built timelapse —</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tl-pub-title">Title</label>
+                                <input type="text" id="tl-pub-title" class="form-input" placeholder="Herb Garden Timelapse – April 2026">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label for="tl-pub-from">From date</label>
+                                    <input type="date" id="tl-pub-from" class="form-input">
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label for="tl-pub-to">To date</label>
+                                    <input type="date" id="tl-pub-to" class="form-input">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tl-pub-text">Narration script (TTS)</label>
+                                <textarea id="tl-pub-text" class="form-input" rows="5" placeholder="Describe what's happening in this timelapse…"></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label for="tl-pub-intro">Intro</label>
+                                    <select id="tl-pub-intro" class="form-input">
+                                        <option value="">— none —</option>
+                                    </select>
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label for="tl-pub-outro">Outro</label>
+                                    <select id="tl-pub-outro" class="form-input">
+                                        <option value="">— none —</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button class="btn btn-primary" id="tl-pub-btn" onclick="App.timelapsePublishSubmit()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    Publish to YouTube
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Jobs + Videos -->
+                    <div class="blog-preview-panel">
+                        <div class="panel-card">
+                            <div class="preview-header" style="margin-bottom:1rem">
+                                <h3 style="margin:0">Build Jobs</h3>
+                                <button class="btn btn-secondary btn-small" onclick="App.timelapseLoadJobs()">Refresh</button>
+                            </div>
+                            <div id="tl-jobs-list">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <p>No builds yet.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-card">
+                            <div class="preview-header" style="margin-bottom:1rem">
+                                <h3 style="margin:0">Output Videos</h3>
+                                <button class="btn btn-secondary btn-small" onclick="App.timelapseLoadVideos()">Refresh</button>
+                            </div>
+                            <div id="tl-videos-list">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    <p>No timelapse videos yet.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-card">
+                            <div class="preview-header" style="margin-bottom:1rem">
+                                <h3 style="margin:0">Publish Jobs</h3>
+                                <button class="btn btn-secondary btn-small" onclick="App.timelapseLoadPublishJobs()">Refresh</button>
+                            </div>
+                            <div id="tl-publish-jobs-list">
+                                <div class="empty-state">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                    <p>No publish jobs yet.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jobs View -->
+            <div id="view-jobs" class="view">
+                <div class="view-header">
+                    <div>
+                        <h1>Generation Jobs</h1>
+                        <p class="subtitle">Track video generation progress through the full pipeline</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="App.loadJobs()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        Refresh
+                    </button>
+                </div>
+                <div id="jobs-list" class="jobs-container">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <p>No jobs yet. Generate a video from the Posts tab.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Videos View -->
+            <div id="view-videos" class="view">
+                <div class="view-header">
+                    <div>
+                        <h1>Video Gallery</h1>
+                        <p class="subtitle">Browse and play generated videos</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="App.loadVideos()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        Refresh
+                    </button>
+                </div>
+                <div id="videos-list" class="card-grid">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <p>No videos generated yet.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="view-settings" class="view">
+                <div class="view-header">
+                    <div>
+                        <h1>Settings</h1>
+                        <p class="subtitle">Service configuration (read-only)</p>
+                    </div>
+                </div>
+                <div id="settings-content" class="settings-grid">
+                    <div class="loading-state">Loading configuration...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Generate Video Modal -->
+    <div id="generate-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="App.closeModal()"></div>
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h2>Generate Video</h2>
+                <button class="modal-close" onclick="App.closeModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Post</label>
+                    <div id="modal-post-title" class="form-value"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="modal-avatar">Avatar</label>
+                    <select id="modal-avatar" class="form-select">
+                        <option value="eve">Eve</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="modal-concat" class="toggle-input" checked>
+                            <span class="toggle-switch"></span>
+                            <span>Intro/Outro Stitching</span>
+                        </label>
+                    </div>
+                    <div id="concat-options" class="form-section-body">
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="modal-intro">Intro Video</label>
+                                <select id="modal-intro" class="form-select">
+                                    <option value="">Server default</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="modal-outro">Outro Video</label>
+                                <select id="modal-outro" class="form-select">
+                                    <option value="">Server default</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="modal-chromakey" class="toggle-input">
+                            <span class="toggle-switch"></span>
+                            <span>Chroma Key (Green Screen Removal)</span>
+                        </label>
+                    </div>
+                    <div id="chromakey-options" class="form-section-body hidden">
+                        <div class="form-group">
+                            <label for="modal-bg">Background Image</label>
+                            <select id="modal-bg" class="form-select">
+                                <option value="">Server default</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="modal-text">Text Override (optional)</label>
+                    <textarea id="modal-text" class="form-textarea" rows="4" placeholder="Leave empty to use the post content with TTS preprocessing..."></textarea>
+                    <div class="form-hint">The video-narrator will apply TTS rules (60+ transformations) to the post content automatically.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="App.closeModal()">Cancel</button>
+                <button class="btn btn-primary" id="modal-submit" onclick="App.submitGenerate()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Generate Video
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

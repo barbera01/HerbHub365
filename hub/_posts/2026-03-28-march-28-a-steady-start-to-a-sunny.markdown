@@ -3,7 +3,6 @@ layout: post
 title: "March 28: A Steady Start to a Sunny Day in the Greenhouse"
 date: 2026-03-28 09:00:56 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-28-march-28-a-steady-start-to-a-sunny.mp3
 ---
 
 The morning at Herb Hub 365 began with crisp, stable air just after seven o'clock. The greenhouse settled into a comfortable twenty degrees Celsius while humidity stayed low between thirty-nine and forty percent. This dry early spring atmosphere means we must keep an eye on thirsty plants as the sun climbs higher.

@@ -3,7 +3,6 @@ layout: post
 title: "Greenhouse Check-in: A Warm and Stable March Evening"
 date: 2026-03-30 18:00:47 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-30-pm-greenhouse-check-in-a-warm-and-stable-march-evening.mp3
 ---
 
 ![Timelapse image for March 30, 2026](/assets/images/blog/2026-03-30-greenhouse-check-in-a-warm-and-stable-march-evening.jpg)

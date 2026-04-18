@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for April 15, 2026](/assets/images/blog/2026-04-15-greenhouse-update-april-15-2026.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/mzkk5nCZFIE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The afternoon sun brought a noticeable rise in warmth to the Herb Hub 365 greenhouse today. Temperatures climbed steadily from a comfortable 22.5°C at the start of the monitoring period to a peak of 25.2°C by midday. The basil plants tracked closely with the ambient air, reaching 23°C, while the chilli and oregano remained slightly cooler, hovering around 22.5°C.
 

@@ -551,6 +551,16 @@ func (h *handlers) handleTimelapseProxy(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(raw)
 
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/timelapse/videos/"):
+		filename := strings.TrimPrefix(r.URL.Path, "/api/timelapse/videos/")
+		if filename == "" || strings.Contains(filename, "..") || strings.Contains(filename, "/") {
+			writeError(w, http.StatusBadRequest, "invalid filename")
+			return
+		}
+		if err := h.timelapseClient.ProxyVideoFile(w, filename); err != nil {
+			writeError(w, http.StatusBadGateway, err.Error())
+		}
+
 	case r.Method == http.MethodGet && r.URL.Path == "/api/timelapse/videos":
 		raw, err := h.timelapseClient.Videos()
 		if err != nil {

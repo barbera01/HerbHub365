@@ -76,6 +76,25 @@ func (c *Client) Config() (json.RawMessage, error) {
 	return c.get("/api/config")
 }
 
+func (c *Client) ProxyVideoFile(w http.ResponseWriter, filename string) error {
+	resp, err := c.httpClient.Get(c.baseURL + "/api/videos/" + filename)
+	if err != nil {
+		return fmt.Errorf("fetch video: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("timelapse-builder returned %d", resp.StatusCode)
+	}
+	w.Header().Set("Content-Type", "video/mp4")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	if ct := resp.Header.Get("Content-Length"); ct != "" {
+		w.Header().Set("Content-Length", ct)
+	}
+	w.WriteHeader(http.StatusOK)
+	_, err = io.Copy(w, resp.Body)
+	return err
+}
+
 func (c *Client) Health() bool {
 	hc := &http.Client{Timeout: 3 * time.Second}
 	resp, err := hc.Get(c.baseURL + "/api/health")

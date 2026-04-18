@@ -3,7 +3,6 @@ layout: post
 title: "Herb Hub 365: A Sunny Afternoon in the Greenhouse"
 date: 2026-04-02 13:00:54 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-02-pm-herb-hub-365-a-sunny-afternoon-in-the.mp3
 ---
 
 ![Timelapse image for April 2, 2026](/assets/images/blog/2026-04-02-herb-hub-365-a-sunny-afternoon-in-the.jpg)

@@ -3,7 +3,6 @@ layout: post
 title: "Herb Hub 365 Afternoon Update: A Brightening Day in the Greenhouse"
 date: 2026-04-05 13:00:54 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-05-pm-herb-hub-365-afternoon-update-a-brightening-day.mp3
 ---
 
 ![Timelapse image for April 5, 2026](/assets/images/blog/2026-04-05-herb-hub-365-afternoon-update-a-brightening-day.jpg)

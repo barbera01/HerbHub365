@@ -264,30 +264,28 @@ func redactSensitive(content string) string {
 
 func formatPrompt(cfg config.Config, sources []Source) string {
 	var builder strings.Builder
-	builder.WriteString("Write a blog article about this part of the Herb Hub 365 platform. The article should read like a magazine-style engineering post — engaging, narrative, and accessible to someone who has never seen the codebase. Use flowing prose paragraphs. Do not list configuration options, enumerate function names, quote code, or use bullet points to summarise technical details.\n\n")
+
+	// Source files first — models weight recent instructions more heavily,
+	// so the article instruction appears last where it has the most influence.
+	builder.WriteString("=== REFERENCE MATERIAL — FOR BACKGROUND ONLY ===\n")
+	builder.WriteString("The following files are provided as factual background. Do not quote, reproduce, or analyse them. Use them only to understand what the feature does.\n\n")
+	for _, source := range sources {
+		builder.WriteString("--- ")
+		builder.WriteString(source.Path)
+		builder.WriteString(" ---\n")
+		builder.WriteString(source.Content)
+		builder.WriteString("\n\n")
+	}
+
+	builder.WriteString("=== YOUR TASK ===\n")
 	if title := strings.TrimSpace(cfg.RepoPost.Title); title != "" {
-		builder.WriteString("Preferred title: ")
+		builder.WriteString("Title: ")
 		builder.WriteString(title)
 		builder.WriteString("\n\n")
 	}
-	builder.WriteString("Topic:\n")
 	builder.WriteString(cfg.RepoPost.Prompt)
 	builder.WriteString("\n\n")
-	builder.WriteString("Guidelines:\n")
-	builder.WriteString("- Draw facts only from the repository excerpts below — do not invent details.\n")
-	builder.WriteString("- Explain what the component does and why it matters to the system, in plain language.\n")
-	builder.WriteString("- Describe the user or system experience, not the implementation mechanics.\n")
-	builder.WriteString("- Do not reproduce code, do not include inline code snippets, do not use fenced code blocks.\n")
-	builder.WriteString("- Do not mention secrets, credentials, tokens, or private configuration values.\n")
-	builder.WriteString("- Do not critique, review, or propose improvements to the code.\n\n")
-	builder.WriteString("Repository excerpts (for reference only — do not reproduce):\n\n")
-	for _, source := range sources {
-		builder.WriteString("Path: ")
-		builder.WriteString(source.Path)
-		builder.WriteString("\n```\n")
-		builder.WriteString(source.Content)
-		builder.WriteString("\n```\n\n")
-	}
+	builder.WriteString("Remember: write a flowing, narrative blog article in markdown starting with a level-1 heading. No code blocks, no inline code, no bullet-point lists of technical details, no code review, no implementation criticism.\n")
 	return builder.String()
 }
 

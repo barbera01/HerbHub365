@@ -1,4 +1,25 @@
 services:
+  llm-service:
+    build:
+      context: ../services/llm-service
+      dockerfile: dockerfile
+    container_name: llm-service
+    restart: unless-stopped
+    networks:
+      - herbhub
+    environment:
+      LLM_SERVICE_LISTEN_ADDR: ${LLM_SERVICE_LISTEN_ADDR:-:8080}
+      LLM_PROVIDER: ${LLM_PROVIDER:-auto}
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://ollama.la.home-cloud.uk}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:latest}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.6}
+      LLM_TOP_P: ${LLM_TOP_P:-0.9}
+      LLM_REPEAT_PENALTY: ${LLM_REPEAT_PENALTY:-1.1}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-10000}
+      LLM_REQUEST_TIMEOUT: ${LLM_REQUEST_TIMEOUT:-20m}
+      LLM_DEBUG: ${LLM_DEBUG:-false}
+
   blog-poster:
     build:
       context: ../services/blog-poster
@@ -15,20 +36,12 @@ services:
       BLOG_TARGET_DATE: ${BLOG_TARGET_DATE:-yesterday}
       RABBITMQ_URL: ${BLOG_POSTER_RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672/}
       RABBITMQ_QUEUE: ${BLOG_POSTER_RABBITMQ_QUEUE:-sensor.snapshots}
-      LLM_PROVIDER: ${BLOG_POSTER_LLM_PROVIDER:-auto}
-      LLM_BASE_URL: ${BLOG_POSTER_LLM_BASE_URL:-http://ollama.la.home-cloud.uk}
-      LLM_API_KEY: ${BLOG_POSTER_LLM_API_KEY:-}
-      LLM_MODEL: ${BLOG_POSTER_LLM_MODEL:-qwen2.5:latest}
-      LLM_TEMPERATURE: ${BLOG_POSTER_LLM_TEMPERATURE:-0.6}
-      LLM_TOP_P: ${BLOG_POSTER_LLM_TOP_P:-0.9}
-      LLM_REPEAT_PENALTY: ${BLOG_POSTER_LLM_REPEAT_PENALTY:-1.1}
-      LLM_MAX_TOKENS: ${BLOG_POSTER_LLM_MAX_TOKENS:-10000}
-      LLM_REQUEST_TIMEOUT: ${BLOG_POSTER_LLM_REQUEST_TIMEOUT:-20m}
-      LLM_DEBUG: ${BLOG_POSTER_LLM_DEBUG:-false}
+      LLM_SERVICE_URL: ${BLOG_POSTER_LLM_SERVICE_URL:-http://llm-service:8080}
+      LLM_SERVICE_TIMEOUT: ${BLOG_POSTER_LLM_SERVICE_TIMEOUT:-20m}
       GIT_PUBLISH_ENABLED: ${BLOG_POSTER_GIT_PUBLISH_ENABLED:-false}
       GIT_REPO_DIR: /repo
       GIT_REMOTE_NAME: ${BLOG_POSTER_GIT_REMOTE_NAME:-origin}
-      GIT_PUSH_BRANCH: ${BLOG_POSTER_GIT_PUSH_BRANCH:-main}
+      GIT_PUSH_BRANCH: ${BLOG_POSTER_GIT_PUSH_BRANCH:-origin/main}
       GIT_PAT: ${BLOG_POSTER_GIT_PAT:-}
       GIT_AUTHOR_NAME: ${BLOG_POSTER_GIT_AUTHOR_NAME:-Herb Hub Bot}
       GIT_AUTHOR_EMAIL: ${BLOG_POSTER_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
@@ -71,6 +84,8 @@ services:
       - ..:/repo
       - ../services/blog-poster/data:/data
       - ${BLOG_POSTER_IMAGE_SOURCE_PATH:-/mnt/hh01-timelapse}:/timelapse:ro
+    depends_on:
+      - llm-service
 
   tts-narrator:
     build:
@@ -100,47 +115,45 @@ services:
       GIT_PUBLISH_ENABLED: ${TTS_GIT_PUBLISH_ENABLED:-false}
       GIT_REPO_DIR: /repo
       GIT_REMOTE_NAME: ${TTS_GIT_REMOTE_NAME:-origin}
-      GIT_PUSH_BRANCH: ${TTS_GIT_PUSH_BRANCH:-main}
+      GIT_PUSH_BRANCH: ${TTS_GIT_PUSH_BRANCH:-origin/main}
       GIT_PAT: ${TTS_GIT_PAT:-}
       GIT_AUTHOR_NAME: ${TTS_GIT_AUTHOR_NAME:-Herb Hub Bot}
       GIT_AUTHOR_EMAIL: ${TTS_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
     volumes:
       - ..:/repo
 
-  herbhub-video:
+  herbhub-manager:
     build:
-      context: ../services/herbhub-video
+      context: ../services/herbhub-manager
       dockerfile: Dockerfile
-    container_name: herbhub-video
+    container_name: herbhub-manager
     restart: unless-stopped
     networks:
       - herbhub
     environment:
-      HERBHUB_VIDEO_MODE: ${HERBHUB_VIDEO_MODE:-daemon}
-      HERBHUB_VIDEO_SCHEDULE: ${HERBHUB_VIDEO_SCHEDULE:-0 9 * * *}
-      HERBHUB_VIDEO_RUN_ON_START: ${HERBHUB_VIDEO_RUN_ON_START:-false}
       LISTEN_ADDR: ${LISTEN_ADDR:-:8080}
       NARRATOR_URL: ${NARRATOR_URL:-https://video-narrator.lab.home-cloud.uk}
       HUB_DIR: ${HUB_DIR:-/repo/hub}
       BLOG_POSTS_DIR: ${BLOG_POSTS_DIR:-/repo/hub/_posts}
       VIDEO_OUTPUT_DIR: ${VIDEO_OUTPUT_DIR:-/mnt/herbhub-video/Video/Output}
-      HERBHUB_VIDEO_GIT_PUBLISH_ENABLED: ${HERBHUB_VIDEO_GIT_PUBLISH_ENABLED:-false}
-      HERBHUB_VIDEO_GIT_REMOTE_NAME: ${HERBHUB_VIDEO_GIT_REMOTE_NAME:-origin}
-      HERBHUB_VIDEO_GIT_PUSH_BRANCH: ${HERBHUB_VIDEO_GIT_PUSH_BRANCH:-main}
-      HERBHUB_VIDEO_GIT_PAT: ${HERBHUB_VIDEO_GIT_PAT:-}
-      HERBHUB_VIDEO_GIT_AUTHOR_NAME: ${HERBHUB_VIDEO_GIT_AUTHOR_NAME:-Herb Hub Bot}
-      HERBHUB_VIDEO_GIT_AUTHOR_EMAIL: ${HERBHUB_VIDEO_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
       POLL_INTERVAL: ${POLL_INTERVAL:-3s}
       REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-120s}
+      LLM_SERVICE_URL: ${LLM_SERVICE_URL:-http://llm-service:8080}
+      LLM_SERVICE_TIMEOUT: ${LLM_SERVICE_TIMEOUT:-25m}
+      BLOG_SYSTEM_PROMPT: ${BLOG_SYSTEM_PROMPT:-}
+      BLOG_SITE_NAME: ${BLOG_SITE_NAME:-HerbHub365}
+      BLOG_SITE_URL: ${BLOG_SITE_URL:-https://herbhub365.com}
+      BLOG_PLANT_NAME: ${BLOG_PLANT_NAME:-herbs}
+      TIMELAPSE_SERVICE_URL: ${TIMELAPSE_SERVICE_URL:-http://timelapse-builder:8082}
     volumes:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.herbhub-video.rule=Host(`video.herbhub365.com`)"
-      - "traefik.http.routers.herbhub-video.entrypoints=websecure"
-      - "traefik.http.routers.herbhub-video.tls=true"
-      - "traefik.http.services.herbhub-video.loadbalancer.server.port=8080"
+      - "traefik.http.routers.herbhub-manager.rule=Host(`manager.herbhub365.com`)"
+      - "traefik.http.routers.herbhub-manager.entrypoints=websecure"
+      - "traefik.http.routers.herbhub-manager.tls=true"
+      - "traefik.http.services.herbhub-manager.loadbalancer.server.port=8080"
 
   video-narrator:
     build:
@@ -194,7 +207,7 @@ services:
       BLOG_POSTER_GIT_PUBLISH_ENABLED: ${BLOG_POSTER_GIT_PUBLISH_ENABLED:-false}
       BLOG_POSTER_GIT_REPO_DIR: ${BLOG_POSTER_GIT_REPO_DIR:-/repo}
       BLOG_POSTER_GIT_REMOTE_NAME: ${BLOG_POSTER_GIT_REMOTE_NAME:-origin}
-      BLOG_POSTER_GIT_PUSH_BRANCH: ${BLOG_POSTER_GIT_PUSH_BRANCH:-main}
+      BLOG_POSTER_GIT_PUSH_BRANCH: ${BLOG_POSTER_GIT_PUSH_BRANCH:-origin/main}
       BLOG_POSTER_GIT_PAT: ${BLOG_POSTER_GIT_PAT:-}
       BLOG_POSTER_GIT_AUTHOR_NAME: ${BLOG_POSTER_GIT_AUTHOR_NAME:-Herb Hub Bot}
       BLOG_POSTER_GIT_AUTHOR_EMAIL: ${BLOG_POSTER_GIT_AUTHOR_EMAIL:-bot@herbhub365.com}
@@ -217,21 +230,28 @@ services:
       context: ..
       dockerfile: services/timelapse-builder/dockerfile
     container_name: timelapse-builder
+    restart: unless-stopped
+    networks:
+      - herbhub
     environment:
-      TIMELAPSE_MODE: ${TIMELAPSE_MODE:-once}
-      TIMELAPSE_INTERVAL_SECONDS: ${TIMELAPSE_INTERVAL_SECONDS:-3600}
-      TIMELAPSE_FROM: ${TIMELAPSE_FROM:-}
-      TIMELAPSE_TO: ${TIMELAPSE_TO:-}
+      TIMELAPSE_MODE: ${TIMELAPSE_MODE:-server}
+      LISTEN_ADDR: ${TIMELAPSE_LISTEN_ADDR:-:8082}
       INPUT_DIR: /input
       OUTPUT_DIR: /output
-      OUTPUT_NAME: ${TIMELAPSE_OUTPUT_NAME:-}
       INPUT_FPS: ${TIMELAPSE_INPUT_FPS:-8}
       OUTPUT_FPS: ${TIMELAPSE_OUTPUT_FPS:-30}
       CRF: ${TIMELAPSE_CRF:-23}
       MIN_BRIGHTNESS: ${TIMELAPSE_MIN_BRIGHTNESS:-0}
+      BUILD_TIMEOUT: ${TIMELAPSE_BUILD_TIMEOUT:-2h}
     volumes:
       - ${TIMELAPSE_INPUT_PATH:-/home/andy/Pictures/timelapse}:/input:ro
       - ${TIMELAPSE_OUTPUT_PATH:-../services/timelapse-builder/output}:/output
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.timelapse-builder.rule=Host(`timelapse.herbhub365.com`)"
+      - "traefik.http.routers.timelapse-builder.entrypoints=websecure"
+      - "traefik.http.routers.timelapse-builder.tls=true"
+      - "traefik.http.services.timelapse-builder.loadbalancer.server.port=8082"
 
   rabbitmq:
     image: rabbitmq:3-management

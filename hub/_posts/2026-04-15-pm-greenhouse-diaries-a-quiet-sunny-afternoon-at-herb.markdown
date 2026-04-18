@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for April 15, 2026](/assets/images/blog/2026-04-15-greenhouse-diaries-a-quiet-sunny-afternoon-at-herb.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/t_dHmXeAh0Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The sun climbed higher today, pushing the ambient light well past 1,000 lux at its peak before settling back down as evening approached. Inside the greenhouse, the temperature climbed steadily with the day, starting around 22.5°C and warming up to a comfortable 23.7°C by the time the last sensor snapshot was taken. The air remained crisp and dry, with humidity hovering near 40%, a classic spring feel that our herbs seem to handle with ease.
 

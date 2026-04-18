@@ -17,20 +17,22 @@ import (
 
 // Server is the HTTP server for the video-narrator API.
 type Server struct {
-	cfg         config.Config
-	ruleSet     *preprocess.RuleSet
-	videoClient *video.Client
-	jobManager  *JobManager
-	httpServer  *http.Server
+	cfg                 config.Config
+	ruleSet             *preprocess.RuleSet
+	videoClient         *video.Client
+	jobManager          *JobManager
+	timelapseJobManager *TimelapseJobManager
+	httpServer          *http.Server
 }
 
 // New creates a new Server with the given configuration.
 func New(cfg config.Config, rs *preprocess.RuleSet, vc *video.Client) *Server {
 	s := &Server{
-		cfg:         cfg,
-		ruleSet:     rs,
-		videoClient: vc,
-		jobManager:  NewJobManager(),
+		cfg:                 cfg,
+		ruleSet:             rs,
+		videoClient:         vc,
+		jobManager:          NewJobManager(),
+		timelapseJobManager: NewTimelapseJobManager(),
 	}
 
 	mux := http.NewServeMux()
@@ -44,6 +46,8 @@ func New(cfg config.Config, rs *preprocess.RuleSet, vc *video.Client) *Server {
 	mux.HandleFunc("/api/config", h.handleConfig)
 	mux.HandleFunc("/api/resources", h.handleResources)
 	mux.HandleFunc("/api/health", h.handleHealth)
+	mux.HandleFunc("/api/timelapse/narrate", h.handleTimelapseNarrate)
+	mux.HandleFunc("/api/timelapse/narrate/", h.handleTimelapseNarrateJob)
 
 	s.httpServer = &http.Server{
 		Addr:         cfg.Server.ListenAddr,

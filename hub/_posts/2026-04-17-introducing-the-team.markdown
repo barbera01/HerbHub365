@@ -3,7 +3,6 @@ layout: post
 title: "Introducing the Team"
 date: 2026-04-17 00:00:01 +0000
 categories: Platform Update
-audio_url: /assets/audio/blog/2026-04-17-introducing-the-team.mp3
 ---
 
 Herb Hub 365 is a greenhouse monitoring and publishing platform built by a small team with a shared interest in making growing systems legible — to the people tending them, and to anyone curious enough to read along. This post introduces the two people whose voices you will hear most on this site.

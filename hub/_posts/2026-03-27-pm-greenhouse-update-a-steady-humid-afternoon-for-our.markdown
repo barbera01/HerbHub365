@@ -3,7 +3,6 @@ layout: post
 title: "Greenhouse Update: A Steady, Humid Afternoon for Our Herbs"
 date: 2026-03-27 18:01:03 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-27-pm-greenhouse-update-a-steady-humid-afternoon-for-our.mp3
 ---
 
 The afternoon at the Herb Hub 365 greenhouse offered a tale of two atmospheres, shifting from a warm start to a cooler evening as daylight faded. We began with an ambient temperature of 21.1°C that gently climbed toward its peak before settling down again by late afternoon. As the sun dipped lower and light levels dropped significantly after midday, the air cooled accordingly, bringing us to a comfortable 18.2°C as we wrapped up observations for this period.

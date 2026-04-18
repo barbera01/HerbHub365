@@ -35,7 +35,6 @@ herbs:
     moisture: "50%"
     status:   healthy
     note:     "Comfortable at 50% — oregano prefers it on the drier side. All good."
-audio_url: /assets/audio/blog/2026-03-25-daily-sensor-snapshot.mp3
 ---
 
 {% include sensor-snapshot.html %}

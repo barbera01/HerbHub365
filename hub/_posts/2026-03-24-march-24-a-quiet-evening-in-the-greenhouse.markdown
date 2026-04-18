@@ -3,7 +3,6 @@ layout: post
 title: "March 24: A Quiet Evening in the Greenhouse"
 date: 2026-03-24 20:00:00 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-24-march-24-a-quiet-evening-in-the-greenhouse.mp3
 ---
 
 The greenhouse settled into a calm evening today, with temperatures hovering comfortably around 21°C for the ambient air and slightly cooler at the base of our plants. Readings from the basil, chilli, oregano, and water reservoir all fell between 19.6°C and 21.3°C, indicating an environment that remains stable without any sudden spikes or drops to worry about.

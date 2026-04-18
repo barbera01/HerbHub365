@@ -3,7 +3,6 @@ layout: post
 title: "Basil (*Ocimum basilicum*) is a wonderfully aromatic and incredibly versatile herb that has been a staple in cuisines and traditional medicine for thousands of years. It's beloved for its sweet, slightly peppery, and sometimes slightly anise-like fragrance."
 date: 2026-04-17 20:33:01 +0000
 categories: Herb Facts
-audio_url: /assets/audio/blog/2026-04-17-basil-ocimum-basilicum-is-a-wonderfully-aromatic-and-incredi.mp3
 ---
 
 Here is a comprehensive overview of basil, covering its history, uses, varieties, and how to care for it.

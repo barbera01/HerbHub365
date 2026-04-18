@@ -3,7 +3,6 @@ layout: post
 title: "Herb Hub 365 Daily Log: A Quiet Morning in the Greenhouse"
 date: 2026-04-11 09:01:27 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-04-11-herb-hub-365-daily-log-a-quiet-morning.mp3
 ---
 
 ![Timelapse image for April 11, 2026](/assets/images/blog/2026-04-11-herb-hub-365-daily-log-a-quiet-morning.jpg)

@@ -3,7 +3,6 @@ layout: post
 title: "Introducing Prometheus Metrics Posts on Herb Hub 365"
 date: 2026-04-17 13:53:14 +0000
 categories: Platform Update
-audio_url: /assets/audio/blog/2026-04-17-introducing-prometheus-metrics-posts-on-herb-hub-365.mp3
 ---
 
 ![Timelapse image for April 17, 2026](/assets/images/blog/2026-04-17-introducing-prometheus-metrics-posts-on-herb-hub-365.jpg)

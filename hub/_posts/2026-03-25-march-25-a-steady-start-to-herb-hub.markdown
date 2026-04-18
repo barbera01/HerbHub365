@@ -3,7 +3,6 @@ layout: post
 title: "March 25: A Steady Start to Herb Hub Day"
 date: 2026-03-25 18:00:32 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-25-march-25-a-steady-start-to-herb-hub.mp3
 ---
 
 Morning readings reveal a calm, stable environment within our greenhouse. The ambient temperature settled comfortably around 24°C, while individual plant zones hovered in their preferred range between 21.7°C and 21.9°C. Humidity remained consistent throughout the monitoring window at approximately 35%, providing just enough moisture without becoming damp or stagnant.

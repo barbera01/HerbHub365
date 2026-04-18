@@ -3,7 +3,6 @@ layout: post
 title: "Herb Hub 365: Afternoon Update for March 31st"
 date: 2026-03-31 13:00:45 +0000
 categories: Herb Hub Update
-audio_url: /assets/audio/blog/2026-03-31-pm-herb-hub-365-afternoon-update-for-march-31st.mp3
 ---
 
 ![Timelapse image for March 31, 2026](/assets/images/blog/2026-03-31-herb-hub-365-afternoon-update-for-march-31st.jpg)

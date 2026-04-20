@@ -52,9 +52,7 @@ func main() {
 		minSoilMoistureThreshold = defaultThreshold
 	}
 
-	metricsURL = os.Getenv("METRICS_URL"  - RABBITMQ_URL = amqp://admin:yourpassword@rabbitmq:5672/
-  - METRICS_URL = http://hh-02:9100/metrics
-  - SOIL_MOISTURE_THRESHOLD = 40.0)
+	metricsURL = os.Getenv("METRICS_URL")
 	if metricsURL == "" {
 		metricsURL = defaultMetricsURL
 	}

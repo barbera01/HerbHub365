@@ -194,7 +194,7 @@ func Load() Config {
 		RequestTimeout:   getDurationEnv("VIDEO_REQUEST_TIMEOUT", 120*time.Second),
 		RabbitMQURL:        os.Getenv("RABBITMQ_URL"),
 		RabbitMQQueue:      getEnv("RABBITMQ_QUEUE", "video.produced"),
-		TimelapseOutputDir: getEnv("TIMELAPSE_OUTPUT_DIR", "/output/timelapse"),
+		TimelapseOutputDir: getEnv("TIMELAPSE_OUTPUT_DIR", "/output"),
 
 		Video: VideoConfig{
 			BaseURL:        getEnv("VIDEO_BASE_URL", "http://172.16.106.81:8011"),

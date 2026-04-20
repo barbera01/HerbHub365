@@ -256,9 +256,9 @@ downloadPhase:
 	m.update(id, "narrating", 0.76, "")
 
 	// ── Phase 6: Overlay TTS audio on timelapse video ───────────────────────
-	timelapsePath := filepath.Join(cfg.TimelapseOutputDir, req.TimelapseFile)
-	if _, err := os.Stat(timelapsePath); err != nil {
-		m.update(id, "failed", 0.76, fmt.Sprintf("timelapse file not found at %s: %v", timelapsePath, err))
+	timelapsePath, err := resolveTimelapsePath(cfg.TimelapseOutputDir, req.TimelapseFile)
+	if err != nil {
+		m.update(id, "failed", 0.76, err.Error())
 		return
 	}
 
@@ -360,6 +360,45 @@ func tlTrimOutput(s string) string {
 		return s
 	}
 	return "…" + s[len(s)-1000:]
+}
+
+func resolveTimelapsePath(outputDir, requestedFile string) (string, error) {
+	requestedFile = strings.TrimSpace(requestedFile)
+	if requestedFile == "" {
+		return "", fmt.Errorf("timelapse file is empty")
+	}
+
+	candidates := make([]string, 0, 3)
+	seen := make(map[string]struct{}, 3)
+	addCandidate := func(path string) {
+		if path == "" {
+			return
+		}
+		cleaned := filepath.Clean(path)
+		if _, ok := seen[cleaned]; ok {
+			return
+		}
+		seen[cleaned] = struct{}{}
+		candidates = append(candidates, cleaned)
+	}
+
+	if filepath.IsAbs(requestedFile) {
+		addCandidate(requestedFile)
+	} else {
+		addCandidate(filepath.Join(outputDir, requestedFile))
+		if filepath.Base(filepath.Clean(outputDir)) == "timelapse" {
+			// Older defaults pointed at /output/timelapse while builder writes to /output.
+			addCandidate(filepath.Join(filepath.Dir(filepath.Clean(outputDir)), requestedFile))
+		}
+	}
+
+	for _, candidate := range candidates {
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate, nil
+		}
+	}
+
+	return "", fmt.Errorf("timelapse file not found; checked: %s", strings.Join(candidates, ", "))
 }
 
 func generateTLID() string {

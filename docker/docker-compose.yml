@@ -12,7 +12,7 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-auto}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://ollama.la.home-cloud.uk}
       LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_MODEL: ${LLM_MODEL:-qwen2.5:latest}
+      LLM_MODEL: ${LLM_MODEL:-gemma4:e4b}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.6}
       LLM_TOP_P: ${LLM_TOP_P:-0.9}
       LLM_REPEAT_PENALTY: ${LLM_REPEAT_PENALTY:-1.1}
@@ -96,7 +96,7 @@ services:
     networks:
       - herbhub
     environment:
-      TTS_MODE: ${TTS_MODE:-daemon}
+      TTS_MODE: ${TTS_MODE:-server}
       TTS_SCHEDULE: ${TTS_SCHEDULE:-10 0 * * *}
       TTS_RUN_ON_START: ${TTS_RUN_ON_START:-false}
       TTS_TARGET_DATE: ${TTS_TARGET_DATE:-yesterday}

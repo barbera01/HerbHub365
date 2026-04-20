@@ -74,15 +74,8 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Connect to RabbitMQ
-	rabbitConn, err := connectToRabbitMQ(ctx)
-	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
-	}
-	defer rabbitConn.Close()
-
-	// Start monitoring in background
-	go monitorLoop(ctx, rabbitConn)
+	// Start monitoring in background (manages its own connection with reconnect)
+	go monitorLoop(ctx)
 
 	// Start HTTP server for health checks
 	go httpServer(ctx)
@@ -104,21 +97,43 @@ func connectToRabbitMQ(ctx context.Context) (*amqp.Connection, error) {
 	return conn, nil
 }
 
-func monitorLoop(ctx context.Context, rabbitConn *amqp.Connection) {
+func monitorLoop(ctx context.Context) {
 	ticker := time.NewTicker(MonitorInterval)
 	defer ticker.Stop()
 
 	log.Println("Starting monitoring loop")
 
+	var conn *amqp.Connection
+
+	connect := func() bool {
+		if conn != nil && !conn.IsClosed() {
+			return true
+		}
+		var err error
+		conn, err = connectToRabbitMQ(ctx)
+		if err != nil {
+			log.Printf("RabbitMQ reconnect failed: %v", err)
+			return false
+		}
+		return true
+	}
+
 	// Initial check
-	checkAndPost(ctx, rabbitConn)
+	if connect() {
+		checkAndPost(ctx, conn)
+	}
 
 	for {
 		select {
 		case <-ticker.C:
-			checkAndPost(ctx, rabbitConn)
+			if connect() {
+				checkAndPost(ctx, conn)
+			}
 		case <-ctx.Done():
 			log.Println("Monitor loop stopped")
+			if conn != nil {
+				conn.Close()
+			}
 			return
 		}
 	}
@@ -142,6 +157,21 @@ func checkAndPost(ctx context.Context, rabbitConn *amqp.Connection) {
 	}
 	defer ch.Close()
 
+	// Declare exchange (idempotent)
+	err = ch.ExchangeDeclare(
+		Exchange,
+		"topic", // type
+		true,    // durable
+		false,   // auto-deleted
+		false,   // internal
+		false,   // no-wait
+		nil,
+	)
+	if err != nil {
+		log.Printf("Failed to declare exchange: %v", err)
+		return
+	}
+
 	// Declare queue (idempotent)
 	_, err = ch.QueueDeclare(
 		QueueName,
@@ -153,6 +183,19 @@ func checkAndPost(ctx context.Context, rabbitConn *amqp.Connection) {
 	)
 	if err != nil {
 		log.Printf("Failed to declare queue: %v", err)
+		return
+	}
+
+	// Bind queue to exchange with wildcard routing key
+	err = ch.QueueBind(
+		QueueName,
+		"watering.#",
+		Exchange,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Printf("Failed to bind queue: %v", err)
 		return
 	}
 

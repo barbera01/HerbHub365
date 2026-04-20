@@ -146,6 +146,8 @@ services:
       BLOG_PLANT_NAME: ${BLOG_PLANT_NAME:-herbs}
       TIMELAPSE_SERVICE_URL: ${TIMELAPSE_SERVICE_URL:-http://timelapse-builder:8082}
       TIMELAPSE_PUBLIC_URL: ${TIMELAPSE_PUBLIC_URL:-https://manager.herbhub365.com}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
     volumes:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output

@@ -14,15 +14,17 @@ import (
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
 	"HerbHub365/services/herbhub-manager/internal/post"
+	"HerbHub365/services/herbhub-manager/internal/publisher"
 	"HerbHub365/services/herbhub-manager/internal/timelapse"
 	"HerbHub365/services/herbhub-manager/internal/video"
 )
 
 type handlers struct {
-	cfg              config.Config
-	videoClient      *video.Client
-	blogClient       *blogpost.Client
-	timelapseClient  *timelapse.Client
+	cfg             config.Config
+	videoClient     *video.Client
+	blogClient      *blogpost.Client
+	timelapseClient *timelapse.Client
+	pubClient       *publisher.Client
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -707,6 +709,79 @@ func (h *handlers) handleTimelapseNarrateJob(w http.ResponseWriter, r *http.Requ
 	}
 
 	writeJSON(w, http.StatusOK, job)
+}
+
+// ── POST /api/publish ─────────────────────────────────────────────────────────
+// Queues an existing local video for YouTube publishing via the video-publisher
+// RabbitMQ consumer. The caller supplies only {slug}; the handler resolves the
+// video filename and post date from the output directory and posts directory.
+
+type publishRequest struct {
+	Slug string `json:"slug"`
+}
+
+func (h *handlers) handlePublish(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	if h.pubClient == nil {
+		writeError(w, http.StatusServiceUnavailable, "publishing not configured (RABBITMQ_URL not set)")
+		return
+	}
+
+	var req publishRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid request: %v", err))
+		return
+	}
+	if strings.TrimSpace(req.Slug) == "" {
+		writeError(w, http.StatusBadRequest, "slug is required")
+		return
+	}
+
+	posts, err := post.FindAllPosts(h.cfg.Post.PostsDir)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("read posts: %v", err))
+		return
+	}
+
+	var found *post.Post
+	for _, p := range posts {
+		if p.Slug == req.Slug {
+			found = p
+			break
+		}
+	}
+	if found == nil {
+		writeError(w, http.StatusNotFound, fmt.Sprintf("post not found: %q", req.Slug))
+		return
+	}
+
+	status := found.OutputStatus(h.cfg.OutputDir)
+	if !status.HasVideo {
+		writeError(w, http.StatusConflict, "no local video found for this post")
+		return
+	}
+
+	msg := publisher.Message{
+		Slug:       found.Slug,
+		Date:       found.Date.Format("2006-01-02"),
+		OutputFile: status.Filename,
+	}
+	if err := h.pubClient.Publish(msg); err != nil {
+		log.Printf("publish %s: %v", found.Slug, err)
+		writeError(w, http.StatusBadGateway, fmt.Sprintf("queue publish: %v", err))
+		return
+	}
+
+	log.Printf("publish queued: slug=%s file=%s", found.Slug, status.Filename)
+	writeJSON(w, http.StatusAccepted, map[string]string{
+		"slug":       found.Slug,
+		"video_file": status.Filename,
+		"status":     "queued",
+	})
 }
 
 // publishCompletedJobs emits RabbitMQ messages for completed jobs.

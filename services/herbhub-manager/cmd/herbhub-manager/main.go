@@ -9,6 +9,7 @@ import (
 	"HerbHub365/services/herbhub-manager/internal/api"
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
+	"HerbHub365/services/herbhub-manager/internal/publisher"
 	"HerbHub365/services/herbhub-manager/internal/timelapse"
 	"HerbHub365/services/herbhub-manager/internal/video"
 )
@@ -30,12 +31,23 @@ func main() {
 	blogClient := blogpost.NewClient(cfg.Blog)
 	timelapseClient := timelapse.NewClient(cfg.Timelapse.ServiceURL, cfg.Timelapse.Timeout)
 
+	var pubClient *publisher.Client
+	if publisher.Enabled(cfg.RabbitMQ.URL) {
+		var err error
+		pubClient, err = publisher.NewClient(cfg.RabbitMQ.URL, cfg.RabbitMQ.Queue)
+		if err != nil {
+			log.Printf("publisher client: %v (YouTube publishing disabled)", err)
+		} else {
+			log.Printf("  rabbitmq:     %s (queue: %s)", cfg.RabbitMQ.URL, cfg.RabbitMQ.Queue)
+		}
+	}
+
 	webFS, err := fs.Sub(webContent, "web")
 	if err != nil {
 		log.Fatalf("embedded web fs: %v", err)
 	}
 
-	router := api.NewRouter(cfg, videoClient, blogClient, timelapseClient, http.FS(webFS))
+	router := api.NewRouter(cfg, videoClient, blogClient, timelapseClient, pubClient, http.FS(webFS))
 
 	log.Printf("listening on %s", cfg.ListenAddr)
 	if err := http.ListenAndServe(cfg.ListenAddr, router); err != nil {

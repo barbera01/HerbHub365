@@ -169,6 +169,12 @@ const App = {
                                 YouTube
                             </a>
                         ` : ''}
+                        ${post.has_video && !post.published ? `
+                            <button class="btn btn-publish btn-small" onclick="event.stopPropagation(); App.publishToYouTube('${post.slug}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"></path><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"></polygon></svg>
+                                Publish
+                            </button>
+                        ` : ''}
                         <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); App.openGenerateModal('${post.slug}')">
                             Generate
                         </button>
@@ -291,6 +297,33 @@ const App = {
             submitBtn.innerHTML = `
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 Generate Video`;
+        }
+    },
+
+    // ── YouTube Publish ───────────────────────────────────────────────────────
+
+    async publishToYouTube(slug) {
+        const post = this.posts.find(p => p.slug === slug);
+        if (!post) return;
+
+        if (!confirm(`Queue "${post.title}" for YouTube publishing?`)) return;
+
+        try {
+            const res = await fetch('/api/publish', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ slug }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || `HTTP ${res.status}`);
+            }
+
+            this.toast('Queued for YouTube publishing', 'success');
+            await this.loadPosts();
+        } catch (err) {
+            this.toast(`Publish failed: ${err.message}`, 'error');
         }
     },
 

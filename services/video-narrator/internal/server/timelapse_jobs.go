@@ -20,7 +20,7 @@ import (
 	"HerbHub365/services/video-narrator/internal/config"
 	"HerbHub365/services/video-narrator/internal/preprocess"
 	"HerbHub365/services/video-narrator/internal/queue"
-	"HerbHub365/services/video-narrator/internal/video"
+	"HerbHub365/services/video-narrator/internal/tts"
 )
 
 // TimelapseNarrateRequest is the JSON body for POST /api/timelapse/narrate.
@@ -38,7 +38,7 @@ type TimelapseNarrateRequest struct {
 type TimelapseJob struct {
 	ID          string  `json:"id"`
 	Slug        string  `json:"slug"`
-	Phase       string  `json:"phase"` // queued, preprocessing, submitting, generating, narrating, stitching, completed, failed
+	Phase       string  `json:"phase"` // queued, preprocessing, synthesizing, muxing, stitching, completed, failed
 	Progress    float64 `json:"progress"`
 	Error       string  `json:"error,omitempty"`
 	VideoFile   string  `json:"video_file,omitempty"`
@@ -105,7 +105,7 @@ func (m *TimelapseJobManager) setVideoFile(id, filename string) {
 func (m *TimelapseJobManager) SubmitJob(
 	cfg config.Config,
 	rs *preprocess.RuleSet,
-	vc *video.Client,
+	tc *tts.Client,
 	req TimelapseNarrateRequest,
 ) (string, error) {
 	if strings.TrimSpace(req.Text) == "" {
@@ -134,7 +134,7 @@ func (m *TimelapseJobManager) SubmitJob(
 	m.jobs[id] = job
 	m.mu.Unlock()
 
-	go m.runPipeline(id, cfg, rs, vc, req)
+	go m.runPipeline(id, cfg, rs, tc, req)
 	return id, nil
 }
 
@@ -142,7 +142,7 @@ func (m *TimelapseJobManager) runPipeline(
 	id string,
 	cfg config.Config,
 	rs *preprocess.RuleSet,
-	vc *video.Client,
+	tc *tts.Client,
 	req TimelapseNarrateRequest,
 ) {
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Video.MaxWait+cfg.Video.PipelineBuffer)
@@ -164,99 +164,41 @@ func (m *TimelapseJobManager) runPipeline(
 	}
 	m.update(id, "preprocessing", 0.05, "")
 
-	// ── Phase 2: Submit to MuseTalk for TTS audio ────────────────────────────
-	m.update(id, "submitting", 0.07, "")
-	log.Printf("[tl-job %s] submitting TTS to MuseTalk (%d chars)", id[:8], len(processed))
+	if tc == nil {
+		m.update(id, "failed", 0.07, "tts client is not configured")
+		return
+	}
 
-	museJobID, err := vc.Submit(ctx, vc.Cfg().AvatarID, processed)
+	// ── Phase 2: Generate TTS audio directly ─────────────────────────────────
+	m.update(id, "synthesizing", 0.07, "")
+	log.Printf("[tl-job %s] generating direct TTS audio (%d chars)", id[:8], len(processed))
+
+	ttsBytes, err := tc.Speak(ctx, processed)
 	if err != nil {
-		m.update(id, "failed", 0.10, fmt.Sprintf("submit to MuseTalk: %v", err))
+		m.update(id, "failed", 0.10, fmt.Sprintf("generate TTS audio: %v", err))
 		return
 	}
-	m.update(id, "generating", 0.10, "")
+	m.update(id, "synthesizing", 0.72, "")
 
-	// ── Phase 3: Poll MuseTalk ───────────────────────────────────────────────
-	ticker := time.NewTicker(cfg.Video.PollInterval)
-	defer ticker.Stop()
-	deadline := time.Now().Add(cfg.Video.MaxWait)
-
-	for {
-		select {
-		case <-ctx.Done():
-			m.update(id, "failed", 0.0, "timed out waiting for MuseTalk")
-			return
-		case <-ticker.C:
-			if time.Now().After(deadline) {
-				m.update(id, "failed", 0.0, fmt.Sprintf("timed out after %s", cfg.Video.MaxWait))
-				return
-			}
-			status, err := vc.PollOnce(ctx, museJobID)
-			if err != nil {
-				continue
-			}
-			switch strings.ToLower(status.Status) {
-			case "completed", "done", "success":
-				goto downloadPhase
-			case "failed", "error":
-				msg := status.Error
-				if msg == "" {
-					msg = "MuseTalk job failed"
-				}
-				m.update(id, "failed", 0.10, msg)
-				return
-			default:
-				mp := status.Progress
-				if mp < 0 {
-					mp = 0
-				}
-				if mp > 1 {
-					mp = 1
-				}
-				m.update(id, "generating", 0.10+mp*0.60, "")
-			}
-		}
+	audioExt := strings.TrimSpace(cfg.TTS.ResponseFormat)
+	if audioExt == "" {
+		audioExt = "mp3"
 	}
-
-downloadPhase:
-	// ── Phase 4: Download avatar MP4 (for audio track) ──────────────────────
-	m.update(id, "narrating", 0.72, "")
-	log.Printf("[tl-job %s] downloading avatar MP4 for audio extraction", id[:8])
-
-	avatarBytes, err := vc.Download(ctx, museJobID)
+	ttsAudioTmp, err := os.CreateTemp("", "tl-tts-*."+audioExt)
 	if err != nil {
-		m.update(id, "failed", 0.72, fmt.Sprintf("download avatar: %v", err))
+		m.update(id, "failed", 0.72, fmt.Sprintf("create TTS temp: %v", err))
 		return
 	}
-
-	avatarTmp, err := os.CreateTemp("", "tl-avatar-*.mp4")
-	if err != nil {
-		m.update(id, "failed", 0.72, fmt.Sprintf("create avatar temp: %v", err))
-		return
-	}
-	avatarTmpPath := avatarTmp.Name()
-	defer os.Remove(avatarTmpPath)
-
-	if _, err := avatarTmp.Write(avatarBytes); err != nil {
-		avatarTmp.Close()
-		m.update(id, "failed", 0.72, fmt.Sprintf("write avatar temp: %v", err))
-		return
-	}
-	avatarTmp.Close()
-
-	// ── Phase 5: Extract TTS audio from avatar MP4 ──────────────────────────
-	ttsAudioPath := avatarTmpPath + ".aac"
+	ttsAudioPath := ttsAudioTmp.Name()
 	defer os.Remove(ttsAudioPath)
 
-	extractOut, err := exec.CommandContext(ctx, ffmpeg,
-		"-y", "-i", avatarTmpPath,
-		"-vn", "-acodec", "aac", "-ar", "48000", "-ac", "2",
-		ttsAudioPath,
-	).CombinedOutput()
-	if err != nil {
-		m.update(id, "failed", 0.75, fmt.Sprintf("extract TTS audio: %v\n%s", err, tlTrimOutput(string(extractOut))))
+	if _, err := ttsAudioTmp.Write(ttsBytes); err != nil {
+		ttsAudioTmp.Close()
+		m.update(id, "failed", 0.72, fmt.Sprintf("write TTS temp: %v", err))
 		return
 	}
-	m.update(id, "narrating", 0.76, "")
+	ttsAudioTmp.Close()
+	m.update(id, "muxing", 0.76, "")
 
 	// ── Phase 6: Overlay TTS audio on timelapse video ───────────────────────
 	timelapsePath, cleanupTimelapse, err := prepareTimelapseInput(ctx, cfg, req)
@@ -291,7 +233,7 @@ downloadPhase:
 		m.update(id, "failed", 0.78, fmt.Sprintf("overlay TTS audio: %v\n%s", err, tlTrimOutput(string(overlayOut))))
 		return
 	}
-	m.update(id, "narrating", 0.80, "")
+	m.update(id, "muxing", 0.80, "")
 
 	// ── Phase 7: Stitch intro + narrated_timelapse + outro ──────────────────
 	m.update(id, "stitching", 0.82, "")

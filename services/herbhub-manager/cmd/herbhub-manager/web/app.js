@@ -996,6 +996,7 @@ const App = {
         const tlPhaseLabels = {
             queued: 'Queued', preprocessing: 'Preprocessing', submitting: 'Submitting',
             generating: 'Generating', narrating: 'Narrating', stitching: 'Stitching',
+            synthesizing: 'Synthesizing Audio', muxing: 'Muxing Audio',
             completed: 'Completed', failed: 'Failed',
         };
         container.innerHTML = this.tlPublishJobs.map(j => {

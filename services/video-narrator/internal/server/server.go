@@ -12,6 +12,7 @@ import (
 
 	"HerbHub365/services/video-narrator/internal/config"
 	"HerbHub365/services/video-narrator/internal/preprocess"
+	"HerbHub365/services/video-narrator/internal/tts"
 	"HerbHub365/services/video-narrator/internal/video"
 )
 
@@ -20,17 +21,19 @@ type Server struct {
 	cfg                 config.Config
 	ruleSet             *preprocess.RuleSet
 	videoClient         *video.Client
+	ttsClient           *tts.Client
 	jobManager          *JobManager
 	timelapseJobManager *TimelapseJobManager
 	httpServer          *http.Server
 }
 
 // New creates a new Server with the given configuration.
-func New(cfg config.Config, rs *preprocess.RuleSet, vc *video.Client) *Server {
+func New(cfg config.Config, rs *preprocess.RuleSet, vc *video.Client, tc *tts.Client) *Server {
 	s := &Server{
 		cfg:                 cfg,
 		ruleSet:             rs,
 		videoClient:         vc,
+		ttsClient:           tc,
 		jobManager:          NewJobManager(),
 		timelapseJobManager: NewTimelapseJobManager(),
 	}

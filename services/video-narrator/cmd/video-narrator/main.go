@@ -18,6 +18,7 @@ import (
 	"HerbHub365/services/video-narrator/internal/post"
 	"HerbHub365/services/video-narrator/internal/preprocess"
 	"HerbHub365/services/video-narrator/internal/server"
+	"HerbHub365/services/video-narrator/internal/tts"
 	"HerbHub365/services/video-narrator/internal/video"
 
 	"github.com/robfig/cron/v3"
@@ -59,19 +60,19 @@ func main() {
 // ─── mode: server ─────────────────────────────────────────────────────────────
 
 func runServer(ctx context.Context, cfg config.Config) error {
-	rs, videoClient, err := buildDeps(cfg)
+	rs, videoClient, ttsClient, err := buildDeps(cfg)
 	if err != nil {
 		return err
 	}
 
-	srv := server.New(cfg, rs, videoClient)
+	srv := server.New(cfg, rs, videoClient, ttsClient)
 	return srv.ListenAndServe(ctx)
 }
 
 // ─── mode: generate ───────────────────────────────────────────────────────────
 
 func runGenerate(ctx context.Context, cfg config.Config) error {
-	rs, videoClient, err := buildDeps(cfg)
+	rs, videoClient, _, err := buildDeps(cfg)
 	if err != nil {
 		return err
 	}
@@ -117,7 +118,7 @@ func runGenerate(ctx context.Context, cfg config.Config) error {
 // ─── mode: backfill ───────────────────────────────────────────────────────────
 
 func runBackfill(ctx context.Context, cfg config.Config) error {
-	rs, videoClient, err := buildDeps(cfg)
+	rs, videoClient, _, err := buildDeps(cfg)
 	if err != nil {
 		return err
 	}
@@ -337,13 +338,14 @@ func generatePost(
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-func buildDeps(cfg config.Config) (*preprocess.RuleSet, *video.Client, error) {
+func buildDeps(cfg config.Config) (*preprocess.RuleSet, *video.Client, *tts.Client, error) {
 	rs, err := preprocess.LoadRules(cfg.RulesFile)
 	if err != nil {
-		return nil, nil, fmt.Errorf("load rules: %w", err)
+		return nil, nil, nil, fmt.Errorf("load rules: %w", err)
 	}
 	videoClient := video.NewClient(cfg.Video, cfg.RequestTimeout)
-	return rs, videoClient, nil
+	ttsClient := tts.NewClient(cfg.TTS, cfg.RequestTimeout)
+	return rs, videoClient, ttsClient, nil
 }
 
 func resolveMode(defaultMode string) string {

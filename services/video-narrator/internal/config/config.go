@@ -33,6 +33,9 @@ type Config struct {
 	// Video is the avatar video API configuration.
 	Video VideoConfig
 
+	// TTS is the direct speech synthesis configuration used for timelapse narration.
+	TTS TTSConfig
+
 	// Concat controls the ffmpeg intro/outro post-processing step.
 	Concat ConcatConfig
 
@@ -87,6 +90,16 @@ type VideoConfig struct {
 	// Note: resolution and fps are NOT sent to the API — MuseTalk preserves the
 	// source avatar resolution (e.g. 1280×720 for a 720p green-screen loop) and
 	// ignores any resolution/fps hint. Upscaling is handled by ffmpeg in concat.
+}
+
+// TTSConfig holds direct text-to-speech API settings.
+type TTSConfig struct {
+	BaseURL        string
+	Model          string
+	Voice          string
+	Voices         []string
+	Speed          float64
+	ResponseFormat string
 }
 
 // ConcatConfig controls the ffmpeg intro/outro stitching step.
@@ -203,6 +216,15 @@ func Load() Config {
 			PollInterval:   getDurationEnv("VIDEO_POLL_INTERVAL", 10*time.Second),
 			MaxWait:        getDurationEnv("VIDEO_MAX_WAIT", 40*time.Minute),
 			PipelineBuffer: getDurationEnv("VIDEO_PIPELINE_BUFFER", 10*time.Minute),
+		},
+
+		TTS: TTSConfig{
+			BaseURL:        getEnv("TTS_BASE_URL", "https://kokoro-api.lab.home-cloud.uk/v1/audio/speech"),
+			Model:          getEnv("TTS_MODEL", "kokoro"),
+			Voice:          getEnv("TTS_VOICE", "eve"),
+			Voices:         getCSVEnv("TTS_VOICES"),
+			Speed:          getFloatEnv("TTS_SPEED", 0),
+			ResponseFormat: getEnv("TTS_FORMAT", "mp3"),
 		},
 
 		Concat: ConcatConfig{

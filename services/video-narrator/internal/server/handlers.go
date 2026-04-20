@@ -258,7 +258,7 @@ func (h *handlers) handleTimelapseNarrate(w http.ResponseWriter, r *http.Request
 	jobID, err := h.server.timelapseJobManager.SubmitJob(
 		h.server.cfg,
 		h.server.ruleSet,
-		h.server.videoClient,
+		h.server.ttsClient,
 		req,
 	)
 	if err != nil {

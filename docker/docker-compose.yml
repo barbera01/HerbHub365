@@ -145,6 +145,7 @@ services:
       BLOG_SITE_URL: ${BLOG_SITE_URL:-https://herbhub365.com}
       BLOG_PLANT_NAME: ${BLOG_PLANT_NAME:-herbs}
       TIMELAPSE_SERVICE_URL: ${TIMELAPSE_SERVICE_URL:-http://timelapse-builder:8082}
+      TIMELAPSE_PUBLIC_URL: ${TIMELAPSE_PUBLIC_URL:-https://manager.herbhub365.com}
     volumes:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
@@ -174,6 +175,11 @@ services:
       VIDEO_AVATAR: ${VIDEO_AVATAR:-eve}
       VIDEO_AVATARS: ${VIDEO_AVATARS:-eve}
       VIDEO_REQUEST_TIMEOUT: ${VIDEO_REQUEST_TIMEOUT:-120s}
+      TTS_BASE_URL: ${TTS_BASE_URL:-https://kokoro-api.lab.home-cloud.uk/v1/audio/speech}
+      TTS_MODEL: ${TTS_MODEL:-kokoro}
+      TTS_VOICE: ${TTS_VOICE:-eve}
+      TTS_SPEED: ${TTS_SPEED:-0}
+      TTS_FORMAT: ${TTS_FORMAT:-mp3}
       RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
       CONCAT_ENABLED: ${CONCAT_ENABLED:-true}

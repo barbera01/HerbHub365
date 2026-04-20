@@ -41,6 +41,13 @@ services:
       VIDEO_MAX_WAIT: ${VIDEO_MAX_WAIT:-40m}
       VIDEO_PIPELINE_BUFFER: ${VIDEO_PIPELINE_BUFFER:-15m}
 
+      # Direct TTS API used by timelapse narration.
+      TTS_BASE_URL: ${TTS_BASE_URL:-https://kokoro-api.lab.home-cloud.uk/v1/audio/speech}
+      TTS_MODEL: ${TTS_MODEL:-kokoro}
+      TTS_VOICE: ${TTS_VOICE:-eve}
+      TTS_SPEED: ${TTS_SPEED:-0}
+      TTS_FORMAT: ${TTS_FORMAT:-mp3}
+
       # Posts dir not required — herbhub-video sends post text inline.
       # Set to a dummy path; the server will simply not use it.
       HUB_DIR: /dev/null

@@ -38,7 +38,7 @@ type TimelapseNarrateRequest struct {
 type TimelapseJob struct {
 	ID          string  `json:"id"`
 	Slug        string  `json:"slug"`
-	Phase       string  `json:"phase"` // queued, preprocessing, synthesizing, muxing, stitching, completed, failed
+	Phase       string  `json:"phase"` // queued, preprocessing, synthesizing, muxing, stitching, handoff, completed, failed
 	Progress    float64 `json:"progress"`
 	Error       string  `json:"error,omitempty"`
 	VideoFile   string  `json:"video_file,omitempty"`
@@ -271,8 +271,8 @@ func (m *TimelapseJobManager) runPipeline(
 	}
 
 	m.setVideoFile(id, outputFilename)
-	m.update(id, "completed", 1.0, "")
-	log.Printf("[tl-job %s] completed: %s (%.1f MB)", id[:8], outputPath, float64(size)/(1024*1024))
+	m.update(id, "handoff", 0.94, "")
+	log.Printf("[tl-job %s] rendered: %s (%.1f MB)", id[:8], outputPath, float64(size)/(1024*1024))
 
 	// ── Notify via RabbitMQ ──────────────────────────────────────────────────
 	date := req.Date
@@ -290,15 +290,20 @@ func (m *TimelapseJobManager) runPipeline(
 
 	markerPath := filepath.Join(cfg.Concat.OutputDir, strings.TrimSuffix(outputFilename, ".mp4")+".json")
 	if err := os.WriteFile(markerPath, msgData, 0644); err != nil {
-		log.Printf("[tl-job %s] write marker: %v", id[:8], err)
+		m.update(id, "failed", 0.94, fmt.Sprintf("write handoff marker: %v", err))
+		return
 	}
 
 	pub := queue.NewPublisher(cfg.RabbitMQURL, cfg.RabbitMQQueue)
 	if pub != nil && pub.Enabled() {
 		if err := pub.Publish(ctx, msgData); err != nil {
-			log.Printf("[tl-job %s] publish to queue: %v", id[:8], err)
+			m.update(id, "failed", 0.94, fmt.Sprintf("publish handoff: %v", err))
+			return
 		}
 	}
+
+	m.update(id, "completed", 1.0, "")
+	log.Printf("[tl-job %s] handoff complete for %s", id[:8], outputFilename)
 }
 
 func tlTrimOutput(s string) string {

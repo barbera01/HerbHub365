@@ -660,7 +660,7 @@ func (h *handlers) timelapseVideoURL(filename string) string {
 	if base == "" || filename == "" {
 		return ""
 	}
-	return base + "/api/videos/" + url.PathEscape(filename)
+	return base + "/api/timelapse/videos/" + url.PathEscape(filename)
 }
 
 func (h *handlers) createTimelapsePost(req timelapsePublishRequest, slug string) error {

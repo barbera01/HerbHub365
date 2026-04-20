@@ -27,7 +27,8 @@ import (
 //	submitting     0.05 - 0.10
 //	generating     0.10 - 0.70  (maps MuseTalk 0-1 to this range)
 //	downloading    0.70 - 0.80
-//	stitching      0.80 - 0.95
+//	stitching      0.80 - 0.94
+//	handoff        0.94 - 1.00
 //	completed      1.00
 //	failed         (retains last progress)
 
@@ -36,7 +37,7 @@ type Job struct {
 	ID          string  `json:"id"`
 	Slug        string  `json:"slug"`
 	AvatarID    string  `json:"avatar_id"`
-	Phase       string  `json:"phase"` // queued, preprocessing, submitting, generating, downloading, stitching, completed, failed
+	Phase       string  `json:"phase"` // queued, preprocessing, submitting, generating, downloading, stitching, handoff, completed, failed
 	Progress    float64 `json:"progress"`
 	Error       string  `json:"error,omitempty"`
 	VideoFile   string  `json:"video_file,omitempty"`
@@ -306,11 +307,13 @@ downloadPhase:
 			return
 		}
 		jm.setVideoFile(id, outputFilename)
-		jm.update(id, "completed", 1.0, "")
+		jm.update(id, "handoff", 0.94, "")
 		log.Printf("[job %s] wrote raw video: %s (%d bytes)", id[:8], outputPath, len(mp4Bytes))
 		if err := notify.PublishCompletion(ctx, cfg, req.Slug, outputFilename); err != nil {
-			log.Printf("[job %s] publish completion: %v", id[:8], err)
+			jm.update(id, "failed", 0.94, fmt.Sprintf("publish completion: %v", err))
+			return
 		}
+		jm.update(id, "completed", 1.0, "")
 		return
 	}
 
@@ -367,11 +370,13 @@ downloadPhase:
 	}
 
 	jm.setVideoFile(id, outputFilename)
-	jm.update(id, "completed", 1.0, "")
-	log.Printf("[job %s] completed: %s (%.1f MB)", id[:8], outputPath, float64(size)/(1024*1024))
+	jm.update(id, "handoff", 0.94, "")
+	log.Printf("[job %s] completed render: %s (%.1f MB)", id[:8], outputPath, float64(size)/(1024*1024))
 	if err := notify.PublishCompletion(ctx, cfg, req.Slug, outputFilename); err != nil {
-		log.Printf("[job %s] publish completion: %v", id[:8], err)
+		jm.update(id, "failed", 0.94, fmt.Sprintf("publish completion: %v", err))
+		return
 	}
+	jm.update(id, "completed", 1.0, "")
 }
 
 // findPostBySlug searches postsDir for a post matching the slug fragment.

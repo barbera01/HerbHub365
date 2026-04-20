@@ -997,6 +997,7 @@ const App = {
             queued: 'Queued', preprocessing: 'Preprocessing', submitting: 'Submitting',
             generating: 'Generating', narrating: 'Narrating', stitching: 'Stitching',
             synthesizing: 'Synthesizing Audio', muxing: 'Muxing Audio',
+            handoff: 'Handing Off',
             completed: 'Completed', failed: 'Failed',
         };
         container.innerHTML = this.tlPublishJobs.map(j => {

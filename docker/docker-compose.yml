@@ -296,6 +296,7 @@ services:
       SOIL_MOISTURE_THRESHOLD: ${WATERING_SOIL_MOISTURE_THRESHOLD:-40.0}
       RABBITMQ_URL: ${WATERING_RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
       METRICS_URL: ${WATERING_METRICS_URL:-http://hh-02:9100/metrics}
+      MONITOR_INTERVAL: ${WATERING_MONITOR_INTERVAL:-30m}
     healthcheck:
       test:
         [

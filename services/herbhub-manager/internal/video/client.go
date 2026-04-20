@@ -209,6 +209,7 @@ func (c *Client) Resources() (*Resources, error) {
 type TimelapseNarrateRequest struct {
 	Text          string `json:"text"`
 	TimelapseFile string `json:"timelapse_file"`
+	TimelapseURL  string `json:"timelapse_url,omitempty"`
 	Intro         string `json:"intro,omitempty"`
 	Outro         string `json:"outro,omitempty"`
 	Slug          string `json:"slug"`

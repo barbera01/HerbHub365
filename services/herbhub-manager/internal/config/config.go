@@ -35,6 +35,7 @@ type BlogConfig struct {
 // TimelapseConfig holds settings for calling timelapse-builder.
 type TimelapseConfig struct {
 	ServiceURL string
+	PublicURL  string
 	Timeout    time.Duration
 }
 
@@ -56,6 +57,7 @@ func Load() Config {
 
 		Timelapse: TimelapseConfig{
 			ServiceURL: getEnv("TIMELAPSE_SERVICE_URL", "http://timelapse-builder:8082"),
+			PublicURL:  getEnv("TIMELAPSE_PUBLIC_URL", getEnv("TIMELAPSE_SERVICE_URL", "http://timelapse-builder:8082")),
 			Timeout:    getDurationEnv("TIMELAPSE_SERVICE_TIMEOUT", 30*time.Second),
 		},
 

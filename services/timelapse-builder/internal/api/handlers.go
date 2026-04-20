@@ -204,9 +204,10 @@ func (h *handlers) runBuild(jobID string, p job.Params) {
 	fmt.Fprintf(tmp, "file '%s'\n", frames[len(frames)-1].path)
 	tmp.Close()
 
-	outputName := p.OutputName
-	if outputName == "" {
-		outputName = fmt.Sprintf("timelapse-%s.mp4", time.Now().UTC().Format("20060102-150405"))
+	outputName, err := sanitizeOutputName(p.OutputName)
+	if err != nil {
+		h.tracker.MarkFailed(jobID, err.Error(), "")
+		return
 	}
 	outputPath := filepath.Join(h.cfg.OutputDir, outputName)
 
@@ -222,18 +223,41 @@ func (h *handlers) runBuild(jobID string, p job.Params) {
 		"-movflags", "+faststart",
 		outputPath,
 	)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
 	log.Printf("timelapse (job=%s): running ffmpeg → %s", jobID[:8], outputName)
-	if err := cmd.Run(); err != nil {
+	out, err := cmd.CombinedOutput()
+	if err != nil {
 		log.Printf("timelapse (job=%s): ffmpeg failed: %v", jobID[:8], err)
-		h.tracker.MarkFailed(jobID, fmt.Sprintf("ffmpeg: %v", err), "")
+		h.tracker.MarkFailed(jobID, fmt.Sprintf("ffmpeg: %v\n%s", err, trimOutput(string(out))), string(out))
 		return
 	}
 
 	log.Printf("timelapse build ok (job=%s): %s", jobID[:8], outputName)
 	h.tracker.MarkCompleted(jobID, outputName, "")
+}
+
+func sanitizeOutputName(name string) (string, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return fmt.Sprintf("timelapse-%s.mp4", time.Now().UTC().Format("20060102-150405")), nil
+	}
+
+	cleaned := filepath.Clean(name)
+	if cleaned == "." || cleaned == ".." || filepath.Base(cleaned) != cleaned {
+		return "", fmt.Errorf("output_name must be a filename, got %q", name)
+	}
+	if filepath.Ext(cleaned) == "" {
+		cleaned += ".mp4"
+	}
+	return cleaned, nil
+}
+
+func trimOutput(s string) string {
+	s = strings.TrimSpace(s)
+	if len(s) <= 1000 {
+		return s
+	}
+	return "…" + s[len(s)-1000:]
 }
 
 // ── GET /api/jobs ─────────────────────────────────────────────────────────────

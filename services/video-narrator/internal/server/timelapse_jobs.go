@@ -6,7 +6,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,6 +27,7 @@ import (
 type TimelapseNarrateRequest struct {
 	Text          string `json:"text"`           // TTS narration script
 	TimelapseFile string `json:"timelapse_file"` // filename of the built timelapse MP4
+	TimelapseURL  string `json:"timelapse_url,omitempty"`
 	Intro         string `json:"intro"`          // intro filename (in resources dir)
 	Outro         string `json:"outro"`          // outro filename (in resources dir)
 	Slug          string `json:"slug"`           // used for output filename and notification
@@ -256,11 +259,12 @@ downloadPhase:
 	m.update(id, "narrating", 0.76, "")
 
 	// ── Phase 6: Overlay TTS audio on timelapse video ───────────────────────
-	timelapsePath, err := resolveTimelapsePath(cfg.TimelapseOutputDir, req.TimelapseFile)
+	timelapsePath, cleanupTimelapse, err := prepareTimelapseInput(ctx, cfg, req)
 	if err != nil {
 		m.update(id, "failed", 0.76, err.Error())
 		return
 	}
+	defer cleanupTimelapse()
 
 	narratedTmp, err := os.CreateTemp("", "tl-narrated-*.mp4")
 	if err != nil {
@@ -360,6 +364,61 @@ func tlTrimOutput(s string) string {
 		return s
 	}
 	return "…" + s[len(s)-1000:]
+}
+
+func prepareTimelapseInput(ctx context.Context, cfg config.Config, req TimelapseNarrateRequest) (string, func(), error) {
+	var downloadErr error
+	if strings.TrimSpace(req.TimelapseURL) != "" {
+		path, err := downloadTimelapse(ctx, cfg.RequestTimeout, req.TimelapseURL)
+		if err == nil {
+			return path, func() { _ = os.Remove(path) }, nil
+		}
+		downloadErr = err
+		if strings.TrimSpace(req.TimelapseFile) == "" {
+			return "", func() {}, err
+		}
+	}
+
+	path, err := resolveTimelapsePath(cfg.TimelapseOutputDir, req.TimelapseFile)
+	if err != nil {
+		if downloadErr != nil {
+			return "", func() {}, fmt.Errorf("%v; local fallback failed: %w", downloadErr, err)
+		}
+		return "", func() {}, err
+	}
+	return path, func() {}, nil
+}
+
+func downloadTimelapse(ctx context.Context, timeout time.Duration, sourceURL string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, strings.TrimSpace(sourceURL), nil)
+	if err != nil {
+		return "", fmt.Errorf("build timelapse download request: %w", err)
+	}
+
+	client := &http.Client{Timeout: timeout}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("download timelapse from %s: %w", sourceURL, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		snippet, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		return "", fmt.Errorf("download timelapse from %s returned %d: %s", sourceURL, resp.StatusCode, strings.TrimSpace(string(snippet)))
+	}
+
+	tmp, err := os.CreateTemp("", "tl-source-*.mp4")
+	if err != nil {
+		return "", fmt.Errorf("create timelapse temp: %w", err)
+	}
+	defer tmp.Close()
+
+	if _, err := io.Copy(tmp, resp.Body); err != nil {
+		_ = os.Remove(tmp.Name())
+		return "", fmt.Errorf("write timelapse temp: %w", err)
+	}
+
+	return tmp.Name(), nil
 }
 
 func resolveTimelapsePath(outputDir, requestedFile string) (string, error) {

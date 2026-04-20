@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -635,6 +636,7 @@ func (h *handlers) handleTimelapsePublish(w http.ResponseWriter, r *http.Request
 	jobID, err := h.videoClient.NarrateTimelapse(video.TimelapseNarrateRequest{
 		Text:          req.TTSText,
 		TimelapseFile: req.TimelapseFile,
+		TimelapseURL:  h.timelapseVideoURL(req.TimelapseFile),
 		Intro:         req.Intro,
 		Outro:         req.Outro,
 		Slug:          slug,
@@ -650,6 +652,15 @@ func (h *handlers) handleTimelapsePublish(w http.ResponseWriter, r *http.Request
 		"slug":   slug,
 		"phase":  "queued",
 	})
+}
+
+func (h *handlers) timelapseVideoURL(filename string) string {
+	base := strings.TrimRight(strings.TrimSpace(h.cfg.Timelapse.PublicURL), "/")
+	filename = strings.TrimSpace(filename)
+	if base == "" || filename == "" {
+		return ""
+	}
+	return base + "/api/videos/" + url.PathEscape(filename)
 }
 
 func (h *handlers) createTimelapsePost(req timelapsePublishRequest, slug string) error {

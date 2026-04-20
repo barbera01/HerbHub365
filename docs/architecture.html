@@ -15,7 +15,7 @@
       color: #1a202c;
     }
     header {
-      max-width: 1300px;
+      max-width: 1400px;
       margin: 0 auto 28px;
     }
     header h1 {
@@ -32,8 +32,8 @@
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      max-width: 1300px;
-      margin: 0 auto 24px;
+      max-width: 1400px;
+      margin: 0 auto 28px;
     }
     .legend-item {
       display: flex;
@@ -49,25 +49,78 @@
       border: 2px solid;
       flex-shrink: 0;
     }
-    .diagram-wrapper {
-      background: #fff;
+    .section {
+      max-width: 1400px;
+      margin: 0 auto 48px;
+      background: white;
       border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      padding: 32px 24px;
-      max-width: 1300px;
-      margin: 0 auto;
-      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 28px 32px;
+    }
+    .section h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section .subtitle {
+      font-size: 0.88rem;
+      color: #718096;
+      margin: 0 0 20px;
     }
     .mermaid {
-      display: flex;
-      justify-content: center;
+      overflow-x: auto;
     }
-    footer {
-      max-width: 1300px;
-      margin: 20px auto 0;
-      font-size: 0.8rem;
-      color: #718096;
-      text-align: right;
+    .badge-new {
+      display: inline-block;
+      background: #48bb78;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      vertical-align: middle;
+    }
+    .service-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .service-table th {
+      background: #edf2f7;
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .service-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    .service-table tr:last-child td { border-bottom: none; }
+    .tag {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin: 1px;
+    }
+    .tag-cron  { background: #ebf8ff; color: #2b6cb0; }
+    .tag-http  { background: #e6fffa; color: #2c7a7b; }
+    .tag-amqp  { background: #fffaf0; color: #c05621; }
+    .tag-new   { background: #f0fff4; color: #276749; }
+    .tag-infra { background: #faf5ff; color: #553c9a; }
+    code {
+      background: #edf2f7;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 0.82em;
     }
   </style>
 </head>
@@ -75,166 +128,433 @@
 
 <header>
   <h1>HerbHub365 — Architecture &amp; Traffic Flow</h1>
-  <p>feat/llm-split branch &nbsp;·&nbsp; Generated 2026-04-17</p>
+  <p>Updated 2026-04-20 · Includes <span class="badge-new">NEW</span> manual YouTube publish via RabbitMQ management API</p>
 </header>
 
 <div class="legend">
   <div class="legend-item">
-    <div class="legend-swatch" style="background:#f5f5f5;border-color:#666666;"></div>
-    External / IoT
+    <div class="legend-swatch" style="background:#dbeafe;border-color:#3b82f6"></div>
+    Scheduled / daemon service
   </div>
   <div class="legend-item">
-    <div class="legend-swatch" style="background:#d5e8d4;border-color:#82b366;"></div>
-    Infrastructure (RabbitMQ, Traefik)
+    <div class="legend-swatch" style="background:#dcfce7;border-color:#16a34a"></div>
+    Management / interactive
   </div>
   <div class="legend-item">
-    <div class="legend-swatch" style="background:#dae8fc;border-color:#6c8ebf;"></div>
-    HerbHub Service
+    <div class="legend-swatch" style="background:#fef9c3;border-color:#ca8a04"></div>
+    Message bus / queue
   </div>
   <div class="legend-item">
-    <div class="legend-swatch" style="background:#d5e8d4;border-color:#007700;"></div>
-    ★ llm-service (new — feat/llm-split)
+    <div class="legend-swatch" style="background:#fee2e2;border-color:#dc2626"></div>
+    Publishing / upload
   </div>
   <div class="legend-item">
-    <div class="legend-swatch" style="background:#fff2cc;border-color:#d6b656;"></div>
-    External API
+    <div class="legend-swatch" style="background:#fce7f3;border-color:#db2777"></div>
+    External API / cloud
   </div>
   <div class="legend-item">
-    <div class="legend-swatch" style="background:#ffe6cc;border-color:#d79b00;"></div>
-    Shared Storage
-  </div>
-  <div class="legend-item">
-    <div class="legend-swatch" style="background:#e1d5e7;border-color:#9673a6;"></div>
-    CI/CD &amp; Azure Hosting
-  </div>
-  <div class="legend-item" style="gap:4px;">
-    <span style="font-size:1.1rem;color:#555;">- -</span>
-    Scheduled / monitoring trigger
+    <div class="legend-swatch" style="background:#f3f4f6;border-color:#6b7280"></div>
+    Infrastructure
   </div>
 </div>
 
-<div class="diagram-wrapper">
+<!-- ═══ DIAGRAM 1: Full System Architecture ═══════════════════════════════ -->
+<div class="section">
+  <h2>① Full System Architecture</h2>
+  <p class="subtitle">All services, queues, and external APIs. Left-to-right data flow.</p>
   <div class="mermaid">
-%%{init: {"theme": "base", "themeVariables": {"fontSize": "14px", "lineColor": "#555555"}, "flowchart": {"curve": "basis", "padding": 20}}}%%
-graph TD
+flowchart LR
+    subgraph IOT["🌱 IoT &amp; External Sources"]
+        direction TB
+        SENSORS["Sensors\nhh-02:9100\n(node_exporter)"]
+        CAMERA["Timelapse\nCamera"]
+        BROWSER["User / Browser"]
+    end
 
-  subgraph EXT["  External / IoT  "]
-    IoT["IoT Sensors"]
-    User["User / Browser"]
-    Sched["Scheduler\n(Cronicle)"]
-    NodeExp["Node Exporter\nhh-02:9100"]
-  end
+    subgraph SCHED["⏰ Scheduled Services"]
+        direction TB
+        BLOGPOSTER["blog-poster\ncron 00:05 UTC\n+ prom-post 23:00"]
+        TTS["tts-narrator\ncron 00:10 UTC"]
+        VIDNAR["video-narrator\ndaemon / server\n:8090"]
+        TLAPSE["timelapse-builder\n:8082"]
+        WATERING["watering\n5 min poll"]
+    end
 
-  subgraph INFRA["  Infrastructure  "]
-    RMQ[("RabbitMQ")]
-    Traefik["Traefik\n(reverse proxy)"]
-  end
+    subgraph MGMT["🎛️ Management"]
+        MANAGER["herbhub-manager\n:8080\nWeb UI + REST API"]
+    end
 
-  subgraph CONTENT["  Content Pipeline  "]
-    Blog["blog-poster"]
-    LLM["★ llm-service"]
-    TTS["tts-narrator"]
-    Water["watering"]
-    Timelapse["timelapse-builder"]
-  end
+    subgraph MQ["📨 RabbitMQ — :5672 AMQP · :15672 Mgmt API"]
+        direction TB
+        Q1["⊟ sensor.snapshots"]
+        Q2["⊟ video.produced"]
+        QDLQ["⊟ video.produced.dlq"]
+        Q3["⊟ watering.queue"]
+    end
 
-  subgraph VIDEO["  Video Pipeline  "]
-    HVid["herbhub-video\n(:8080)"]
-    VidNar["video-narrator\n(:8090)"]
-    VidPub["video-publisher"]
-  end
+    subgraph DATA["🗄️ Data Stores"]
+        direction TB
+        JEKYLL[("Jekyll Repo\n_posts/\nassets/")]
+        VIDOUT[("Video Output\n.mp4 + .json")]
+        AUDIOOUT[("Audio Output\n.mp3")]
+    end
 
-  subgraph STORE["  Shared Storage  "]
-    Repo[("/repo\n(shared volume)")]
-    Mnt[("/mnt/herbhub-video\n(shared volume)")]
-  end
+    subgraph PUBLISH["📤 Publishing"]
+        VIDPUB["video-publisher\nYouTube uploader"]
+    end
 
-  subgraph APIS["  External APIs  "]
-    Ollama["Ollama /\nOpenAI-compat"]
-    Kokoro["Kokoro TTS API"]
-    GH["GitHub\n(origin/main)"]
-    MuseTalk["MuseTalk API\n(avatar video)"]
-    YT["YouTube"]
-    Prom["Prometheus"]
-  end
+    subgraph APIS["☁️ External APIs"]
+        direction TB
+        LLM["Ollama / LLM\nollama.la.home-cloud.uk"]
+        KOKORO["Kokoro TTS\nkokoro-api.lab.home-cloud.uk"]
+        MUSETALK["MuseTalk\n172.16.106.81:8011"]
+        YOUTUBE["YouTube API\ngoogleapis.com"]
+        GITHUB["GitHub\nJekyll Repo"]
+        PROM["Prometheus\nprometheus.home-cloud.uk"]
+    end
 
-  subgraph CICD["  CI/CD &amp; Azure Hosting  "]
-    GHActions["GitHub Actions\nAzure Static Web Apps CI/CD"]
-    Jekyll["Jekyll Build\nhub/ → _site/"]
-    AzureSWA["Azure Static Web Apps\nwonderful-ocean-0a19a7903"]
-    Visitor["Public Visitor\nherbhub365.com"]
-  end
+    subgraph INFRA["🔧 Infrastructure"]
+        direction TB
+        TRAEFIK["Traefik\nReverse Proxy"]
+        CRONICLE["Cronicle\nScheduler :3012"]
+    end
 
-  IoT       -->|"sensor.snapshots"| RMQ
-  RMQ       -->|"consume"| Blog
-  Blog      -->|"POST /generate"| LLM
-  LLM       -->|"HTTP"| Ollama
-  Blog      -->|"write _posts"| Repo
-  Blog      -->|"git push"| GH
-  Repo      -->|"read _posts"| TTS
-  TTS       -->|"write audio"| Repo
-  TTS       -->|"HTTP TTS"| Kokoro
-  TTS       -.->|"git push"| GH
-  User      -->|"HTTPS"| Traefik
-  Traefik   -->|":8080"| HVid
-  HVid      -->|"read _posts"| Repo
-  HVid      -->|"POST /video/generate"| VidNar
-  VidNar    -->|"HTTP lip-sync"| MuseTalk
-  VidNar    -->|"video.produced"| RMQ
-  RMQ       -->|"consume"| VidPub
-  VidPub    -->|"OAuth upload"| YT
-  VidPub    -->|"update YAML"| Repo
-  VidNar    -->|"write MP4"| Mnt
-  VidPub    -->|"read MP4"| Mnt
-  NodeExp   -->|"scrape metrics"| Water
-  Water     -->|"watering signals"| RMQ
-  Sched     -.->|"cron (0 9,16 * * *)"| Blog
-  Sched     -.->|"cron trigger"| TTS
-  Prom      -.->|"scrape :8787"| Water
+    SENSORS -->|"AMQP publish"| Q1
+    CAMERA -->|"images mount"| TLAPSE
+    BROWSER -->|"HTTPS"| TRAEFIK
+    TRAEFIK -->|"HTTP"| MANAGER
 
-  GH        -->|"push to origin/main\ntriggers workflow"| GHActions
-  GHActions -->|"checkout submodules\n+ jekyll build"| Jekyll
-  Jekyll    -->|"static-web-apps-deploy@v1\n+ API token secret"| AzureSWA
-  AzureSWA  -->|"serves static site\n(HTTPS)"| Visitor
-  VidPub    -.->|"git push\n(youtube_url frontmatter)"| GH
+    Q1 -->|"AMQP consume"| BLOGPOSTER
+    BLOGPOSTER -->|"HTTP"| LLM
+    BLOGPOSTER -->|"writes posts"| JEKYLL
+    BLOGPOSTER -->|"git push"| GITHUB
 
-  classDef service   fill:#dae8fc,stroke:#6c8ebf,color:#1a202c
-  classDef newSvc    fill:#d5e8d4,stroke:#007700,color:#005500,font-weight:bold
-  classDef infra     fill:#d5e8d4,stroke:#82b366,color:#1a202c
-  classDef external  fill:#f5f5f5,stroke:#888888,color:#2d3748
-  classDef api       fill:#fff2cc,stroke:#d6b656,color:#1a202c
-  classDef storage   fill:#ffe6cc,stroke:#d79b00,color:#1a202c
-  classDef cicd      fill:#e1d5e7,stroke:#9673a6,color:#1a202c
+    JEKYLL -->|"reads posts"| TTS
+    TTS -->|"HTTPS POST"| KOKORO
+    TTS -->|"writes MP3"| AUDIOOUT
+    TTS -->|"git push"| GITHUB
 
-  class Blog,TTS,Water,Timelapse,HVid,VidNar,VidPub service
-  class LLM newSvc
-  class RMQ,Traefik infra
-  class IoT,User,Sched,NodeExp external
-  class Ollama,Kokoro,GH,MuseTalk,YT,Prom api
-  class Repo,Mnt storage
-  class GHActions,Jekyll,AzureSWA,Visitor cicd
+    JEKYLL -->|"reads posts"| VIDNAR
+    VIDNAR -->|"HTTP"| MUSETALK
+    VIDNAR -->|"writes MP4"| VIDOUT
+    VIDNAR -->|"AMQP publish"| Q2
+
+    MANAGER -->|"HTTPS"| VIDNAR
+    MANAGER -->|"HTTP"| TLAPSE
+    MANAGER -->|"HTTP"| LLM
+    MANAGER -->|"HTTP :15672\nmgmt API 🆕"| Q2
+
+    Q2 -->|"AMQP consume"| VIDPUB
+    VIDPUB -->|"HTTPS OAuth2"| YOUTUBE
+    VIDPUB -->|"updates embed\ngit push"| GITHUB
+    VIDPUB -->|"on failure"| QDLQ
+
+    PROM -->|"HTTP scrape"| WATERING
+    WATERING -->|"AMQP publish"| Q3
+
+    style VIDPUB fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    style MANAGER fill:#dcfce7,stroke:#16a34a,color:#14532d
+    style Q2 fill:#fef9c3,stroke:#ca8a04
+    style BLOGPOSTER fill:#dbeafe,stroke:#3b82f6
+    style TTS fill:#dbeafe,stroke:#3b82f6
+    style VIDNAR fill:#dbeafe,stroke:#3b82f6
   </div>
 </div>
 
-<footer>HerbHub365 · docs/architecture.html</footer>
+<!-- ═══ DIAGRAM 2: Video Content Pipeline ════════════════════════════════ -->
+<div class="section">
+  <h2>② Video Content Pipeline — End-to-End Flow</h2>
+  <p class="subtitle">How a daily blog post becomes a YouTube video. Shows both automated (daemon) and manual (manager) paths.</p>
+  <div class="mermaid">
+flowchart TD
+    A["📡 IoT Sensors\nsoil / environment data"] -->|"AMQP → sensor.snapshots"| B
+
+    B["blog-poster\ncron 00:05 UTC"] -->|"HTTP POST"| C["Ollama / LLM\nContent generation"]
+    C -->|"Returns generated content"| B
+    B -->|"Writes markdown"| D[("Jekyll _posts/\nYYYY-MM-DD-slug.md")]
+    B -->|"git push"| GH["GitHub\nherbhub365.com"]
+
+    D -->|"reads"| E["tts-narrator\ncron 00:10 UTC"]
+    E -->|"HTTPS POST text"| F["Kokoro TTS API\nMP3 generation"]
+    F -->|"audio stream"| E
+    E -->|"writes .mp3"| AU[("assets/audio/blog/\nYYYY-MM-DD-slug.mp3")]
+    AU -->|"audio_url in front matter\ngit push"| GH
+
+    D -->|"reads"| G
+
+    subgraph VIDGEN["Video Generation — two paths"]
+        G["video-narrator\n:8090 daemon/server"]
+        GM["herbhub-manager\n:8080 POST /api/generate"]
+        GM -->|"HTTPS with post text"| G
+    end
+
+    G -->|"HTTP TTS + MuseTalk"| MT["MuseTalk API\n172.16.106.81:8011\nAvatar video generation"]
+    MT -->|"MP4 stream"| G
+    G -->|"writes"| VO[("Video Output\nYYYY-MM-DD-slug.mp4")]
+    G -->|"AMQP publish\nvideo.produced"| MQ
+
+    VO -->|"file path in message"| MQ["RabbitMQ\nvideo.produced queue"]
+
+    MQ -->|"AMQP consume"| VP["video-publisher"]
+    VP -->|"HTTPS OAuth2\nupload MP4"| YT["YouTube API\ngoogleapis.com"]
+    YT -->|"videoId"| VP
+    VP -->|"injects iframe embed\ngit push"| GH
+    VP -->|"deletes MP4,\nwrites .json marker"| VO
+
+    style GM fill:#dcfce7,stroke:#16a34a
+    style VP fill:#fee2e2,stroke:#dc2626
+    style MQ fill:#fef9c3,stroke:#ca8a04
+  </div>
+</div>
+
+<!-- ═══ DIAGRAM 3: Manual YouTube Publish (NEW) ══════════════════════════ -->
+<div class="section">
+  <h2>③ Manual YouTube Publish <span class="badge-new">NEW</span></h2>
+  <p class="subtitle">
+    User triggers publish from the Posts page when a local MP4 exists.
+    herbhub-manager queues the message via RabbitMQ management HTTP API — no separate publish service endpoint needed.
+  </p>
+  <div class="mermaid">
+sequenceDiagram
+    actor User
+    participant M as herbhub-manager<br/>:8080
+    participant R as RabbitMQ Mgmt API<br/>rabbitmq:15672
+    participant Q as video.produced<br/>queue
+    participant VP as video-publisher
+    participant YT as YouTube API
+    participant GH as GitHub
+
+    User->>M: POST /api/publish {slug}
+    M->>M: Resolve post → find .mp4 in output dir
+    M->>R: POST /api/exchanges/%2F/amq.default/publish<br/>{slug, date, output_file, status:"completed"}
+    R->>Q: Route message (delivery_mode:2 persistent)
+    R-->>M: {routed: true}
+    M-->>User: 202 Accepted {status:"queued"}
+
+    Note over VP,Q: video-publisher consumer picks up message
+    VP->>Q: AMQP consume
+    Q-->>VP: {slug, date, output_file}
+    VP->>VP: Load post metadata (title, tags, excerpt)
+    VP->>YT: Upload MP4 (HTTPS OAuth2)
+    YT-->>VP: videoId
+    VP->>VP: Write .json marker with youtube_url
+    VP->>GH: Inject iframe embed, git push
+    VP->>VP: Delete local .mp4
+
+    Note over User,M: Posts page badge updates to "Published" on next refresh
+  </div>
+</div>
+
+<!-- ═══ DIAGRAM 4: Timelapse Pipeline ════════════════════════════════════ -->
+<div class="section">
+  <h2>④ Timelapse Pipeline</h2>
+  <p class="subtitle">From camera images to a narrated timelapse video on YouTube.</p>
+  <div class="mermaid">
+flowchart LR
+    CAM["📷 Timelapse Camera\n/home/andy/Pictures/timelapse"] -->|"images mount\n/input"| TB
+
+    TB["timelapse-builder\n:8082"] -->|"POST /api/build"| TB
+    TB -->|"ffmpeg stitch"| TVO[("Timelapse .mp4\n/output/")]
+
+    MANAGER["herbhub-manager\n:8080"] -->|"POST /api/timelapse/build"| TB
+    MANAGER -->|"POST /api/timelapse/publish\n{timelapse_file, tts_text, title}"| VN
+
+    TB -->|"GET /api/timelapse/videos/{file}"| MANAGER
+
+    VN["video-narrator\n:8090\nNarrate timelapse"] -->|"TTS + MuseTalk"| VN
+    VN -->|"writes narrated MP4"| VO2[("Video Output\n.mp4")]
+    VN -->|"AMQP publish\nvideo.produced"| MQ2["RabbitMQ\nvideo.produced"]
+
+    MQ2 -->|"AMQP consume"| VP2["video-publisher"]
+    VP2 -->|"HTTPS OAuth2"| YT2["YouTube API"]
+    VP2 -->|"git push embed"| GH2["GitHub"]
+
+    style MANAGER fill:#dcfce7,stroke:#16a34a
+    style VP2 fill:#fee2e2,stroke:#dc2626
+    style MQ2 fill:#fef9c3,stroke:#ca8a04
+  </div>
+</div>
+
+<!-- ═══ DIAGRAM 5: Watering Automation ══════════════════════════════════ -->
+<div class="section">
+  <h2>⑤ Watering Automation</h2>
+  <p class="subtitle">Soil moisture monitoring and automated watering via GPIO.</p>
+  <div class="mermaid">
+flowchart LR
+    NE["node_exporter\nhh-02:9100"] -->|"HTTP metrics"| W
+    PROM["Prometheus\nprometheus.home-cloud.uk"] -->|"also scrapes"| NE
+
+    W["watering service\n5 min poll"] -->|"compare to threshold\n(default 40%)"| W
+    W -->|"below threshold\nAMQP publish"| Q3["⊟ watering.queue"]
+    W -->|"GPIO control"| GPIO["GPIO\nWatering Valve"]
+
+    style W fill:#dbeafe,stroke:#3b82f6
+  </div>
+</div>
+
+<!-- ═══ SERVICE REFERENCE TABLE ══════════════════════════════════════════ -->
+<div class="section">
+  <h2>⑥ Service Reference</h2>
+  <p class="subtitle">All services, ports, schedules, and external dependencies.</p>
+  <table class="service-table">
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Port</th>
+        <th>Mode / Schedule</th>
+        <th>Consumes</th>
+        <th>Produces / Publishes</th>
+        <th>External APIs</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>llm-service</strong></td>
+        <td><code>:8080</code></td>
+        <td><span class="tag tag-http">HTTP server</span></td>
+        <td>HTTP requests from blog-poster, herbhub-manager</td>
+        <td>Generated text responses</td>
+        <td>Ollama (<code>ollama.la.home-cloud.uk</code>)</td>
+      </tr>
+      <tr>
+        <td><strong>blog-poster</strong></td>
+        <td>—</td>
+        <td>
+          <span class="tag tag-cron">cron 00:05</span>
+          <span class="tag tag-cron">prom-post 23:00</span>
+        </td>
+        <td>RabbitMQ <code>sensor.snapshots</code></td>
+        <td>Jekyll <code>_posts/*.markdown</code>, git push to GitHub</td>
+        <td>llm-service, GitHub, Prometheus</td>
+      </tr>
+      <tr>
+        <td><strong>tts-narrator</strong></td>
+        <td>—</td>
+        <td><span class="tag tag-cron">cron 00:10</span> <code>TTS_MODE</code></td>
+        <td>Jekyll <code>_posts/</code> (reads locally)</td>
+        <td><code>assets/audio/blog/*.mp3</code>, git push, <code>audio_url</code> in front matter</td>
+        <td>Kokoro TTS (<code>kokoro-api.lab.home-cloud.uk</code>)</td>
+      </tr>
+      <tr>
+        <td><strong>video-narrator</strong></td>
+        <td><code>:8090</code></td>
+        <td><span class="tag tag-http">HTTP server</span> <span class="tag tag-cron">daemon mode</span></td>
+        <td>Jekyll <code>_posts/</code>, HTTP from herbhub-manager</td>
+        <td><code>Video Output/*.mp4</code>, AMQP → <code>video.produced</code></td>
+        <td>MuseTalk (<code>172.16.106.81:8011</code>), Kokoro TTS</td>
+      </tr>
+      <tr>
+        <td><strong>herbhub-manager</strong></td>
+        <td><code>:8080</code></td>
+        <td><span class="tag tag-http">HTTP server</span> <span class="tag tag-new">Web UI</span></td>
+        <td>Jekyll <code>_posts/</code>, Video Output</td>
+        <td>HTTP to video-narrator, timelapse-builder, llm-service; <span class="tag tag-new">NEW</span> AMQP via RabbitMQ mgmt :15672 → <code>video.produced</code></td>
+        <td>video-narrator, timelapse-builder, llm-service, RabbitMQ :15672</td>
+      </tr>
+      <tr>
+        <td><strong>video-publisher</strong></td>
+        <td>—</td>
+        <td><span class="tag tag-amqp">AMQP consumer</span></td>
+        <td>RabbitMQ <code>video.produced</code></td>
+        <td>YouTube upload, Jekyll post embed (git push), <code>.json</code> marker, DLQ on failure</td>
+        <td>YouTube API (<code>googleapis.com</code>), GitHub</td>
+      </tr>
+      <tr>
+        <td><strong>timelapse-builder</strong></td>
+        <td><code>:8082</code></td>
+        <td><span class="tag tag-http">HTTP server</span></td>
+        <td>Image mount <code>/input</code>, HTTP from herbhub-manager</td>
+        <td>Timelapse <code>.mp4</code> in <code>/output</code></td>
+        <td>ffmpeg (local)</td>
+      </tr>
+      <tr>
+        <td><strong>watering</strong></td>
+        <td><code>:8787</code> health</td>
+        <td><span class="tag tag-cron">5 min poll</span></td>
+        <td>Prometheus metrics (hh-02:9100)</td>
+        <td>AMQP → <code>watering.queue</code>, GPIO watering valve</td>
+        <td>Prometheus, node_exporter</td>
+      </tr>
+      <tr>
+        <td><strong>RabbitMQ</strong></td>
+        <td><code>:5672</code> / <code>:15672</code></td>
+        <td><span class="tag tag-infra">Infrastructure</span></td>
+        <td colspan="3">
+          Queues: <code>sensor.snapshots</code> · <code>video.produced</code> · <code>video.produced.dlq</code> · <code>watering.queue</code>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Traefik</strong></td>
+        <td><code>:80/:443</code></td>
+        <td><span class="tag tag-infra">Reverse proxy</span></td>
+        <td colspan="3">
+          Routes: <code>manager.herbhub365.com</code> → herbhub-manager ·
+          <code>rabbit.herbhub365.com</code> → RabbitMQ :15672 ·
+          <code>scheduler.herbhub365.com</code> → Cronicle :3012
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Cronicle</strong></td>
+        <td><code>:3012</code></td>
+        <td><span class="tag tag-infra">Job scheduler</span></td>
+        <td colspan="3">Manages scheduled tasks with web UI</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ QUEUE REFERENCE ════════════════════════════════════════════════════ -->
+<div class="section">
+  <h2>⑦ RabbitMQ Queue Reference</h2>
+  <p class="subtitle">All queues, producers, and consumers.</p>
+  <table class="service-table">
+    <thead>
+      <tr><th>Queue</th><th>Producer(s)</th><th>Consumer(s)</th><th>Message shape</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>sensor.snapshots</code></td>
+        <td>IoT devices / sensors</td>
+        <td>blog-poster</td>
+        <td>Sensor snapshot JSON</td>
+      </tr>
+      <tr>
+        <td><code>video.produced</code></td>
+        <td>video-narrator (daemon/pipeline)<br/><strong>herbhub-manager</strong> <span class="tag tag-new">NEW</span> via mgmt API</td>
+        <td>video-publisher</td>
+        <td><code>{ slug, date, output_file, status, timestamp }</code></td>
+      </tr>
+      <tr>
+        <td><code>video.produced.dlq</code></td>
+        <td>video-publisher (on failure)</td>
+        <td>Manual inspection</td>
+        <td><code>{ error, timestamp, original }</code></td>
+      </tr>
+      <tr>
+        <td><code>watering.queue</code></td>
+        <td>watering service</td>
+        <td>—</td>
+        <td>Watering event JSON</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 <script>
   mermaid.initialize({
     startOnLoad: true,
-    theme: 'base',
+    theme: 'default',
+    flowchart: { useMaxWidth: true, htmlLabels: true },
+    sequence: { useMaxWidth: true, showSequenceNumbers: false },
     themeVariables: {
-      fontSize: '14px',
-      lineColor: '#555555',
-      primaryColor: '#dae8fc',
-      primaryBorderColor: '#6c8ebf',
-    },
-    flowchart: {
-      curve: 'basis',
-      padding: 20,
-      htmlLabels: true,
+      primaryColor: '#dbeafe',
+      primaryBorderColor: '#3b82f6',
+      secondaryColor: '#fef9c3',
+      tertiaryColor: '#dcfce7',
+      lineColor: '#4b5563',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     }
   });
 </script>
-
 </body>
 </html>

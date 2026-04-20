@@ -25,15 +25,16 @@ const (
 	defaultRabbitMQURL = "amqp://admin:yourpassword@rabbitmq:5672/"
 	Exchange           = "herbhub.watering"
 	QueueName          = "watering.queue"
-	MonitorInterval    = 5 * time.Minute
 	ServerPort         = ":8787"
-	defaultThreshold   = 40.0 // Default soil moisture threshold in percent
+	defaultThreshold   = 40.0
+	defaultInterval    = 30 * time.Minute
 )
 
 var (
 	minSoilMoistureThreshold float64
 	metricsURL               string
 	rabbitMQURL              string
+	monitorInterval          time.Duration
 	promPattern              = regexp.MustCompile(`herbhub_soil_percent\{plant="([^"]+)"\}\s+([0-9.]+)`)
 )
 
@@ -62,9 +63,19 @@ func main() {
 		rabbitMQURL = defaultRabbitMQURL
 	}
 
+	monitorInterval = defaultInterval
+	if v := os.Getenv("MONITOR_INTERVAL"); v != "" {
+		if d, err := time.ParseDuration(v); err == nil && d > 0 {
+			monitorInterval = d
+		} else {
+			log.Printf("Invalid MONITOR_INTERVAL %q, using default %s", v, defaultInterval)
+		}
+	}
+
 	log.Printf("Initialized with moisture threshold: %.2f%%", minSoilMoistureThreshold)
 	log.Printf("Metrics URL: %s", metricsURL)
 	log.Printf("RabbitMQ URL: %s", rabbitMQURL)
+	log.Printf("Monitor interval: %s", monitorInterval)
 
 	// Setup channels for signal handling
 	stop := make(chan os.Signal, 1)
@@ -98,7 +109,7 @@ func connectToRabbitMQ(ctx context.Context) (*amqp.Connection, error) {
 }
 
 func monitorLoop(ctx context.Context) {
-	ticker := time.NewTicker(MonitorInterval)
+	ticker := time.NewTicker(monitorInterval)
 	defer ticker.Stop()
 
 	log.Println("Starting monitoring loop")

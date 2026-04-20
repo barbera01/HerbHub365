@@ -5,14 +5,15 @@ import (
 
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
+	"HerbHub365/services/herbhub-manager/internal/publisher"
 	"HerbHub365/services/herbhub-manager/internal/timelapse"
 	"HerbHub365/services/herbhub-manager/internal/video"
 )
 
 // NewRouter builds the HTTP mux with all API routes and static file serving.
-func NewRouter(cfg config.Config, videoClient *video.Client, blogClient *blogpost.Client, timelapseClient *timelapse.Client, webFS http.FileSystem) http.Handler {
+func NewRouter(cfg config.Config, videoClient *video.Client, blogClient *blogpost.Client, timelapseClient *timelapse.Client, pubClient *publisher.Client, webFS http.FileSystem) http.Handler {
 	mux := http.NewServeMux()
-	h := &handlers{cfg: cfg, videoClient: videoClient, blogClient: blogClient, timelapseClient: timelapseClient}
+	h := &handlers{cfg: cfg, videoClient: videoClient, blogClient: blogClient, timelapseClient: timelapseClient, pubClient: pubClient}
 
 	// Video API routes.
 	mux.HandleFunc("/api/posts", h.handlePosts)
@@ -25,6 +26,9 @@ func NewRouter(cfg config.Config, videoClient *video.Client, blogClient *blogpos
 	mux.HandleFunc("/api/config", h.handleConfig)
 	mux.HandleFunc("/api/resources", h.handleResources)
 	mux.HandleFunc("/api/health", h.handleHealth)
+
+	// YouTube publish route.
+	mux.HandleFunc("/api/publish", h.handlePublish)
 
 	// Blog poster API routes.
 	mux.HandleFunc("/api/blog/generate", h.handleBlogGenerate)

@@ -15,6 +15,13 @@ type Config struct {
 	RequestTimeout time.Duration
 	Blog           BlogConfig
 	Timelapse      TimelapseConfig
+	RabbitMQ       RabbitMQConfig
+}
+
+// RabbitMQConfig holds settings for publishing to the video.produced queue.
+type RabbitMQConfig struct {
+	URL   string // RABBITMQ_URL (amqp://...)
+	Queue string // RABBITMQ_QUEUE
 }
 
 // PostConfig describes where Jekyll posts live.
@@ -59,6 +66,11 @@ func Load() Config {
 			ServiceURL: getEnv("TIMELAPSE_SERVICE_URL", "http://timelapse-builder:8082"),
 			PublicURL:  getEnv("TIMELAPSE_PUBLIC_URL", "https://manager.herbhub365.com"),
 			Timeout:    getDurationEnv("TIMELAPSE_SERVICE_TIMEOUT", 30*time.Second),
+		},
+
+		RabbitMQ: RabbitMQConfig{
+			URL:   os.Getenv("RABBITMQ_URL"),
+			Queue: getEnv("RABBITMQ_QUEUE", "video.produced"),
 		},
 
 		Blog: BlogConfig{

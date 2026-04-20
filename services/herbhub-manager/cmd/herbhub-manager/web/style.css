@@ -404,6 +404,17 @@ body {
     font-size: 13px;
 }
 
+.btn-publish {
+    background: rgba(255, 0, 0, 0.1);
+    color: #cc0000;
+    border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.btn-publish:hover {
+    background: #cc0000;
+    color: white;
+}
+
 .btn-danger {
     background: rgba(220, 38, 38, 0.1);
     color: var(--danger);

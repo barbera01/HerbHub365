@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for April 20, 2026](/assets/images/blog/2026-04-20-greenhouse-snapshot-april-20th-observations.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/uX5--gEkDQQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 Yesterday was a productive day observing our herbs. The overall greenhouse environment remained stable, with barometric pressure holding steady at 1021 hPa throughout the monitoring period.
 

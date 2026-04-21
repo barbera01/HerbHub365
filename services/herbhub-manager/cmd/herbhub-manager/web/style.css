@@ -1343,3 +1343,52 @@ body {
     white-space: nowrap;
     flex-shrink: 0;
 }
+
+/* ── Queue Select Mode ─────────────────────────────────────────────────────── */
+
+.queue-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.queue-bar.hidden {
+    display: none;
+}
+
+.queue-bar-actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-shrink: 0;
+}
+
+.card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow-md);
+}
+
+.card-checkbox {
+    margin-bottom: var(--space-sm);
+}
+
+.card-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+#select-mode-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}

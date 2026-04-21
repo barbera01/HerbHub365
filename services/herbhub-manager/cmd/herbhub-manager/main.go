@@ -6,10 +6,15 @@ import (
 	"log"
 	"net/http"
 
+	"context"
+	"os/signal"
+	"syscall"
+
 	"HerbHub365/services/herbhub-manager/internal/api"
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
 	"HerbHub365/services/herbhub-manager/internal/publisher"
+	"HerbHub365/services/herbhub-manager/internal/queue"
 	"HerbHub365/services/herbhub-manager/internal/timelapse"
 	"HerbHub365/services/herbhub-manager/internal/video"
 )
@@ -18,6 +23,9 @@ import (
 var webContent embed.FS
 
 func main() {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	cfg := config.Load()
 
 	log.Printf("herbhub-manager starting on %s", cfg.ListenAddr)
@@ -42,12 +50,15 @@ func main() {
 		}
 	}
 
+	queueManager := queue.NewManager(videoClient, cfg.Post.PostsDir)
+	go queueManager.Run(ctx)
+
 	webFS, err := fs.Sub(webContent, "web")
 	if err != nil {
 		log.Fatalf("embedded web fs: %v", err)
 	}
 
-	router := api.NewRouter(cfg, videoClient, blogClient, timelapseClient, pubClient, http.FS(webFS))
+	router := api.NewRouter(cfg, videoClient, blogClient, timelapseClient, pubClient, queueManager, http.FS(webFS))
 
 	log.Printf("listening on %s", cfg.ListenAddr)
 	if err := http.ListenAndServe(cfg.ListenAddr, router); err != nil {

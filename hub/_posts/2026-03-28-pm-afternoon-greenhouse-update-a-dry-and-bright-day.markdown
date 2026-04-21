@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for March 28, 2026](/assets/images/blog/2026-03-28-afternoon-greenhouse-update-a-dry-and-bright-day.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/1fl2Cug4pJs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The sun brought a warm welcome to the greenhouse, with light levels climbing steadily from morning shadows until mid-afternoon brightness peaked near 800 lux. As evening approached, the intensity settled back down while the air remained quite dry throughout the day. Humidity hovered around an average of thirty-three percent before dipping below thirty-one in the late hours.
 

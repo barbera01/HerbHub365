@@ -343,7 +343,34 @@ func clientFromToken(ctx context.Context, config *oauth2.Config, tokenPath strin
 	if err != nil {
 		return nil, fmt.Errorf("read token: %w", err)
 	}
-	return config.Client(ctx, tok), nil
+	ts := oauth2.ReuseTokenSource(tok, &persistingTokenSource{
+		path:   tokenPath,
+		token:  tok,
+		source: config.TokenSource(ctx, tok),
+	})
+	return oauth2.NewClient(ctx, ts), nil
+}
+
+type persistingTokenSource struct {
+	path   string
+	token  *oauth2.Token
+	source oauth2.TokenSource
+}
+
+func (s *persistingTokenSource) Token() (*oauth2.Token, error) {
+	tok, err := s.source.Token()
+	if err != nil {
+		return nil, err
+	}
+	if tokenChanged(s.token, tok) {
+		if err := writeToken(s.path, tok); err != nil {
+			log.Printf("persist refreshed token: %v", err)
+		} else {
+			log.Printf("persisted refreshed youtube token with expiry %s", tok.Expiry.UTC().Format(time.RFC3339))
+		}
+		s.token = tok
+	}
+	return tok, nil
 }
 
 func readToken(path string) (*oauth2.Token, error) {
@@ -357,6 +384,28 @@ func readToken(path string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	return &tok, nil
+}
+
+func writeToken(path string, tok *oauth2.Token) error {
+	data, err := json.MarshalIndent(tok, "", "    ")
+	if err != nil {
+		return err
+	}
+	tmpPath := path + ".tmp"
+	if err := os.WriteFile(tmpPath, data, 0600); err != nil {
+		return err
+	}
+	return os.Rename(tmpPath, path)
+}
+
+func tokenChanged(current, next *oauth2.Token) bool {
+	if current == nil || next == nil {
+		return current != next
+	}
+	return current.AccessToken != next.AccessToken ||
+		current.RefreshToken != next.RefreshToken ||
+		current.TokenType != next.TokenType ||
+		!current.Expiry.Equal(next.Expiry)
 }
 
 func uploadToYouTube(ctx context.Context, service *youtube.Service, videoPath, title, description string, tags []string, cfg Config) (string, error) {

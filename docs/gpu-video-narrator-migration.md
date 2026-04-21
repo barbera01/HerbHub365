@@ -162,7 +162,7 @@ Create `/opt/herbhub/repo/docker/.env`:
 ```env
 VIDEO_BASE_URL=http://localhost:8011
 RABBITMQ_URL=amqp://admin:yourpassword@MAIN_SERVER_IP:5672/
-NFS_OUTPUT_MOUNT=/mnt/herbhub-video
+NFS_OUTPUT_MOUNT=/mnt/herbhub-video/Video/Output
 # Resources are read directly from the NAS NFS mount — no local copies needed
 VIDEO_RESOURCES_PATH=/mnt/herbhub-video/Resources/video
 VIDEO_BG_RESOURCES_PATH=/mnt/herbhub-video/Resources/video_backgrounds
@@ -246,7 +246,7 @@ docker compose up -d herbhub-video video-publisher
 |---|---|---|
 | `VIDEO_BASE_URL` | MuseTalk API URL on the GPU machine | `http://localhost:8011` |
 | `RABBITMQ_URL` | AMQP URL on the main server | _(required)_ |
-| `NFS_OUTPUT_MOUNT` | Local path of the NAS NFS mount | `/mnt/herbhub-video` |
+| `NFS_OUTPUT_MOUNT` | Local path of the shared `Video/Output` directory | `/mnt/herbhub-video/Video/Output` |
 | `VIDEO_RESOURCES_PATH` | Intro/outro MP4s (on NAS) | `/mnt/herbhub-video/Resources/video` |
 | `VIDEO_BG_RESOURCES_PATH` | Background images (on NAS) | `/mnt/herbhub-video/Resources/video_backgrounds` |
 | `VIDEO_AVATAR` | Default avatar ID | `rowan` |

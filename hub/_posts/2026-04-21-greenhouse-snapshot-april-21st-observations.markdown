@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for April 21, 2026](/assets/images/blog/2026-04-21-greenhouse-snapshot-april-21st-observations.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/xhG3QxCH9gM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 What a dynamic day in the greenhouse! Our sensors captured a full cycle of conditions for our herbs, showing lovely shifts in light and temperature throughout the day. The overall average temperature hovered around a comfortable 20.45°C, peaking at 22.56°C by the afternoon.
 

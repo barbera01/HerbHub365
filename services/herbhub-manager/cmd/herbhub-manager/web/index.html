@@ -69,6 +69,14 @@
                     </div>
                     <div class="header-actions">
                         <input type="text" id="post-search" class="search-input" placeholder="Search posts...">
+                        <button id="select-mode-btn" class="btn btn-secondary btn-small" onclick="App.toggleSelectMode()">Select</button>
+                    </div>
+                </div>
+                <div id="queue-bar" class="queue-bar hidden">
+                    <span id="queue-bar-label">Select posts to queue for video generation</span>
+                    <div class="queue-bar-actions">
+                        <button class="btn btn-secondary btn-small" onclick="App.toggleSelectMode()">Cancel</button>
+                        <button id="queue-selected-btn" class="btn btn-primary btn-small" onclick="App.queueSelected()" disabled>Queue videos</button>
                     </div>
                 </div>
                 <div id="posts-list" class="card-grid">

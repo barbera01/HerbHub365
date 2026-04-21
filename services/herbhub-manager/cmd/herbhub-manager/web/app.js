@@ -17,9 +17,12 @@ const App = {
     currentView: 'posts',
     posts: [],
     jobs: [],
+    queueItems: [],
     config: null,
     resources: null,
     selectedSlug: null,
+    selectMode: false,
+    selectedSlugs: new Set(),
     pollTimer: null,
     blogConfig: null,
     blogPendingFilename: null,
@@ -129,6 +132,64 @@ const App = {
         }
     },
 
+    toggleSelectMode() {
+        this.selectMode = !this.selectMode;
+        this.selectedSlugs = new Set();
+        const btn = document.getElementById('select-mode-btn');
+        if (btn) btn.classList.toggle('active', this.selectMode);
+        const bar = document.getElementById('queue-bar');
+        if (bar) bar.classList.toggle('hidden', !this.selectMode);
+        this.renderPosts();
+    },
+
+    toggleSelectPost(slug) {
+        if (this.selectedSlugs.has(slug)) {
+            this.selectedSlugs.delete(slug);
+        } else {
+            this.selectedSlugs.add(slug);
+        }
+        const count = this.selectedSlugs.size;
+        const queueBtn = document.getElementById('queue-selected-btn');
+        if (queueBtn) {
+            queueBtn.textContent = count > 0 ? 'Queue ' + count + ' video' + (count > 1 ? 's' : '') : 'Queue videos';
+            queueBtn.disabled = count === 0;
+        }
+        // Toggle card selected state.
+        document.querySelectorAll('#posts-list .card[data-slug="' + slug + '"]').forEach(card => {
+            card.classList.toggle('selected', this.selectedSlugs.has(slug));
+        });
+    },
+
+    async queueSelected() {
+        if (this.selectedSlugs.size === 0) return;
+
+        const avatarID = (this.config && this.config.default_avatar) || 'eve';
+        const concatEnabled = this.config ? this.config.concat_enabled !== false : true;
+
+        try {
+            const res = await fetch('/api/queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    slugs: [...this.selectedSlugs],
+                    avatar_id: avatarID,
+                    concat_enabled: concatEnabled,
+                }),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || 'HTTP ' + res.status);
+            }
+            const data = await res.json();
+            this.toast(data.total + ' video' + (data.total > 1 ? 's' : '') + ' queued', 'success');
+            this.toggleSelectMode();
+            this.switchView('jobs');
+            this.loadJobs();
+        } catch (err) {
+            this.toast('Queue failed: ' + err.message, 'error');
+        }
+    },
+
     renderPosts() {
         const container = document.getElementById('posts-list');
 
@@ -144,44 +205,31 @@ const App = {
             return;
         }
 
-        container.innerHTML = this.posts.map(post => `
-            <div class="card" data-slug="${post.slug}" data-title="${post.title.toLowerCase()}"
-                 onclick="App.openGenerateModal('${post.slug}')">
-                <div class="card-header">
-                    <div class="card-title">${this.escapeHtml(post.title)}</div>
-                    <div class="card-date">${post.date}</div>
-                </div>
+        const selectMode = this.selectMode;
+        container.innerHTML = this.posts.map(post => {
+            const isSelected = this.selectedSlugs.has(post.slug);
+            const clickHandler = selectMode
+                ? `App.toggleSelectPost('${post.slug}')`
+                : `App.openGenerateModal('${post.slug}')`;
+            const badgeClass = post.has_video ? 'has-video' : (post.published ? 'published' : 'no-video');
+            const badgeHtml = post.has_video
+                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="20 6 9 17 4 12"></polyline></svg> Video ready'
+                : (post.published
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 2 3.5 6.5v5.1c0 5 3.4 9.6 8.5 10.9 5.1-1.3 8.5-5.9 8.5-10.9V6.5L12 2z"></path><polyline points="9 12 12 15 16 9"></polyline></svg> Published'
+                    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> No video');
+
+            const actionsHtml = selectMode ? '' : `
+                ${post.youtube_url ? `<a class="btn btn-secondary btn-small" href="${post.youtube_url}" target="_blank" rel="noopener" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M14 3h7v7"></path><path d="M10 14L21 3"></path><path d="M21 14v7h-7"></path><path d="M3 10v11h11"></path></svg> YouTube</a>` : ''}
+                ${post.has_video && !post.published ? `<button class="btn btn-publish btn-small" onclick="event.stopPropagation(); App.publishToYouTube('${post.slug}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"></path><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"></polygon></svg> Publish</button>` : ''}
+                <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); App.openGenerateModal('${post.slug}')">Generate</button>`;
+
+            return `<div class="card${isSelected ? ' selected' : ''}" data-slug="${post.slug}" data-title="${post.title.toLowerCase()}" onclick="${clickHandler}">
+                ${selectMode ? `<div class="card-checkbox"><input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); App.toggleSelectPost('${post.slug}')"></div>` : ''}
+                <div class="card-header"><div class="card-title">${this.escapeHtml(post.title)}</div><div class="card-date">${post.date}</div></div>
                 <div class="card-excerpt">${this.escapeHtml(post.excerpt)}</div>
-                <div class="card-footer">
-                    <span class="card-badge ${post.has_video ? 'has-video' : (post.published ? 'published' : 'no-video')}">
-                        ${post.has_video
-                            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="20 6 9 17 4 12"></polyline></svg> Video ready'
-                            : (post.published
-                                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 2 3.5 6.5v5.1c0 5 3.4 9.6 8.5 10.9 5.1-1.3 8.5-5.9 8.5-10.9V6.5L12 2z"></path><polyline points="9 12 12 15 16 9"></polyline></svg> Published'
-                                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> No video'
-                            )
-                        }
-                    </span>
-                    <div class="card-actions">
-                        ${post.youtube_url ? `
-                            <a class="btn btn-secondary btn-small" href="${post.youtube_url}" target="_blank" rel="noopener" onclick="event.stopPropagation();">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M14 3h7v7"></path><path d="M10 14L21 3"></path><path d="M21 14v7h-7"></path><path d="M3 10v11h11"></path></svg>
-                                YouTube
-                            </a>
-                        ` : ''}
-                        ${post.has_video && !post.published ? `
-                            <button class="btn btn-publish btn-small" onclick="event.stopPropagation(); App.publishToYouTube('${post.slug}')">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"></path><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"></polygon></svg>
-                                Publish
-                            </button>
-                        ` : ''}
-                        <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); App.openGenerateModal('${post.slug}')">
-                            Generate
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+                <div class="card-footer"><span class="card-badge ${badgeClass}">${badgeHtml}</span><div class="card-actions">${actionsHtml}</div></div>
+            </div>`;
+        }).join('');
     },
 
     // ── Resources ─────────────────────────────────────────────────────────────
@@ -331,10 +379,17 @@ const App = {
 
     async loadJobs() {
         try {
-            const res = await fetch('/api/jobs');
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            this.jobs = data.jobs || [];
+            const [jobsRes, queueRes] = await Promise.all([
+                fetch('/api/jobs'),
+                fetch('/api/queue'),
+            ]);
+            if (!jobsRes.ok) throw new Error(`HTTP ${jobsRes.status}`);
+            const jobsData = await jobsRes.json();
+            this.jobs = jobsData.jobs || [];
+            if (queueRes.ok) {
+                const queueData = await queueRes.json();
+                this.queueItems = queueData.items || [];
+            }
             this.renderJobs();
             this.updateJobBadge();
         } catch (err) {
@@ -345,23 +400,34 @@ const App = {
     renderJobs() {
         const container = document.getElementById('jobs-list');
 
-        if (this.jobs.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                    </svg>
-                    <p>No jobs yet. Generate a video from the Posts tab.</p>
-                </div>`;
+        const pendingQueue = this.queueItems.filter(i => i.phase === 'pending');
+        const hasContent = this.jobs.length > 0 || this.queueItems.length > 0;
+
+        if (!hasContent) {
+            container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg><p>No jobs yet. Select posts and queue them from the Posts tab.</p></div>';
             return;
         }
 
-        // Sort newest first.
-        const sorted = [...this.jobs].sort((a, b) =>
-            new Date(b.created_at) - new Date(a.created_at)
-        );
+        const parts = [];
 
-        container.innerHTML = sorted.map(job => this.renderJobCard(job)).join('');
+        if (pendingQueue.length > 0) {
+            parts.push('<div class="queue-section-label">Queued (' + pendingQueue.length + ')</div>');
+            pendingQueue.forEach(item => parts.push(this.renderQueueCard(item)));
+        }
+
+        const sorted = [...this.jobs].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        sorted.forEach(job => parts.push(this.renderJobCard(job)));
+
+        container.innerHTML = parts.join('');
+    },
+
+    renderQueueCard(item) {
+        const escapedTitle = this.escapeHtml(item.title || item.slug);
+        const escapedSlug = this.escapeHtml(item.slug);
+        const escapedAvatar = this.escapeHtml(item.avatar_id || 'default');
+        const concatTag = item.concat_enabled ? '<span class="job-option-tag enabled">concat</span>' : '';
+        const ckTag = item.chroma_key_enabled ? '<span class="job-option-tag enabled">chroma-key</span>' : '';
+        return '<div class="job-card phase-queued queue-pending-card"><div class="job-header"><div class="job-title">' + escapedTitle + '</div><span class="job-phase phase-queued">Pending</span></div><div class="job-meta"><span>' + escapedSlug + '</span><span>' + this.timeAgo(item.created_at) + '</span></div><div class="job-options"><span class="job-option-tag">' + escapedAvatar + '</span>' + concatTag + ckTag + '</div><div class="job-actions"><button class="btn btn-danger btn-small" onclick="App.cancelQueueItem(\'' + item.id + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Cancel</button></div></div>';
     },
 
     renderJobCard(job) {
@@ -432,16 +498,30 @@ const App = {
     },
 
     updateJobBadge() {
-        const active = this.jobs.filter(j =>
-            !['completed', 'failed'].includes(j.phase)
-        ).length;
+        const activeJobs = this.jobs.filter(j => !['completed', 'failed'].includes(j.phase)).length;
+        const pendingQueue = this.queueItems.filter(i => i.phase === 'pending').length;
+        const total = activeJobs + pendingQueue;
 
         const badge = document.getElementById('active-jobs-badge');
-        if (active > 0) {
-            badge.textContent = active;
+        if (total > 0) {
+            badge.textContent = total;
             badge.classList.remove('hidden');
         } else {
             badge.classList.add('hidden');
+        }
+    },
+
+    async cancelQueueItem(id) {
+        try {
+            const res = await fetch('/api/queue/' + id, { method: 'DELETE' });
+            if (!res.ok && res.status !== 204) {
+                const err = await res.json();
+                throw new Error(err.error || 'HTTP ' + res.status);
+            }
+            this.toast('Job cancelled', 'success');
+            await this.loadJobs();
+        } catch (err) {
+            this.toast('Cancel failed: ' + err.message, 'error');
         }
     },
 

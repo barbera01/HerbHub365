@@ -15,6 +15,7 @@ import (
 	"HerbHub365/services/herbhub-manager/internal/config"
 	"HerbHub365/services/herbhub-manager/internal/post"
 	"HerbHub365/services/herbhub-manager/internal/publisher"
+	"HerbHub365/services/herbhub-manager/internal/queue"
 	"HerbHub365/services/herbhub-manager/internal/timelapse"
 	"HerbHub365/services/herbhub-manager/internal/video"
 )
@@ -25,6 +26,7 @@ type handlers struct {
 	blogClient      *blogpost.Client
 	timelapseClient *timelapse.Client
 	pubClient       *publisher.Client
+	queueManager    *queue.Manager
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -782,6 +784,95 @@ func (h *handlers) handlePublish(w http.ResponseWriter, r *http.Request) {
 		"video_file": status.Filename,
 		"status":     "queued",
 	})
+}
+
+// ── /api/queue ────────────────────────────────────────────────────────────────
+
+type queueAddRequest struct {
+	Slugs            []string `json:"slugs"`
+	AvatarID         string   `json:"avatar_id,omitempty"`
+	ConcatEnabled    bool     `json:"concat_enabled"`
+	ConcatIntro      string   `json:"concat_intro,omitempty"`
+	ConcatOutro      string   `json:"concat_outro,omitempty"`
+	ChromaKeyEnabled bool     `json:"chroma_key_enabled"`
+	ChromaKeyBG      string   `json:"chroma_key_bg,omitempty"`
+}
+
+func (h *handlers) handleQueue(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		items := h.queueManager.Items()
+		writeJSON(w, http.StatusOK, map[string]any{
+			"items": items,
+			"total": len(items),
+		})
+
+	case http.MethodPost:
+		var req queueAddRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid request: %v", err))
+			return
+		}
+		if len(req.Slugs) == 0 {
+			writeError(w, http.StatusBadRequest, "slugs is required")
+			return
+		}
+
+		posts, err := post.FindAllPosts(h.cfg.Post.PostsDir)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, fmt.Sprintf("read posts: %v", err))
+			return
+		}
+		titleBySlug := make(map[string]string, len(posts))
+		for _, p := range posts {
+			titleBySlug[p.Slug] = p.Title
+		}
+
+		var addReqs []queue.AddRequest
+		for _, slug := range req.Slugs {
+			addReqs = append(addReqs, queue.AddRequest{
+				Slug:             slug,
+				Title:            titleBySlug[slug],
+				AvatarID:         req.AvatarID,
+				ConcatEnabled:    req.ConcatEnabled,
+				ConcatIntro:      req.ConcatIntro,
+				ConcatOutro:      req.ConcatOutro,
+				ChromaKeyEnabled: req.ChromaKeyEnabled,
+				ChromaKeyBG:      req.ChromaKeyBG,
+			})
+		}
+
+		added := h.queueManager.Add(addReqs)
+		log.Printf("queue: added %d items", len(added))
+		writeJSON(w, http.StatusAccepted, map[string]any{
+			"items": added,
+			"total": len(added),
+		})
+
+	default:
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+	}
+}
+
+func (h *handlers) handleQueueCancel(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	id := strings.TrimPrefix(r.URL.Path, "/api/queue/")
+	id = strings.TrimSuffix(id, "/")
+	if id == "" {
+		writeError(w, http.StatusBadRequest, "id is required")
+		return
+	}
+
+	if !h.queueManager.Cancel(id) {
+		writeError(w, http.StatusNotFound, "item not found or not cancellable")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // publishCompletedJobs emits RabbitMQ messages for completed jobs.

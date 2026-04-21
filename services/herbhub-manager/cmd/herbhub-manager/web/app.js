@@ -322,10 +322,20 @@ const App = {
             if (concatOutro) body.concat_outro = concatOutro;
             if (chromaKeyBG) body.chroma_key_bg = chromaKeyBG;
 
-            const res = await fetch('/api/generate', {
+            const queueBody = {
+                slugs: [slug],
+                avatar_id: body.avatar_id,
+                concat_enabled: body.concat_enabled,
+                concat_intro: body.concat_intro,
+                concat_outro: body.concat_outro,
+                chroma_key_enabled: body.chroma_key_enabled,
+                chroma_key_bg: body.chroma_key_bg,
+            };
+
+            const res = await fetch('/api/queue', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+                body: JSON.stringify(queueBody),
             });
 
             if (!res.ok) {
@@ -333,8 +343,7 @@ const App = {
                 throw new Error(err.error || `HTTP ${res.status}`);
             }
 
-            const data = await res.json();
-            this.toast(`Pipeline started (Job: ${data.job_id.slice(0, 8)}...)`, 'success');
+            this.toast('Added to generation queue', 'success');
             this.closeModal();
             this.switchView('jobs');
             this.loadJobs();

@@ -25,11 +25,11 @@ Every data point, timelapse frame, and narrated video that appears on this site 
           <rect x="18" y="12" width="12" height="4" rx="1" fill="white" opacity="0.7"/>
         </svg>
         <div>
-          <code style="font-size: 0.85rem; font-weight: 700; color: var(--forest);">hh-01</code>
-          <p style="font-size: 0.7rem; color: var(--ink-muted); margin: 1px 0 0 0;">Image Capture</p>
+          <span style="font-family: monospace; font-size: 0.9rem; font-weight: 800; color: #1a3d2b; display: block;">hh-01</span>
+          <p style="font-size: 0.7rem; color: #4a5e52; margin: 1px 0 0 0;">Image Capture</p>
         </div>
       </div>
-      <p style="font-size: 0.75rem; color: var(--ink); margin: 0; line-height: 1.5;">Raspberry Pi 3B · Cortex-A53 · 1 GB RAM<br>Pi AI Camera · WiFi · Debian 13</p>
+      <p style="font-size: 0.75rem; color: #1e2e22; margin: 0; line-height: 1.5;">Raspberry Pi 3B · Cortex-A53 · 1 GB RAM<br>Pi AI Camera · WiFi · Debian 13</p>
     </div>
 
     <div style="background: white; border-radius: var(--radius-sm); border: 1px solid var(--border); border-top: 4px solid #2d7a4f; padding: 14px 16px;">
@@ -43,11 +43,11 @@ Every data point, timelapse frame, and narrated video that appears on this site 
           <path d="M10 14 Q24 10 38 14" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.7"/>
         </svg>
         <div>
-          <code style="font-size: 0.85rem; font-weight: 700; color: var(--forest);">hh-02</code>
-          <p style="font-size: 0.7rem; color: var(--ink-muted); margin: 1px 0 0 0;">Hardware Control</p>
+          <span style="font-family: monospace; font-size: 0.9rem; font-weight: 800; color: #1a3d2b; display: block;">hh-02</span>
+          <p style="font-size: 0.7rem; color: #4a5e52; margin: 1px 0 0 0;">Hardware Control</p>
         </div>
       </div>
-      <p style="font-size: 0.75rem; color: var(--ink); margin: 0; line-height: 1.5;">Raspberry Pi 3B · Cortex-A53 · 1 GB RAM<br>Relays · Sensors · Docker · GPIO · WiFi</p>
+      <p style="font-size: 0.75rem; color: #1e2e22; margin: 0; line-height: 1.5;">Raspberry Pi 3B · Cortex-A53 · 1 GB RAM<br>Relays · Sensors · Docker · GPIO · WiFi</p>
     </div>
 
     <div style="background: white; border-radius: var(--radius-sm); border: 1px solid var(--border); border-top: 4px solid #00ADD8; padding: 14px 16px;">
@@ -60,11 +60,11 @@ Every data point, timelapse frame, and narrated video that appears on this site 
           <rect x="18" y="39" width="12" height="2" rx="1" fill="white" opacity="0.5"/>
         </svg>
         <div>
-          <code style="font-size: 0.85rem; font-weight: 700; color: var(--forest);">hh-03</code>
-          <p style="font-size: 0.7rem; color: var(--ink-muted); margin: 1px 0 0 0;">Orchestration &amp; Compute</p>
+          <span style="font-family: monospace; font-size: 0.9rem; font-weight: 800; color: #1a3d2b; display: block;">hh-03</span>
+          <p style="font-size: 0.7rem; color: #4a5e52; margin: 1px 0 0 0;">Orchestration &amp; Compute</p>
         </div>
       </div>
-      <p style="font-size: 0.75rem; color: var(--ink); margin: 0; line-height: 1.5;">Raspberry Pi 400 · Cortex-A72 · 4 GB RAM<br>Docker · NFS · 118 GB SD · Ethernet</p>
+      <p style="font-size: 0.75rem; color: #1e2e22; margin: 0; line-height: 1.5;">Raspberry Pi 400 · Cortex-A72 · 4 GB RAM<br>Docker · NFS · 118 GB SD · Ethernet</p>
     </div>
 
     <div style="background: white; border-radius: var(--radius-sm); border: 1px solid var(--border); border-top: 4px solid #76B900; padding: 14px 16px;">
@@ -77,11 +77,11 @@ Every data point, timelapse frame, and narrated video that appears on this site 
           <rect x="26" y="34" width="8" height="2" rx="1" fill="#76B900" opacity="0.6"/>
         </svg>
         <div>
-          <code style="font-size: 0.85rem; font-weight: 700; color: var(--forest);">lin-hp</code>
-          <p style="font-size: 0.7rem; color: var(--ink-muted); margin: 1px 0 0 0;">AI Compute</p>
+          <span style="font-family: monospace; font-size: 0.9rem; font-weight: 800; color: #1a3d2b; display: block;">lin-hp</span>
+          <p style="font-size: 0.7rem; color: #4a5e52; margin: 1px 0 0 0;">AI Compute</p>
         </div>
       </div>
-      <p style="font-size: 0.75rem; color: var(--ink); margin: 0; line-height: 1.5;">Xeon E5-2650 · 32 threads · 31 GB RAM<br>RTX 3060 12 GB · Ubuntu 24.04</p>
+      <p style="font-size: 0.75rem; color: #1e2e22; margin: 0; line-height: 1.5;">Xeon E5-2650 · 32 threads · 31 GB RAM<br>RTX 3060 12 GB · Ubuntu 24.04</p>
     </div>
 
     <div style="background: white; border-radius: var(--radius-sm); border: 1px solid var(--border); border-top: 4px solid #c8a45a; padding: 14px 16px;">
@@ -95,11 +95,11 @@ Every data point, timelapse frame, and narrated video that appears on this site 
           <path d="M36 38 L36 42 L44 42" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.7"/>
         </svg>
         <div>
-          <code style="font-size: 0.85rem; font-weight: 700; color: var(--forest);">NAS</code>
-          <p style="font-size: 0.7rem; color: var(--ink-muted); margin: 1px 0 0 0;">Shared Storage</p>
+          <span style="font-family: monospace; font-size: 0.9rem; font-weight: 800; color: #1a3d2b; display: block;">NAS</span>
+          <p style="font-size: 0.7rem; color: #4a5e52; margin: 1px 0 0 0;">Shared Storage</p>
         </div>
       </div>
-      <p style="font-size: 0.75rem; color: var(--ink); margin: 0; line-height: 1.5;">Synology · 172.16.99.17<br>1.5 TB video storage · NFS exports</p>
+      <p style="font-size: 0.75rem; color: #1e2e22; margin: 0; line-height: 1.5;">Synology · 172.16.99.17<br>1.5 TB video storage · NFS exports</p>
     </div>
 
   </div>

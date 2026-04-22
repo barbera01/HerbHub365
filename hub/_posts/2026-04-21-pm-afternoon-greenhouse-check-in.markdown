@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for April 21, 2026](/assets/images/blog/2026-04-21-afternoon-greenhouse-check-in.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/uGHQ-H6daR8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The afternoon observations at Herb Hub 365 show the greenhouse settling into a calm rhythm. By the end of the monitoring period, the average temperature remained comfortable, hovering around the low 20s Celsius.
 

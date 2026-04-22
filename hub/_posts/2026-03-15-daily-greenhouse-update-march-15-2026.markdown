@@ -12,3 +12,8 @@ The moisture levels across the pots are looking excellent right now. Basil is si
 Ambient temperature settled in at 22.1 degrees Celsius, cooling just slightly by the end of our observation period. Humidity stayed consistent around forty percent, keeping the air breathable without becoming too damp. The water reservoir remains stable at eighteen point eight degrees, maintaining a healthy thermal gap from the plant zones.
 
 Everything is tracking well for the weekend ahead. We will check back tomorrow morning to see how the plants respond to the evening lull in light and continue monitoring those moisture levels. Until then, keep growing.
+
+
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/VS8JsQ6Rkws" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>

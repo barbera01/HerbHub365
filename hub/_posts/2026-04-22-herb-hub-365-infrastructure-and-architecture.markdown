@@ -277,7 +277,7 @@ flowchart LR
   <tbody>
     <tr style="border-bottom:1px solid #dde8e2;">
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">llm-service</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8080</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8080</span></td>
       <td style="padding:8px 12px;">HTTP server</td>
       <td style="padding:8px 12px;">HTTP from blog-poster, herbhub-manager</td>
       <td style="padding:8px 12px;">Generated text responses</td>
@@ -287,7 +287,7 @@ flowchart LR
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">blog-poster</td>
       <td style="padding:8px 12px;">—</td>
       <td style="padding:8px 12px;">cron 00:05 + 23:00</td>
-      <td style="padding:8px 12px;">RabbitMQ <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">sensor.snapshots</code></td>
+      <td style="padding:8px 12px;">RabbitMQ <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">sensor.snapshots</span></td>
       <td style="padding:8px 12px;">Jekyll posts, git push</td>
       <td style="padding:8px 12px;">llm-service, GitHub, Prometheus</td>
     </tr>
@@ -295,65 +295,65 @@ flowchart LR
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">tts-narrator</td>
       <td style="padding:8px 12px;">—</td>
       <td style="padding:8px 12px;">cron 00:10</td>
-      <td style="padding:8px 12px;">Jekyll <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">_posts/</code></td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">assets/audio/blog/*.mp3</code>, git push</td>
+      <td style="padding:8px 12px;">Jekyll <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">_posts/</span></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">assets/audio/blog/*.mp3</span>, git push</td>
       <td style="padding:8px 12px;">Kokoro TTS</td>
     </tr>
     <tr style="border-bottom:1px solid #dde8e2;background:#fafcfa;">
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">video-narrator</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8090</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8090</span></td>
       <td style="padding:8px 12px;">HTTP server + daemon</td>
       <td style="padding:8px 12px;">Jekyll posts, HTTP from herbhub-manager</td>
-      <td style="padding:8px 12px;">Video Output <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">.mp4</code>, AMQP → <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</code></td>
+      <td style="padding:8px 12px;">Video Output <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">.mp4</span>, AMQP → <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</span></td>
       <td style="padding:8px 12px;">MuseTalk, Kokoro TTS</td>
     </tr>
     <tr style="border-bottom:1px solid #dde8e2;">
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">herbhub-manager</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8080</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8080</span></td>
       <td style="padding:8px 12px;">HTTP server + Web UI</td>
       <td style="padding:8px 12px;">Jekyll posts, Video Output</td>
-      <td style="padding:8px 12px;">HTTP to services, AMQP via RabbitMQ mgmt API → <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</code></td>
+      <td style="padding:8px 12px;">HTTP to services, AMQP via RabbitMQ mgmt API → <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</span></td>
       <td style="padding:8px 12px;">video-narrator, timelapse-builder, llm-service</td>
     </tr>
     <tr style="border-bottom:1px solid #dde8e2;background:#fafcfa;">
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">video-publisher</td>
       <td style="padding:8px 12px;">—</td>
       <td style="padding:8px 12px;">AMQP consumer</td>
-      <td style="padding:8px 12px;">RabbitMQ <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</code></td>
-      <td style="padding:8px 12px;">YouTube upload, Jekyll embed git push, <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">.json</code> marker, DLQ on failure</td>
+      <td style="padding:8px 12px;">RabbitMQ <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</span></td>
+      <td style="padding:8px 12px;">YouTube upload, Jekyll embed git push, <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">.json</span> marker, DLQ on failure</td>
       <td style="padding:8px 12px;">YouTube API, GitHub</td>
     </tr>
     <tr style="border-bottom:1px solid #dde8e2;">
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">timelapse-builder</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8082</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8082</span></td>
       <td style="padding:8px 12px;">HTTP server</td>
-      <td style="padding:8px 12px;">Image mount <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">/input</code>, HTTP from herbhub-manager</td>
-      <td style="padding:8px 12px;">Timelapse <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">.mp4</code> in <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">/output</code></td>
+      <td style="padding:8px 12px;">Image mount <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">/input</span>, HTTP from herbhub-manager</td>
+      <td style="padding:8px 12px;">Timelapse <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">.mp4</span> in <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">/output</span></td>
       <td style="padding:8px 12px;">ffmpeg (local)</td>
     </tr>
     <tr style="border-bottom:1px solid #dde8e2;background:#fafcfa;">
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">watering</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8787</code> health</td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:8787</span> health</td>
       <td style="padding:8px 12px;">5 min poll</td>
       <td style="padding:8px 12px;">Prometheus metrics (hh-02:9100)</td>
-      <td style="padding:8px 12px;">AMQP → <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">watering.queue</code>, GPIO valve</td>
+      <td style="padding:8px 12px;">AMQP → <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">watering.queue</span>, GPIO valve</td>
       <td style="padding:8px 12px;">Prometheus, node_exporter</td>
     </tr>
     <tr style="border-bottom:1px solid #dde8e2;">
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">RabbitMQ</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:5672 / :15672</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:5672 / :15672</span></td>
       <td style="padding:8px 12px;">Infrastructure</td>
-      <td colspan="3" style="padding:8px 12px;">Queues: <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">sensor.snapshots</code> · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</code> · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced.dlq</code> · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">watering.queue</code></td>
+      <td colspan="3" style="padding:8px 12px;">Queues: <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">sensor.snapshots</span> · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</span> · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced.dlq</span> · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">watering.queue</span></td>
     </tr>
     <tr style="border-bottom:1px solid #dde8e2;background:#fafcfa;">
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">Traefik</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:80 / :443</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:80 / :443</span></td>
       <td style="padding:8px 12px;">Reverse proxy</td>
-      <td colspan="3" style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">manager.herbhub365.com</code> → herbhub-manager · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">rabbit.herbhub365.com</code> → RabbitMQ :15672 · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">scheduler.herbhub365.com</code> → Cronicle :3012</td>
+      <td colspan="3" style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">manager.herbhub365.com</span> → herbhub-manager · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">rabbit.herbhub365.com</span> → RabbitMQ :15672 · <span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">scheduler.herbhub365.com</span> → Cronicle :3012</td>
     </tr>
     <tr>
       <td style="padding:8px 12px;font-weight:600;color:#1a3d2b;">Cronicle</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:3012</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">:3012</span></td>
       <td style="padding:8px 12px;">Job scheduler</td>
       <td colspan="3" style="padding:8px 12px;">Manages scheduled tasks with web UI</td>
     </tr>
@@ -375,25 +375,25 @@ flowchart LR
   </thead>
   <tbody>
     <tr style="border-bottom:1px solid #dde8e2;">
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">sensor.snapshots</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">sensor.snapshots</span></td>
       <td style="padding:8px 12px;">IoT devices / sensors</td>
       <td style="padding:8px 12px;">blog-poster</td>
       <td style="padding:8px 12px;">Sensor snapshot JSON</td>
     </tr>
     <tr style="border-bottom:1px solid #dde8e2;background:#fafcfa;">
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced</span></td>
       <td style="padding:8px 12px;">video-narrator (daemon)<br>herbhub-manager (via mgmt API)</td>
       <td style="padding:8px 12px;">video-publisher</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">{ slug, date, output_file, status, timestamp }</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">{ slug, date, output_file, status, timestamp }</span></td>
     </tr>
     <tr style="border-bottom:1px solid #dde8e2;">
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced.dlq</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">video.produced.dlq</span></td>
       <td style="padding:8px 12px;">video-publisher (on failure)</td>
       <td style="padding:8px 12px;">Manual inspection</td>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">{ error, timestamp, original }</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">{ error, timestamp, original }</span></td>
     </tr>
     <tr>
-      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">watering.queue</code></td>
+      <td style="padding:8px 12px;"><span style="font-family:'SF Mono',Menlo,monospace;background:#edf5f0;color:#1a3d2b;padding:2px 6px;border-radius:3px;font-size:0.78em;font-weight:600;">watering.queue</span></td>
       <td style="padding:8px 12px;">watering service</td>
       <td style="padding:8px 12px;">—</td>
       <td style="padding:8px 12px;">Watering event JSON</td>

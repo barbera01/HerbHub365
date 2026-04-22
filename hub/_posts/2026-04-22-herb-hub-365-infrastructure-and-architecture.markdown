@@ -38,7 +38,7 @@ This post is a technical deep-dive into how Herb Hub 365 is wired together — t
 
 The complete platform spans IoT edge devices, eight Go microservices, a RabbitMQ message broker, shared file storage, and a small number of external APIs. Data flows left to right: physical sensors and the timelapse camera feed into the service layer, which coordinates content generation, video production, and publishing via asynchronous queues.
 
-<div class="mermaid" style="margin:1.5rem 0;overflow-x:auto;">
+<div style="margin:1.5rem 0;background:white;border-radius:12px;padding:1.25rem 1.5rem;overflow-x:auto;border:1px solid #dde8e2;"><div class="mermaid">
 flowchart LR
     subgraph IOT["🌱 IoT &amp; External Sources"]
         direction TB
@@ -134,13 +134,13 @@ flowchart LR
     style BLOGPOSTER fill:#dbeafe,stroke:#3b82f6
     style TTS fill:#dbeafe,stroke:#3b82f6
     style VIDNAR fill:#dbeafe,stroke:#3b82f6
-</div>
+</div></div>
 
 ## Video Content Pipeline
 
 Every narrated video on this site follows a deterministic pipeline that starts with a sensor reading and ends with a YouTube embed injected into a blog post. The diagram below traces the full end-to-end flow, including the two paths by which video generation can be triggered: automatically by the daemon or manually via the manager web UI.
 
-<div class="mermaid" style="margin:1.5rem 0;overflow-x:auto;">
+<div style="margin:1.5rem 0;background:white;border-radius:12px;padding:1.25rem 1.5rem;overflow-x:auto;border:1px solid #dde8e2;"><div class="mermaid">
 flowchart TD
     A["📡 IoT Sensors\nsoil / environment data"] -->|"AMQP → sensor.snapshots"| B
 
@@ -179,13 +179,13 @@ flowchart TD
     style GM fill:#dcfce7,stroke:#16a34a
     style VP fill:#fee2e2,stroke:#dc2626
     style MQ fill:#fef9c3,stroke:#ca8a04
-</div>
+</div></div>
 
 ## Manual YouTube Publish
 
 In addition to the fully automated pipeline, videos can be published manually from the herbhub-manager web UI. Rather than adding a separate publish endpoint to video-publisher, the manager queues the message directly via the RabbitMQ management HTTP API. The video-publisher consumer picks it up from the same `video.produced` queue and handles the upload identically to the automated path.
 
-<div class="mermaid" style="margin:1.5rem 0;overflow-x:auto;">
+<div style="margin:1.5rem 0;background:white;border-radius:12px;padding:1.25rem 1.5rem;overflow-x:auto;border:1px solid #dde8e2;"><div class="mermaid">
 sequenceDiagram
     actor User
     participant M as herbhub-manager<br/>:8080
@@ -213,13 +213,13 @@ sequenceDiagram
     VP->>VP: Delete local .mp4
 
     Note over User,M: Posts page badge updates to "Published" on next refresh
-</div>
+</div></div>
 
 ## Timelapse Pipeline
 
 Timelapse videos follow a slightly different path. The timelapse-builder service stitches raw camera frames into an MP4 independently of the blog pipeline. When a timelapse is ready to be narrated and published, herbhub-manager triggers video-narrator directly with the timelapse file and a narration script, then the same video production and publishing path handles the rest.
 
-<div class="mermaid" style="margin:1.5rem 0;overflow-x:auto;">
+<div style="margin:1.5rem 0;background:white;border-radius:12px;padding:1.25rem 1.5rem;overflow-x:auto;border:1px solid #dde8e2;"><div class="mermaid">
 flowchart LR
     CAM["📷 Timelapse Camera\n/home/andy/Pictures/timelapse"] -->|"images mount\n/input"| TB
 
@@ -242,13 +242,13 @@ flowchart LR
     style MANAGER fill:#dcfce7,stroke:#16a34a
     style VP2 fill:#fee2e2,stroke:#dc2626
     style MQ2 fill:#fef9c3,stroke:#ca8a04
-</div>
+</div></div>
 
 ## Watering Automation
 
 The watering subsystem is the most self-contained part of the platform. A Go service on hh-02 polls Prometheus every five minutes to read soil moisture metrics exported by node_exporter. When any zone drops below threshold it publishes a watering event to RabbitMQ and triggers the GPIO relay directly to open the corresponding valve.
 
-<div class="mermaid" style="margin:1.5rem 0;overflow-x:auto;">
+<div style="margin:1.5rem 0;background:white;border-radius:12px;padding:1.25rem 1.5rem;overflow-x:auto;border:1px solid #dde8e2;"><div class="mermaid">
 flowchart LR
     NE["node_exporter\nhh-02:9100"] -->|"HTTP metrics"| W
     PROM["Prometheus\nprometheus.home-cloud.uk"] -->|"also scrapes"| NE
@@ -258,7 +258,7 @@ flowchart LR
     W -->|"GPIO control"| GPIO["GPIO\nWatering Valve"]
 
     style W fill:#dbeafe,stroke:#3b82f6
-</div>
+</div></div>
 
 ## Service Reference
 

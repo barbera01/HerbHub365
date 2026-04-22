@@ -147,36 +147,36 @@ Each service has a single, clearly bounded responsibility.
 <div style="background: var(--foam); border-left: 4px solid var(--leaf); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1.25rem 1.5rem; margin: 1.5rem 0;">
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">
     <div style="background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border);">
-      <code style="font-size: 0.78rem; color: var(--leaf); font-weight: 700;">timelapse-builder</code>
-      <p style="font-size: 0.75rem; color: var(--ink-muted); margin: 4px 0 0 0; line-height: 1.4;">Image → MP4 · ffmpeg · stdlib only</p>
+      <span style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #1a3d2b; display: block; margin-bottom: 4px;">timelapse-builder</span>
+      <p style="font-size: 0.75rem; color: #4a5e52; margin: 4px 0 0 0; line-height: 1.4;">Image → MP4 · ffmpeg · stdlib only</p>
     </div>
     <div style="background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border);">
-      <code style="font-size: 0.78rem; color: var(--leaf); font-weight: 700;">video-narrator</code>
-      <p style="font-size: 0.75rem; color: var(--ink-muted); margin: 4px 0 0 0; line-height: 1.4;">MuseTalk · Kokoro TTS · NVENC/x264</p>
+      <span style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #1a3d2b; display: block; margin-bottom: 4px;">video-narrator</span>
+      <p style="font-size: 0.75rem; color: #4a5e52; margin: 4px 0 0 0; line-height: 1.4;">MuseTalk · Kokoro TTS · NVENC/x264</p>
     </div>
     <div style="background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border);">
-      <code style="font-size: 0.78rem; color: var(--leaf); font-weight: 700;">video-publisher</code>
-      <p style="font-size: 0.75rem; color: var(--ink-muted); margin: 4px 0 0 0; line-height: 1.4;">YouTube Data API v3 · OAuth 2.0</p>
+      <span style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #1a3d2b; display: block; margin-bottom: 4px;">video-publisher</span>
+      <p style="font-size: 0.75rem; color: #4a5e52; margin: 4px 0 0 0; line-height: 1.4;">YouTube Data API v3 · OAuth 2.0</p>
     </div>
     <div style="background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border);">
-      <code style="font-size: 0.78rem; color: var(--leaf); font-weight: 700;">llm-service</code>
-      <p style="font-size: 0.75rem; color: var(--ink-muted); margin: 4px 0 0 0; line-height: 1.4;">Ollama · Gemma 4 · stdlib only</p>
+      <span style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #1a3d2b; display: block; margin-bottom: 4px;">llm-service</span>
+      <p style="font-size: 0.75rem; color: #4a5e52; margin: 4px 0 0 0; line-height: 1.4;">Ollama · Gemma 4 · stdlib only</p>
     </div>
     <div style="background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border);">
-      <code style="font-size: 0.78rem; color: var(--leaf); font-weight: 700;">blog-poster</code>
-      <p style="font-size: 0.75rem; color: var(--ink-muted); margin: 4px 0 0 0; line-height: 1.4;">Prometheus · LLM · Git · RabbitMQ</p>
+      <span style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #1a3d2b; display: block; margin-bottom: 4px;">blog-poster</span>
+      <p style="font-size: 0.75rem; color: #4a5e52; margin: 4px 0 0 0; line-height: 1.4;">Prometheus · LLM · Git · RabbitMQ</p>
     </div>
     <div style="background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border);">
-      <code style="font-size: 0.78rem; color: var(--leaf); font-weight: 700;">tts-narrator</code>
-      <p style="font-size: 0.75rem; color: var(--ink-muted); margin: 4px 0 0 0; line-height: 1.4;">Kokoro TTS · MP3 · cron</p>
+      <span style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #1a3d2b; display: block; margin-bottom: 4px;">tts-narrator</span>
+      <p style="font-size: 0.75rem; color: #4a5e52; margin: 4px 0 0 0; line-height: 1.4;">Kokoro TTS · MP3 · cron</p>
     </div>
     <div style="background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border);">
-      <code style="font-size: 0.78rem; color: var(--leaf); font-weight: 700;">herbhub-manager</code>
-      <p style="font-size: 0.75rem; color: var(--ink-muted); margin: 4px 0 0 0; line-height: 1.4;">Orchestration · RabbitMQ · stdlib only</p>
+      <span style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #1a3d2b; display: block; margin-bottom: 4px;">herbhub-manager</span>
+      <p style="font-size: 0.75rem; color: #4a5e52; margin: 4px 0 0 0; line-height: 1.4;">Orchestration · RabbitMQ · stdlib only</p>
     </div>
     <div style="background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border);">
-      <code style="font-size: 0.78rem; color: var(--leaf); font-weight: 700;">watering</code>
-      <p style="font-size: 0.75rem; color: var(--ink-muted); margin: 4px 0 0 0; line-height: 1.4;">GPIO · Prometheus · RabbitMQ · Go 1.25</p>
+      <span style="font-family: monospace; font-size: 0.8rem; font-weight: 800; color: #1a3d2b; display: block; margin-bottom: 4px;">watering</span>
+      <p style="font-size: 0.75rem; color: #4a5e52; margin: 4px 0 0 0; line-height: 1.4;">GPIO · Prometheus · RabbitMQ · Go 1.25</p>
     </div>
   </div>
 </div>

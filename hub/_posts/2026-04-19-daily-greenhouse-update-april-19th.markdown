@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for April 19, 2026](/assets/images/blog/2026-04-19-daily-greenhouse-update-april-19th.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/sGWs0LaRoGs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 Good morning, green thumbs! Here is your snapshot of the herb hub's environment from April 19th. The day began with a gradual warming trend, peaking in light intensity near the morning's peak readings.
 

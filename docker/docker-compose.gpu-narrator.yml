@@ -11,7 +11,8 @@
 # Required environment variables (set in .env or export before running):
 #   RABBITMQ_URL          AMQP URL on the main server (e.g. amqp://admin:pass@192.168.1.10:5672/)
 #   VIDEO_BASE_URL        URL of the MuseTalk API (e.g. http://localhost:8011)
-#   NFS_OUTPUT_MOUNT      Local path where the NFS share is mounted (default: /mnt/herbhub-video)
+#   NFS_OUTPUT_MOUNT      Local path of the shared video output directory
+#                         (default: /mnt/herbhub-video/Video/Output)
 
 services:
   video-narrator:
@@ -78,7 +79,8 @@ services:
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
 
     volumes:
-      # NFS submounts mounted directly — avoids Linux bind-mount/submount visibility issue.
+      # Bind the shared video output directory directly. Point NFS_OUTPUT_MOUNT at
+      # the host's Video/Output path, not the NFS share root.
       - ${NFS_OUTPUT_MOUNT:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
       - ${VIDEO_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video}:/app/resources/video:ro
       - ${VIDEO_BG_RESOURCES_PATH:-/mnt/herbhub-video/Resources/video_backgrounds}:/app/resources/video_backgrounds:ro

@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -28,10 +30,10 @@ type TimelapseNarrateRequest struct {
 	Text          string `json:"text"`           // TTS narration script
 	TimelapseFile string `json:"timelapse_file"` // filename of the built timelapse MP4
 	TimelapseURL  string `json:"timelapse_url,omitempty"`
-	Intro         string `json:"intro"`          // intro filename (in resources dir)
-	Outro         string `json:"outro"`          // outro filename (in resources dir)
-	Slug          string `json:"slug"`           // used for output filename and notification
-	Date          string `json:"date"`           // YYYY-MM-DD for the RabbitMQ message
+	Intro         string `json:"intro"` // intro filename (in resources dir)
+	Outro         string `json:"outro"` // outro filename (in resources dir)
+	Slug          string `json:"slug"`  // used for output filename and notification
+	Date          string `json:"date"`  // YYYY-MM-DD for the RabbitMQ message
 }
 
 // TimelapseJob represents a timelapse narration job.
@@ -316,6 +318,9 @@ func tlTrimOutput(s string) string {
 func prepareTimelapseInput(ctx context.Context, cfg config.Config, req TimelapseNarrateRequest) (string, func(), error) {
 	var downloadErr error
 	if strings.TrimSpace(req.TimelapseURL) != "" {
+		if err := validateTimelapseURL(req.TimelapseURL, cfg.TimelapseAllowedHosts); err != nil {
+			return "", func() {}, fmt.Errorf("timelapse_url rejected: %w", err)
+		}
 		path, err := downloadTimelapse(ctx, cfg.RequestTimeout, req.TimelapseURL)
 		if err == nil {
 			return path, func() { _ = os.Remove(path) }, nil
@@ -334,6 +339,56 @@ func prepareTimelapseInput(ctx context.Context, cfg config.Config, req Timelapse
 		return "", func() {}, err
 	}
 	return path, func() {}, nil
+}
+
+// validateTimelapseURL guards against SSRF and request-forgery by enforcing:
+//  1. Only http:// or https:// schemes are permitted.
+//  2. The host must not resolve to a loopback or private-network address.
+//  3. When allowedHosts is non-empty, the host (with optional port) must appear
+//     in the list.
+func validateTimelapseURL(rawURL string, allowedHosts []string) error {
+	rawURL = strings.TrimSpace(rawURL)
+	parsed, err := url.ParseRequestURI(rawURL)
+	if err != nil {
+		return fmt.Errorf("invalid URL: %w", err)
+	}
+
+	switch strings.ToLower(parsed.Scheme) {
+	case "http", "https":
+		// allowed
+	default:
+		return fmt.Errorf("scheme %q is not permitted; only http and https are allowed", parsed.Scheme)
+	}
+
+	hostname := parsed.Hostname()
+	if hostname == "" {
+		return fmt.Errorf("URL has no host")
+	}
+
+	// Reject bare IP literals that are loopback or private.
+	if ip := net.ParseIP(hostname); ip != nil {
+		if ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsUnspecified() {
+			return fmt.Errorf("requests to private/loopback addresses are not permitted")
+		}
+	}
+
+	// Allowlist check (host[:port]).
+	if len(allowedHosts) > 0 {
+		hostWithPort := parsed.Host // includes port when present
+		matched := false
+		for _, allowed := range allowedHosts {
+			if strings.EqualFold(hostWithPort, strings.TrimSpace(allowed)) ||
+				strings.EqualFold(hostname, strings.TrimSpace(allowed)) {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			return fmt.Errorf("host %q is not in the permitted allowlist", parsed.Host)
+		}
+	}
+
+	return nil
 }
 
 func downloadTimelapse(ctx context.Context, timeout time.Duration, sourceURL string) (string, error) {

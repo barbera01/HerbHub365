@@ -64,6 +64,12 @@ type Config struct {
 	// TimelapseOutputDir is the directory where timelapse-builder writes its MP4s.
 	// The timelapse narration pipeline reads source files from here.
 	TimelapseOutputDir string
+
+	// TimelapseAllowedHosts is an optional allowlist of hostnames (and optional
+	// :port) that are permitted as timelapse_url download sources.
+	// When empty, any public HTTPS/HTTP host is accepted.
+	// Example: "timelapse.internal.example.com,storage.example.com:9000"
+	TimelapseAllowedHosts []string
 }
 
 // VideoConfig holds avatar video API settings.
@@ -197,17 +203,18 @@ func Load() Config {
 	postsDir := getEnv("BLOG_POSTS_DIR", filepath.Join(hubDir, "_posts"))
 
 	return Config{
-		Mode:             getEnv("VIDEO_MODE", "daemon"),
-		GenerateSchedule: getEnv("VIDEO_SCHEDULE", "15 0 * * *"),
-		RunOnStart:       getBoolEnv("VIDEO_RUN_ON_START", false),
-		TargetDate:       getEnv("VIDEO_TARGET_DATE", "yesterday"),
-		TargetSlug:       os.Getenv("VIDEO_TARGET_SLUG"),
-		RulesFile:        getEnv("VIDEO_RULES_FILE", "/app/config/tts-rules.json"),
-		SkipPatterns:     getCSVEnv("VIDEO_SKIP_PATTERN"),
-		RequestTimeout:   getDurationEnv("VIDEO_REQUEST_TIMEOUT", 120*time.Second),
-		RabbitMQURL:        os.Getenv("RABBITMQ_URL"),
-		RabbitMQQueue:      getEnv("RABBITMQ_QUEUE", "video.produced"),
-		TimelapseOutputDir: getEnv("TIMELAPSE_OUTPUT_DIR", "/output"),
+		Mode:                  getEnv("VIDEO_MODE", "daemon"),
+		GenerateSchedule:      getEnv("VIDEO_SCHEDULE", "15 0 * * *"),
+		RunOnStart:            getBoolEnv("VIDEO_RUN_ON_START", false),
+		TargetDate:            getEnv("VIDEO_TARGET_DATE", "yesterday"),
+		TargetSlug:            os.Getenv("VIDEO_TARGET_SLUG"),
+		RulesFile:             getEnv("VIDEO_RULES_FILE", "/app/config/tts-rules.json"),
+		SkipPatterns:          getCSVEnv("VIDEO_SKIP_PATTERN"),
+		RequestTimeout:        getDurationEnv("VIDEO_REQUEST_TIMEOUT", 120*time.Second),
+		RabbitMQURL:           os.Getenv("RABBITMQ_URL"),
+		RabbitMQQueue:         getEnv("RABBITMQ_QUEUE", "video.produced"),
+		TimelapseOutputDir:    getEnv("TIMELAPSE_OUTPUT_DIR", "/output"),
+		TimelapseAllowedHosts: getCSVEnv("TIMELAPSE_ALLOWED_HOSTS"),
 
 		Video: VideoConfig{
 			BaseURL:        getEnv("VIDEO_BASE_URL", "http://172.16.106.81:8011"),
@@ -228,14 +235,14 @@ func Load() Config {
 		},
 
 		Concat: ConcatConfig{
-			Enabled:    getBoolEnv("CONCAT_ENABLED", true),
-			IntroPath:  getEnv("CONCAT_INTRO", "/app/resources/video/intro.mp4"),
-			OutroPath:  getEnv("CONCAT_OUTRO", "/app/resources/video/outro.mp4"),
-			OutputDir:  getEnv("VIDEO_OUTPUT_DIR", "/output/video"),
-			FFmpegPath: getEnv("FFMPEG_PATH", "ffmpeg"),
-			VideoCodec: getEnv("CONCAT_VIDEO_CODEC", "libx264"),
-			CRF:        getIntEnv("CONCAT_CRF", 18),
-			Preset:     getEnv("CONCAT_PRESET", "fast"),
+			Enabled:       getBoolEnv("CONCAT_ENABLED", true),
+			IntroPath:     getEnv("CONCAT_INTRO", "/app/resources/video/intro.mp4"),
+			OutroPath:     getEnv("CONCAT_OUTRO", "/app/resources/video/outro.mp4"),
+			OutputDir:     getEnv("VIDEO_OUTPUT_DIR", "/output/video"),
+			FFmpegPath:    getEnv("FFMPEG_PATH", "ffmpeg"),
+			VideoCodec:    getEnv("CONCAT_VIDEO_CODEC", "libx264"),
+			CRF:           getIntEnv("CONCAT_CRF", 18),
+			Preset:        getEnv("CONCAT_PRESET", "fast"),
 			Threads:       getIntEnv("CONCAT_THREADS", 1),
 			StitchTimeout: getDurationEnv("CONCAT_STITCH_TIMEOUT", 30*time.Minute),
 			ChromaKey: ChromaKeyConfig{

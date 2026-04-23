@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for April 23, 2026](/assets/images/blog/2026-04-23-afternoon-greenhouse-update-growth-and-changing-conditions.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/y7g-gc9nM7s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 Hello Herb Enthusiasts! Here is your mid-day snapshot from the Herb Hub 365 greenhouse. The afternoon brought noticeable shifts in the environment as the day progressed.
 

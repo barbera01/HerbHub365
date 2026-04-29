@@ -11,6 +11,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -71,6 +72,38 @@ type ollamaResponse struct {
 	Error string `json:"error"`
 }
 
+type geminiRequest struct {
+	SystemInstruction geminiContent          `json:"systemInstruction,omitempty"`
+	Contents          []geminiContent        `json:"contents"`
+	GenerationConfig  geminiGenerationConfig `json:"generationConfig,omitempty"`
+}
+
+type geminiContent struct {
+	Role  string       `json:"role,omitempty"`
+	Parts []geminiPart `json:"parts"`
+}
+
+type geminiPart struct {
+	Text string `json:"text"`
+}
+
+type geminiGenerationConfig struct {
+	Temperature     float64 `json:"temperature,omitempty"`
+	TopP            float64 `json:"topP,omitempty"`
+	MaxOutputTokens int     `json:"maxOutputTokens,omitempty"`
+}
+
+type geminiResponse struct {
+	Candidates []struct {
+		Content geminiContent `json:"content"`
+	} `json:"candidates"`
+	Error *struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Status  string `json:"status"`
+	} `json:"error"`
+}
+
 func NewClient(cfg config.LLMConfig) *Client {
 	// No Timeout on the http.Client — long Ollama streaming responses are
 	// cancelled via the request context instead. ResponseHeaderTimeout on the
@@ -90,6 +123,23 @@ func NewClient(cfg config.LLMConfig) *Client {
 }
 
 func (c *Client) Generate(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
+	content, err := c.generatePrimary(ctx, systemPrompt, userPrompt)
+	if err == nil {
+		return content, nil
+	}
+	if !c.shouldTryConfiguredFallback(ctx, err) {
+		return "", err
+	}
+
+	log.Printf("primary LLM unavailable, trying %s fallback: %v", c.config.FallbackProvider, err)
+	fallbackContent, fallbackErr := c.generateFallback(ctx, systemPrompt, userPrompt)
+	if fallbackErr != nil {
+		return "", fmt.Errorf("primary LLM failed: %v; fallback %s failed: %w", err, c.config.FallbackProvider, fallbackErr)
+	}
+	return fallbackContent, nil
+}
+
+func (c *Client) generatePrimary(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
 	switch strings.ToLower(strings.TrimSpace(c.config.Provider)) {
 	case "", "auto":
 		content, err := c.generateOpenAICompatible(ctx, systemPrompt, userPrompt)
@@ -110,8 +160,51 @@ func (c *Client) Generate(ctx context.Context, systemPrompt, userPrompt string) 
 		return c.generateOllamaStreaming(ctx, systemPrompt, userPrompt)
 	case "openai", "openai-compatible":
 		return c.generateOpenAICompatible(ctx, systemPrompt, userPrompt)
+	case "gemini", "google", "google-gemini":
+		return c.generateGemini(ctx, systemPrompt, userPrompt, c.config.BaseURL, c.config.APIKey, c.config.Model)
 	default:
 		return "", fmt.Errorf("unsupported LLM_PROVIDER %q", c.config.Provider)
+	}
+}
+
+func (c *Client) shouldTryConfiguredFallback(ctx context.Context, err error) bool {
+	if err == nil || ctx.Err() != nil || !IsAvailabilityError(err) {
+		return false
+	}
+	provider := strings.ToLower(strings.TrimSpace(c.config.FallbackProvider))
+	if provider == "" || provider == "none" || provider == "disabled" {
+		return false
+	}
+	if provider == strings.ToLower(strings.TrimSpace(c.config.Provider)) {
+		return false
+	}
+	if isGeminiProvider(provider) && c.config.FallbackAPIKey == "" {
+		log.Printf("Gemini fallback configured but LLM_FALLBACK_API_KEY/GEMINI_API_KEY is not set")
+		return false
+	}
+	return true
+}
+
+func (c *Client) generateFallback(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
+	switch provider := strings.ToLower(strings.TrimSpace(c.config.FallbackProvider)); provider {
+	case "gemini", "google", "google-gemini":
+		return c.generateGemini(ctx, systemPrompt, userPrompt, c.config.FallbackBaseURL, c.config.FallbackAPIKey, c.config.FallbackModel)
+	case "openai", "openai-compatible":
+		fallback := *c
+		fallback.config.Provider = provider
+		fallback.config.BaseURL = c.config.FallbackBaseURL
+		fallback.config.APIKey = c.config.FallbackAPIKey
+		fallback.config.Model = c.config.FallbackModel
+		return fallback.generateOpenAICompatible(ctx, systemPrompt, userPrompt)
+	case "ollama":
+		fallback := *c
+		fallback.config.Provider = provider
+		fallback.config.BaseURL = c.config.FallbackBaseURL
+		fallback.config.APIKey = c.config.FallbackAPIKey
+		fallback.config.Model = c.config.FallbackModel
+		return fallback.generateOllamaStreaming(ctx, systemPrompt, userPrompt)
+	default:
+		return "", fmt.Errorf("unsupported LLM_FALLBACK_PROVIDER %q", c.config.FallbackProvider)
 	}
 }
 
@@ -177,9 +270,87 @@ func (c *Client) generateOpenAICompatible(ctx context.Context, systemPrompt, pro
 	return strings.TrimSpace(content), nil
 }
 
+func (c *Client) generateGemini(ctx context.Context, systemPrompt, prompt, baseURL, apiKey, model string) (string, error) {
+	if strings.TrimSpace(apiKey) == "" {
+		return "", fmt.Errorf("Gemini API key is required")
+	}
+	if strings.TrimSpace(model) == "" {
+		return "", fmt.Errorf("Gemini model is required")
+	}
+
+	body, err := json.Marshal(geminiRequest{
+		SystemInstruction: geminiContent{Parts: []geminiPart{{Text: systemPrompt}}},
+		Contents: []geminiContent{
+			{Role: "user", Parts: []geminiPart{{Text: prompt}}},
+		},
+		GenerationConfig: geminiGenerationConfig{
+			Temperature:     c.config.Temperature,
+			TopP:            c.config.TopP,
+			MaxOutputTokens: c.config.MaxTokens,
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, geminiGenerateURL(baseURL, model, apiKey), bytes.NewReader(body))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-goog-api-key", apiKey)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("call gemini: %w", err)
+	}
+	defer resp.Body.Close()
+
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	if c.config.Debug {
+		log.Printf("llm gemini response: %s", truncateForLog(responseBody))
+	}
+
+	var parsed geminiResponse
+	decodeErr := json.Unmarshal(responseBody, &parsed)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		if decodeErr != nil {
+			return "", fmt.Errorf("gemini returned %d: %s", resp.StatusCode, strings.TrimSpace(string(responseBody)))
+		}
+		if parsed.Error != nil && parsed.Error.Message != "" {
+			return "", fmt.Errorf("gemini returned %d: %s", resp.StatusCode, parsed.Error.Message)
+		}
+		return "", fmt.Errorf("gemini returned %d: %s", resp.StatusCode, strings.TrimSpace(string(responseBody)))
+	}
+	if decodeErr != nil {
+		return "", fmt.Errorf("decode gemini response: %w", decodeErr)
+	}
+	if parsed.Error != nil && parsed.Error.Message != "" {
+		return "", fmt.Errorf("gemini error: %s", parsed.Error.Message)
+	}
+	if len(parsed.Candidates) == 0 {
+		return "", fmt.Errorf("gemini returned no candidates")
+	}
+
+	parts := parsed.Candidates[0].Content.Parts
+	texts := make([]string, 0, len(parts))
+	for _, part := range parts {
+		texts = append(texts, part.Text)
+	}
+	content := extractMarkdownContent(strings.Join(texts, ""))
+	if strings.TrimSpace(content) == "" {
+		return "", fmt.Errorf("gemini returned empty content")
+	}
+
+	return strings.TrimSpace(content), nil
+}
+
 func (c *Client) WarmModel(ctx context.Context) error {
 	provider := strings.ToLower(strings.TrimSpace(c.config.Provider))
-	if provider == "openai" || provider == "openai-compatible" {
+	if provider == "openai" || provider == "openai-compatible" || isGeminiProvider(provider) {
 		return nil
 	}
 	body, err := json.Marshal(ollamaRequest{
@@ -324,6 +495,32 @@ func ollamaChatURL(base string) string {
 	return trimmed + "/api/chat"
 }
 
+func geminiGenerateURL(base, model, apiKey string) string {
+	trimmedBase := strings.TrimRight(strings.TrimSpace(base), "/")
+	trimmedModel := strings.Trim(strings.TrimSpace(model), "/")
+	if !strings.HasPrefix(trimmedModel, "models/") {
+		trimmedModel = "models/" + trimmedModel
+	}
+	endpoint := trimmedBase + "/" + trimmedModel + ":generateContent"
+	parsed, err := url.Parse(endpoint)
+	if err != nil {
+		return endpoint + "?key=" + url.QueryEscape(apiKey)
+	}
+	query := parsed.Query()
+	query.Set("key", apiKey)
+	parsed.RawQuery = query.Encode()
+	return parsed.String()
+}
+
+func isGeminiProvider(provider string) bool {
+	switch strings.ToLower(strings.TrimSpace(provider)) {
+	case "gemini", "google", "google-gemini":
+		return true
+	default:
+		return false
+	}
+}
+
 func shouldTryOllamaFallback(ctx context.Context, err error) bool {
 	if err == nil {
 		return false
@@ -354,8 +551,12 @@ func IsAvailabilityError(err error) bool {
 	msg := strings.ToLower(err.Error())
 	return strings.Contains(msg, "connection refused") ||
 		strings.Contains(msg, "no such host") ||
+		strings.Contains(msg, "connection reset") ||
 		strings.Contains(msg, "dial ") ||
-		strings.Contains(msg, "EOF")
+		strings.Contains(msg, "eof") ||
+		strings.Contains(msg, "returned 502") ||
+		strings.Contains(msg, "returned 503") ||
+		strings.Contains(msg, "returned 504")
 }
 
 func flattenContent(content any) string {

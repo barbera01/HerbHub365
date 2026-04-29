@@ -168,7 +168,7 @@ func (c *Client) generatePrimary(ctx context.Context, systemPrompt, userPrompt s
 }
 
 func (c *Client) shouldTryConfiguredFallback(ctx context.Context, err error) bool {
-	if err == nil || ctx.Err() != nil || !IsAvailabilityError(err) {
+	if err == nil || ctx.Err() != nil {
 		return false
 	}
 	provider := strings.ToLower(strings.TrimSpace(c.config.FallbackProvider))
@@ -182,7 +182,16 @@ func (c *Client) shouldTryConfiguredFallback(ctx context.Context, err error) boo
 		log.Printf("Gemini fallback configured but LLM_FALLBACK_API_KEY/GEMINI_API_KEY is not set")
 		return false
 	}
-	return true
+	return IsAvailabilityError(err) || c.primaryIsLocalProvider()
+}
+
+func (c *Client) primaryIsLocalProvider() bool {
+	switch strings.ToLower(strings.TrimSpace(c.config.Provider)) {
+	case "", "auto", "ollama":
+		return true
+	default:
+		return false
+	}
 }
 
 func (c *Client) generateFallback(ctx context.Context, systemPrompt, userPrompt string) (string, error) {

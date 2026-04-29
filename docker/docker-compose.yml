@@ -13,6 +13,11 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-http://ollama.la.home-cloud.uk}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-gemma4:e4b}
+      LLM_FALLBACK_PROVIDER: ${LLM_FALLBACK_PROVIDER:-gemini}
+      LLM_FALLBACK_BASE_URL: ${LLM_FALLBACK_BASE_URL:-https://generativelanguage.googleapis.com/v1beta}
+      LLM_FALLBACK_API_KEY: ${LLM_FALLBACK_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      LLM_FALLBACK_MODEL: ${LLM_FALLBACK_MODEL:-gemini-2.5-flash}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.6}
       LLM_TOP_P: ${LLM_TOP_P:-0.9}
       LLM_REPEAT_PENALTY: ${LLM_REPEAT_PENALTY:-1.1}

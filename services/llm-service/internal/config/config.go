@@ -20,6 +20,10 @@ type LLMConfig struct {
 	BaseURL               string
 	APIKey                string
 	Model                 string
+	FallbackProvider      string
+	FallbackBaseURL       string
+	FallbackAPIKey        string
+	FallbackModel         string
 	Temperature           float64
 	TopP                  float64
 	RepeatPenalty         float64
@@ -37,8 +41,12 @@ func Load() Config {
 		LLM: LLMConfig{
 			Provider:              getEnv("LLM_PROVIDER", "auto"),
 			BaseURL:               getEnv("LLM_BASE_URL", "http://ollama.la.home-cloud.uk"),
-			APIKey:                os.Getenv("LLM_API_KEY"),
+			APIKey:                trimEnvValue(os.Getenv("LLM_API_KEY")),
 			Model:                 getEnv("LLM_MODEL", "qwen2.5:latest"),
+			FallbackProvider:      getEnv("LLM_FALLBACK_PROVIDER", "gemini"),
+			FallbackBaseURL:       getEnv("LLM_FALLBACK_BASE_URL", "https://generativelanguage.googleapis.com/v1beta"),
+			FallbackAPIKey:        trimEnvValue(getEnv("LLM_FALLBACK_API_KEY", os.Getenv("GEMINI_API_KEY"))),
+			FallbackModel:         getEnv("LLM_FALLBACK_MODEL", "gemini-3.1-flash-lite-preview"),
 			Temperature:           getFloatEnv("LLM_TEMPERATURE", 0.6),
 			TopP:                  getFloatEnv("LLM_TOP_P", 0.9),
 			RepeatPenalty:         getFloatEnv("LLM_REPEAT_PENALTY", 1.1),

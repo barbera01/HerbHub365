@@ -5,7 +5,7 @@ date: 2026-05-02 09:00:26 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for May 2, 2026](/assets/images/blog/2026-05-02-a-morning-refresh-at-herb-hub-365.jpg)
+![Timelapse image for May 2, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-05-02-a-morning-refresh-at-herb-hub-365.jpg)
 
 The greenhouse saw a productive start on May 2, 2026, with activity captured between 6:00 AM and 8:30 AM. As the morning progressed, light levels climbed significantly, starting at a dim 177.5 lux and reaching a bright 1041.7 lux by the final reading. This increase in light was accompanied by a gentle cooling of the air; ambient temperatures began at 22.91°C and settled to a crisp 19.05°C, while humidity levels rose from 39.2% to 47.1%.
 

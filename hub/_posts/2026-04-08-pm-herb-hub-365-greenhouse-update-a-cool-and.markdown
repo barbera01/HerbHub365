@@ -5,7 +5,7 @@ date: 2026-04-08 18:01:19 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 8, 2026](/assets/images/blog/2026-04-08-herb-hub-365-greenhouse-update-a-cool-and.jpg)
+![Timelapse image for April 8, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-08-herb-hub-365-greenhouse-update-a-cool-and.jpg)
 
 The morning inside the greenhouse felt crisp, with ambient temperatures starting at 20.3°C and humidity holding steady around 41%. As the day warmed, the environment reached a pleasant peak of 25.93°C in the afternoon, while humidity remained comfortably between 35% and 42%. The basil and oregano are settling into a good rhythm, maintaining their own microclimates just a few degrees warmer than the surrounding air.
 

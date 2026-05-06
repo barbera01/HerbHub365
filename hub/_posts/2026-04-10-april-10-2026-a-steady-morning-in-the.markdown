@@ -5,7 +5,7 @@ date: 2026-04-10 09:00:30 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 10, 2026](/assets/images/blog/2026-04-10-april-10-2026-a-steady-morning-in-the.jpg)
+![Timelapse image for April 10, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-10-april-10-2026-a-steady-morning-in-the.jpg)
 
 The morning sun rose over the Herb Hub 365 greenhouse just after 6:00 AM, bringing a gentle increase in light that climbed steadily throughout the day. By 8:30 AM, intensity had reached a comfortable 665.8 lux, providing the perfect start for the day's growth cycle.
 

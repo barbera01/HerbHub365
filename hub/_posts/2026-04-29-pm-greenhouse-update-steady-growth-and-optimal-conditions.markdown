@@ -5,7 +5,7 @@ date: 2026-04-29 13:01:37 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 29, 2026](/assets/images/blog/2026-04-29-greenhouse-update-steady-growth-and-optimal-conditions.jpg)
+![Timelapse image for April 29, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-29-greenhouse-update-steady-growth-and-optimal-conditions.jpg)
 
 The Herb Hub 365 greenhouse enjoyed a bright and active afternoon session today, tracking conditions from early morning through peak sunlight hours. Overall, the environment remained stable, with the average temperature climbing nicely throughout the recorded period.
 

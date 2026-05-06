@@ -5,7 +5,7 @@ date: 2026-04-15 09:00:40 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 15, 2026](/assets/images/blog/2026-04-15-a-bright-start-to-april-15th-in-the.jpg)
+![Timelapse image for April 15, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-15-a-bright-start-to-april-15th-in-the.jpg)
 
 The morning sun broke through early on April 15th, lifting the greenhouse from a gentle dawn light to bright mid-morning conditions. Inside, the air warmed steadily as the day progressed, climbing from a comfortable 22.4°C to a peak of 23.35°C. Humidity remained on the drier side, hovering around an average of 36% before rising slightly towards the end of the observation window.
 

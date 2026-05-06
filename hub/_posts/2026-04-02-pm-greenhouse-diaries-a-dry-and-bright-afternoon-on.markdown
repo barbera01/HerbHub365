@@ -5,7 +5,7 @@ date: 2026-04-02 18:00:54 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 2, 2026](/assets/images/blog/2026-04-02-greenhouse-diaries-a-dry-and-bright-afternoon-on.jpg)
+![Timelapse image for April 2, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-02-greenhouse-diaries-a-dry-and-bright-afternoon-on.jpg)
 
 The afternoon at the Herb Hub 365 greenhouse marked a distinct shift in conditions, transitioning from humid morning air to drier temperatures by evening. Humidity levels began relatively high but steadily declined as the sun climbed higher, dropping below 40% during late morning before settling around 32-35% towards sunset.
 

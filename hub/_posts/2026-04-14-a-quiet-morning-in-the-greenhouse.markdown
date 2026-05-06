@@ -5,7 +5,7 @@ date: 2026-04-14 09:00:38 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 14, 2026](/assets/images/blog/2026-04-14-a-quiet-morning-in-the-greenhouse.jpg)
+![Timelapse image for April 14, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-14-a-quiet-morning-in-the-greenhouse.jpg)
 
 The morning sun began to peek through the greenhouse glass just after 6:00 AM, bringing the ambient light up from a gentle 94 lux to a brighter 412 lux by mid-morning. Inside, the air was crisp and dry, with humidity hovering around 40 percent.
 

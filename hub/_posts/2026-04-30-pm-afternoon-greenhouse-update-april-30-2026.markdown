@@ -5,7 +5,7 @@ date: 2026-04-30 18:00:19 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 30, 2026](/assets/images/blog/2026-04-30-afternoon-greenhouse-update-april-30-2026.jpg)
+![Timelapse image for April 30, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-30-afternoon-greenhouse-update-april-30-2026.jpg)
 
 It has been a bright and productive day at Herb Hub 365. Light levels peaked at a vibrant 1448.3 lux during the height of the afternoon before settling to a quiet 20 lux as evening approached. The greenhouse stayed comfortably warm for our plants, averaging 24.54°C with a peak of 26.13°C, providing a steady environment for growth.
 

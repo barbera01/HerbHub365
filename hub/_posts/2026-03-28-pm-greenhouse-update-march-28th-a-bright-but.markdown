@@ -5,7 +5,7 @@ date: 2026-03-28 13:00:50 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 28, 2026](/assets/images/blog/2026-03-28-greenhouse-update-march-28th-a-bright-but.jpg)
+![Timelapse image for March 28, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-28-greenhouse-update-march-28th-a-bright-but.jpg)
 
 The morning sun climbed early at Herb Hub 365, bringing natural illumination from low levels up to over 170 lux by mid-morning and peaking near noon. As the brightness increased, so did the greenhouse air temperature, warming steadily from just under 20°C to a comfortable high of roughly 22°C by early afternoon.
 

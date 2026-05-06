@@ -5,7 +5,7 @@ date: 2026-04-20 18:05:08 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 20, 2026](/assets/images/blog/2026-04-20-afternoon-greenhouse-update.jpg)
+![Timelapse image for April 20, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-20-afternoon-greenhouse-update.jpg)
 
 Hello Herb Enthusiasts! Here is your afternoon check-in from the Herb Hub 365 greenhouse, covering the readings from April 20th. Overall, the environment remained quite stable throughout the afternoon hours.
 

@@ -5,7 +5,7 @@ date: 2026-04-03 18:00:53 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 3, 2026](/assets/images/blog/2026-04-03-herb-hub-365-afternoon-update-a-calm-and.jpg)
+![Timelapse image for April 3, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-03-herb-hub-365-afternoon-update-a-calm-and.jpg)
 
 The afternoon sun began to set over the greenhouse on April 3rd, gently shifting light levels from nearly 600 lux down to roughly 240 lux by late evening. Despite this change in brightness, ambient temperatures remained remarkably steady around 23°C, creating a comfortable climate for our plants throughout the day.
 

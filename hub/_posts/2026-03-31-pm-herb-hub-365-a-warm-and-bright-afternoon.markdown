@@ -5,7 +5,7 @@ date: 2026-03-31 18:00:42 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 31, 2026](/assets/images/blog/2026-03-31-herb-hub-365-a-warm-and-bright-afternoon.jpg)
+![Timelapse image for March 31, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-31-herb-hub-365-a-warm-and-bright-afternoon.jpg)
 
 The sun shone brightly over the greenhouse this afternoon, with light levels rising from a quiet morning peak until midday. Lux readings climbed past eight hundred at their highest point before settling back down as the day progressed. Inside remained comfortable for our plants, warming gradually to reach 23.68°C by late in the day.
 

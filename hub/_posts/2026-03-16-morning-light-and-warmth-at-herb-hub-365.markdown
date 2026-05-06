@@ -3,7 +3,7 @@ layout: post
 title: "Morning Light and Warmth at Herb Hub 365"
 date: 2026-03-16 20:00:00 +0000
 categories: Herb Hub Update
-image: /assets/images/blog/2026-03-16-morning-light-and-warmth-at-herb-hub-365.jpg
+image: https://herbhub365.blob.core.windows.net/blogimages/2026-03-16-morning-light-and-warmth-at-herb-hub-365.jpg
 image_alt: "Timelapse snapshot from the Herb Hub 365 greenhouse on March 16, 2026"
 ---
 

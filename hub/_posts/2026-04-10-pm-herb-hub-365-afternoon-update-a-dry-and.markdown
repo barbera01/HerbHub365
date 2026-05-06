@@ -5,7 +5,7 @@ date: 2026-04-10 18:00:30 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 10, 2026](/assets/images/blog/2026-04-10-herb-hub-365-afternoon-update-a-dry-and.jpg)
+![Timelapse image for April 10, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-10-herb-hub-365-afternoon-update-a-dry-and.jpg)
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/EBFQtDeZlK0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>

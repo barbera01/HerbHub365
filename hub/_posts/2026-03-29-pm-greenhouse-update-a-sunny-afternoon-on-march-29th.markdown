@@ -5,7 +5,7 @@ date: 2026-03-29 13:00:50 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 29, 2026](/assets/images/blog/2026-03-29-greenhouse-update-a-sunny-afternoon-on-march-29th.jpg)
+![Timelapse image for March 29, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-29-greenhouse-update-a-sunny-afternoon-on-march-29th.jpg)
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/h1mo52gHaVc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>

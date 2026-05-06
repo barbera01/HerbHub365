@@ -5,7 +5,7 @@ date: 2026-03-30 09:00:47 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 30, 2026](/assets/images/blog/2026-03-30-greenhouse-diaries-a-quiet-start-to-march-in.jpg)
+![Timelapse image for March 30, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-30-greenhouse-diaries-a-quiet-start-to-march-in.jpg)
 
 The morning sun began its gentle climb over our greenhouse on Wednesday, waking up Basil and Oregano at a steady eighteen degrees. By mid-morning, temperatures warmed nicely above twenty degrees as natural light shifted from dim pre-dawn shadows into bright daylight. The chilli plant settled comfortably between them, maintaining a slightly cooler but perfectly healthy zone around seventeen point nine degrees throughout the early hours.
 

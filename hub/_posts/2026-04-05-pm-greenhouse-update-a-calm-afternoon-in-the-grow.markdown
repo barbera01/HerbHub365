@@ -5,7 +5,7 @@ date: 2026-04-05 18:01:36 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 5, 2026](/assets/images/blog/2026-04-05-greenhouse-update-a-calm-afternoon-in-the-grow.jpg)
+![Timelapse image for April 5, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-05-greenhouse-update-a-calm-afternoon-in-the-grow.jpg)
 
 The afternoon sun brought a gentle warmth to the Herb Hub 365 greenhouse, raising the air temperature from a comfortable 19.5°C in the morning to a peak of 24.47°C by late afternoon. Inside the grow beds, the herbs tracked this rise closely, with basil and oregano reaching highs near 22.7°C before settling down as the light levels began to fade. Meanwhile, the water reservoir remained stable around 18.7°C, ensuring a cool base for the roots even as the air warmed up.
 

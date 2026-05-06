@@ -5,7 +5,7 @@ date: 2026-03-29 18:00:43 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 29, 2026](/assets/images/blog/2026-03-29-greenhouse-update-a-sunny-march-evening-for-the.jpg)
+![Timelapse image for March 29, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-29-greenhouse-update-a-sunny-march-evening-for-the.jpg)
 
 The afternoon sun brought a noticeable warmth to our Herb Hub greenhouse as we wrapped up observations yesterday evening. Ambient temperatures climbed steadily, peaking at nearly 22°C before settling back down toward sunset. The basil plants warmed in step with their surroundings, reaching an average of just under 19.6°C by late afternoon.
 

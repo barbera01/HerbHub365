@@ -5,7 +5,7 @@ date: 2026-04-02 13:00:54 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 2, 2026](/assets/images/blog/2026-04-02-herb-hub-365-a-sunny-afternoon-in-the.jpg)
+![Timelapse image for April 2, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-02-herb-hub-365-a-sunny-afternoon-in-the.jpg)
 
 The morning sun began to break through gently around mid-morning on April 2nd, waking up our plants as light levels climbed from a quiet dawn glow. By early afternoon, the greenhouse was basking under strong illumination with readings reaching nearly 750 lux before settling into a comfortable range for the rest of the day. The air warmed steadily alongside it, climbing from an initial cool start to peak temperatures near 22°C by midday.
 

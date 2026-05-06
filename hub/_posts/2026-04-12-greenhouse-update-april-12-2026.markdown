@@ -5,7 +5,7 @@ date: 2026-04-12 09:01:17 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 12, 2026](/assets/images/blog/2026-04-12-greenhouse-update-april-12-2026.jpg)
+![Timelapse image for April 12, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-12-greenhouse-update-april-12-2026.jpg)
 
 The morning inside the Herb Hub 365 greenhouse began gently, with the first sensor readings captured just after 6:00 AM. As the day progressed toward mid-morning, the environment warmed steadily, with ambient temperatures rising from a comfortable 19.6°C to a peak of 21.6°C by 8:30 AM. This gradual increase mirrored the warming of the individual plant zones, where basil and oregano warmed slightly more than the chilli plants and water reservoir.
 

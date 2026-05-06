@@ -78,7 +78,7 @@ services:
       BLOG_IMAGE_OUTPUT_DIR: ${BLOG_IMAGE_OUTPUT_DIR:-/repo/hub/assets/images/blog}
       BLOG_IMAGE_PUBLIC_PATH: ${BLOG_IMAGE_PUBLIC_PATH:-/assets/images/blog}
       BLOG_IMAGE_BLOB_SAS_URL: ${BLOG_IMAGE_BLOB_SAS_URL:-}
-      BLOG_IMAGE_BLOB_PUBLIC_BASE: ${BLOG_IMAGE_BLOB_PUBLIC_BASE:-https://herbhub365.blob.core.windows.net/blog-images}
+      BLOG_IMAGE_BLOB_PUBLIC_BASE: ${BLOG_IMAGE_BLOB_PUBLIC_BASE:-https://herbhub365.blob.core.windows.net/blogimages}
       DATA_DIR: /data
       SENSOR_DATA_ENABLED: ${SENSOR_DATA_ENABLED:-true}
       SENSOR_DATA_FILE: ${SENSOR_DATA_FILE:-/repo/hub/_data/live_sensors.yml}

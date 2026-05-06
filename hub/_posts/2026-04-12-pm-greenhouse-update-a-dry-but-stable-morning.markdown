@@ -5,7 +5,7 @@ date: 2026-04-12 13:01:13 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 12, 2026](/assets/images/blog/2026-04-12-greenhouse-update-a-dry-but-stable-morning.jpg)
+![Timelapse image for April 12, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-12-greenhouse-update-a-dry-but-stable-morning.jpg)
 
 The morning sun broke over the Herb Hub 365 greenhouse, warming the air from a crisp 19.6°C to a comfortable 24°C by midday. Although humidity dipped to 33.8%, the plants are handling these dry conditions well. Steady pressure readings around 1000 hPa suggest a calm day with no sudden weather shifts expected.
 

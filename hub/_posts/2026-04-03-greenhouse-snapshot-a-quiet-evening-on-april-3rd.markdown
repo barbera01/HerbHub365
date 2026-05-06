@@ -5,7 +5,7 @@ date: 2026-04-03 17:55:15 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 3, 2026](/assets/images/blog/2026-04-03-greenhouse-snapshot-a-quiet-evening-on-april-3rd.jpg)
+![Timelapse image for April 3, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-03-greenhouse-snapshot-a-quiet-evening-on-april-3rd.jpg)
 
 The greenhouse settled into a gentle evening rhythm between 17:00 and 17:30 UTC. Ambient air hovered comfortably around 23°C while the water reservoir maintained its cool baseline at roughly 19.5°C. Inside the growing zones, conditions remained stable with basil sitting near 22.8°C and our chilli and oregano plants tracking closely behind just above 22.5°C.
 

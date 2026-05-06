@@ -5,7 +5,7 @@ date: 2026-03-29 09:00:50 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 29, 2026](/assets/images/blog/2026-03-29-greenhouse-morning-report-march-29-2026.jpg)
+![Timelapse image for March 29, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-29-greenhouse-morning-report-march-29-2026.jpg)
 
 The morning inside the Herb Hub began quietly around 6 AM with crisp air hovering near forty percent humidity and temperatures just under nineteen degrees Celsius. As daylight crept across the glass, light levels climbed steadily to over two hundred seventy-four lux by mid-morning, signaling a bright day ahead despite our monitoring window ending at 8:30 AM.
 

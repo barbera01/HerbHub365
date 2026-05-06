@@ -5,7 +5,7 @@ date: 2026-04-14 18:00:36 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 14, 2026](/assets/images/blog/2026-04-14-herb-hub-365-greenhouse-update-a-dry-and.jpg)
+![Timelapse image for April 14, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-14-herb-hub-365-greenhouse-update-a-dry-and.jpg)
 
 The afternoon sun brought a noticeable shift to the greenhouse environment today. We started with a gentle breeze and humidity hovering around 40%, but as light levels climbed, the air quickly dried out. By 16:30, average humidity settled into the low 30s, with the driest moments dipping to 33.3%. It is a classic spring day where the plants are working hard to transpire in the warming air.
 

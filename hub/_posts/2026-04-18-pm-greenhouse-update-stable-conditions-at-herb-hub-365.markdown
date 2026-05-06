@@ -5,7 +5,7 @@ date: 2026-04-18 13:05:07 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 18, 2026](/assets/images/blog/2026-04-18-greenhouse-update-stable-conditions-at-herb-hub-365.jpg)
+![Timelapse image for April 18, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-18-greenhouse-update-stable-conditions-at-herb-hub-365.jpg)
 
 The afternoon readings from the greenhouse indicate a period of stable, warm conditions. Ambient temperatures peaked nicely around midday, reaching 23.66°C, and light levels were quite strong, hitting a high of 1390 lux.
 

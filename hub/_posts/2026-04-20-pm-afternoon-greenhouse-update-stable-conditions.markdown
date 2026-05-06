@@ -5,7 +5,7 @@ date: 2026-04-20 13:05:09 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 20, 2026](/assets/images/blog/2026-04-20-afternoon-greenhouse-update-stable-conditions.jpg)
+![Timelapse image for April 20, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-20-afternoon-greenhouse-update-stable-conditions.jpg)
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/W6SPZahRurY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>

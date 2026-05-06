@@ -5,7 +5,7 @@ date: 2026-03-30 18:00:47 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 30, 2026](/assets/images/blog/2026-03-30-greenhouse-check-in-a-warm-and-stable-march-evening.jpg)
+![Timelapse image for March 30, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-30-greenhouse-check-in-a-warm-and-stable-march-evening.jpg)
 
 The afternoon sun brought gentle warmth to the Herb Hub greenhouse today, raising ambient temperatures from a cool morning start of 18.5°C to a pleasant peak near 24.4°C by late evening. Inside our pots, basil enjoyed its warmest stretch reaching nearly 23°C, while chilli and oregano thrived in their own cozy microclimates throughout the day.
 

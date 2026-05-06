@@ -5,7 +5,7 @@ date: 2026-04-29 18:00:54 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 29, 2026](/assets/images/blog/2026-04-29-greenhouse-update-april-29th-readings.jpg)
+![Timelapse image for April 29, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-29-greenhouse-update-april-29th-readings.jpg)
 
 The afternoon hours on April 29th saw a noticeable warming trend in the greenhouse. Ambient temperatures peaked, reaching a high of 26.98°C. This warming coincided with a drop in humidity, which settled to a low of 30% by the late afternoon.
 

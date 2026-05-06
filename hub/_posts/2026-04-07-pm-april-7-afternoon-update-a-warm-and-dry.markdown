@@ -5,7 +5,7 @@ date: 2026-04-07 18:02:00 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 7, 2026](/assets/images/blog/2026-04-07-april-7-afternoon-update-a-warm-and-dry.jpg)
+![Timelapse image for April 7, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-07-april-7-afternoon-update-a-warm-and-dry.jpg)
 
 The afternoon sun brought a noticeable shift in our greenhouse atmosphere today. By the time the sun began to set around 5:30 PM, the ambient humidity had dropped significantly from the morning levels, settling into the low 30s. While the air felt quite dry with humidity dipping as low as 28%, the temperature remained pleasantly mild, hovering around 22°C before cooling slightly to 21.8°C by the end of our monitoring window.
 

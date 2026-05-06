@@ -5,7 +5,7 @@ date: 2026-05-01 13:00:21 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for May 1, 2026](/assets/images/blog/2026-05-01-afternoon-sun-at-herb-hub-365.jpg)
+![Timelapse image for May 1, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-05-01-afternoon-sun-at-herb-hub-365.jpg)
 
 It has been a bright and active morning here at the greenhouse. Since our initial 6:00 AM readings, we have watched a steady climb in both light and warmth. While the day began at a cool 20.33°C, temperatures reached a peak of 26.71°C by midday as the sun moved overhead.
 

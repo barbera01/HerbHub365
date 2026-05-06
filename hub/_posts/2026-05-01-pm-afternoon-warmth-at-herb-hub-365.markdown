@@ -5,7 +5,7 @@ date: 2026-05-01 18:00:26 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for May 1, 2026](/assets/images/blog/2026-05-01-afternoon-warmth-at-herb-hub-365.jpg)
+![Timelapse image for May 1, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-05-01-afternoon-warmth-at-herb-hub-365.jpg)
 
 It has been a productive day in the greenhouse as temperatures climbed steadily from a cool 20.33°C this morning to a vibrant peak of 28.7°C. The bright afternoon sun provided a warm environment for the herbs, with light levels reaching a strong 1391.7 lux. This abundance of sunshine was accompanied by relatively dry air, as humidity averaged 33.37% while atmospheric pressure dipped slightly toward 1012 hPa.
 

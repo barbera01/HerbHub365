@@ -5,7 +5,7 @@ date: 2026-04-09 09:00:33 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 9, 2026](/assets/images/blog/2026-04-09-greenhouse-update-april-9-2026.jpg)
+![Timelapse image for April 9, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-09-greenhouse-update-april-9-2026.jpg)
 
 Our morning at Herb Hub 365 kicked off with a gentle rise in activity, capturing our first sensor readings just after 6:00 AM. The day began with a comfortable ambient temperature of 23.12°C and humidity levels holding steady at 41.3%. Inside the growing beds, the basil and oregano plants were slightly warmer than the chilli, with basil starting at 22.13°C and oregano matching that warmth before the air cooled slightly by the end of the monitoring period.
 

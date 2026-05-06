@@ -5,7 +5,7 @@ date: 2026-04-26 13:01:21 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 26, 2026](/assets/images/blog/2026-04-26-greenhouse-growth-update.jpg)
+![Timelapse image for April 26, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-26-greenhouse-growth-update.jpg)
 
 The afternoon readings from the greenhouse showed a lovely progression as the day warmed. The average temperature climbed steadily, peaking at 25.15°C by the end of the monitoring period. Ambient humidity remained fairly consistent, dipping slightly from a high of 39.5% down to 34.4%.
 

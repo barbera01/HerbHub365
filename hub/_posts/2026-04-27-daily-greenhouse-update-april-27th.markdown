@@ -5,7 +5,7 @@ date: 2026-04-27 09:06:33 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 27, 2026](/assets/images/blog/2026-04-27-daily-greenhouse-update-april-27th.jpg)
+![Timelapse image for April 27, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-27-daily-greenhouse-update-april-27th.jpg)
 
 Welcome back to the Herb Hub 365 blog! Today's snapshot offers a look at the greenhouse environment from 6:00 AM to 8:00 AM UTC. Overall, the atmosphere remained comfortable, with the average temperature holding steady around 19.14°C.
 

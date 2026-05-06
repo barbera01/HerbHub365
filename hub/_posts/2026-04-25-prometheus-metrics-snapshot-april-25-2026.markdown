@@ -18,7 +18,7 @@ prometheus_chart_exports:
 prometheus_charts: true
 ---
 
-![Timelapse image for April 25, 2026](/assets/images/blog/2026-04-25-prometheus-metrics-snapshot-april-25-2026.jpg)
+![Timelapse image for April 25, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-25-prometheus-metrics-snapshot-april-25-2026.jpg)
 
 This metrics post was generated automatically from Prometheus exports for April 25, 2026.
 

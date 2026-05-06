@@ -5,7 +5,7 @@ date: 2026-05-03 13:00:37 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for May 3, 2026](/assets/images/blog/2026-05-03-herb-hub-365-afternoon-update.jpg)
+![Timelapse image for May 3, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-05-03-herb-hub-365-afternoon-update.jpg)
 
 The greenhouse environment remained stable throughout the morning of May 3rd. Air temperatures averaged a comfortable 23.1°C, while humidity levels dipped slightly from 41% to 40.2% by 7:00 AM. Atmospheric pressure held steady between 1003 and 1004 hPa, providing a consistent backdrop for the herbs as the day began.
 

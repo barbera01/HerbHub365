@@ -5,7 +5,7 @@ date: 2026-04-30 09:05:37 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 30, 2026](/assets/images/blog/2026-04-30-herb-hub-365-morning-update-april-30-2026.jpg)
+![Timelapse image for April 30, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-30-herb-hub-365-morning-update-april-30-2026.jpg)
 
 It was a calm morning in the greenhouse on April 30th. Between 8:30 and 9:00 AM UTC, we observed a gentle warming trend as the ambient temperature rose from 22.12°C to 22.72°C. Humidity remained remarkably steady, hovering around 38.75% and providing a stable atmosphere for the herbs to start their day.
 

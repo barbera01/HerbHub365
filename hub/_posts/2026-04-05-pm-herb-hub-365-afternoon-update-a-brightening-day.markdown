@@ -5,7 +5,7 @@ date: 2026-04-05 13:00:54 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 5, 2026](/assets/images/blog/2026-04-05-herb-hub-365-afternoon-update-a-brightening-day.jpg)
+![Timelapse image for April 5, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-05-herb-hub-365-afternoon-update-a-brightening-day.jpg)
 
 The morning sun began its ascent over our greenhouse around mid-morning, bringing a noticeable shift to the environment. We started with temperatures hovering near 19°C and humidity levels at their peak for the day, but by early afternoon, both metrics had climbed steadily as we approached noon.
 

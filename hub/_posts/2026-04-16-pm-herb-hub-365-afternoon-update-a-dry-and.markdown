@@ -5,7 +5,7 @@ date: 2026-04-16 13:00:44 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 16, 2026](/assets/images/blog/2026-04-16-herb-hub-365-afternoon-update-a-dry-and.jpg)
+![Timelapse image for April 16, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-16-herb-hub-365-afternoon-update-a-dry-and.jpg)
 
 The greenhouse day began with a gentle morning atmosphere, though the air was noticeably dry. As the sun rose, humidity started at a comfortable 42.9% but dropped steadily throughout the afternoon, ending the monitoring period at 35.5%. This drying trend was accompanied by a warming environment, with ambient temperatures climbing from a mild 21.09°C in the early morning to a peak of 23.02°C by mid-afternoon.
 

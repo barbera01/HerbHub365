@@ -5,7 +5,7 @@ date: 2026-04-01 18:00:50 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 1, 2026](/assets/images/blog/2026-04-01-april-1st-greenhouse-update-a-quiet-evening-in.jpg)
+![Timelapse image for April 1, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-01-april-1st-greenhouse-update-a-quiet-evening-in.jpg)
 
 The day began with gentle conditions inside Herb Hub 365, where humidity hovered just under forty percent throughout our observation window. Outside, light levels dropped from bright daylight to softer evening tones as plants settled into their rest cycle.
 

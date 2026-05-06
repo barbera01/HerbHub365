@@ -5,7 +5,7 @@ date: 2026-04-17 13:00:27 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 17, 2026](/assets/images/blog/2026-04-17-herb-hub-365-a-sunny-and-stable-afternoon.jpg)
+![Timelapse image for April 17, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-17-herb-hub-365-a-sunny-and-stable-afternoon.jpg)
 
 The afternoon at Herb Hub 365 brought a noticeable shift in the greenhouse atmosphere as the sun climbed higher. By early morning, the air was cool, but by midday, the environment warmed significantly.
 

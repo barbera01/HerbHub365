@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for May 3, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-05-03-sunday-morning-at-herb-hub-365.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/2psLE48ptZ8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The greenhouse enjoyed a steady start on May 3rd. Between 6:00 AM and 7:00 AM UTC, ambient temperatures rose slightly from 22.92°C to 23.21°C. Light levels climbed gently to a peak of 194.2 lux, while humidity remained comfortably low at an average of 40.6%.
 

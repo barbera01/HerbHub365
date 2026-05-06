@@ -69,6 +69,11 @@ type BlogConfig struct {
 	ImageOutputDir  string
 	ImagePublicPath string
 	IncludeDayImage bool
+	// BlobSASURL is the full Azure Blob SAS URL for the blog-images container,
+	// e.g. https://herbhub365.blob.core.windows.net/blog-images?sv=...&sig=...
+	// When set, images are uploaded via HTTP PUT instead of written to ImageOutputDir.
+	BlobSASURL     string
+	BlobPublicBase string
 }
 
 type GitConfig struct {
@@ -214,6 +219,8 @@ func Load() Config {
 			ImageOutputDir:  getEnv("BLOG_IMAGE_OUTPUT_DIR", filepath.Join(hubDir, "assets", "images", "blog")),
 			ImagePublicPath: getEnv("BLOG_IMAGE_PUBLIC_PATH", "/assets/images/blog"),
 			IncludeDayImage: getBoolEnv("BLOG_INCLUDE_DAY_IMAGE", false),
+			BlobSASURL:      os.Getenv("BLOG_IMAGE_BLOB_SAS_URL"),
+			BlobPublicBase:  getEnv("BLOG_IMAGE_BLOB_PUBLIC_BASE", "https://herbhub365.blob.core.windows.net/blog-images"),
 		},
 		RepoPost: RepoPostConfig{
 			Prompt:        os.Getenv("BLOG_REPO_POST_PROMPT"),
@@ -236,8 +243,8 @@ func Load() Config {
 			Categories:  getEnv("PROM_POST_CATEGORIES", "Metrics Observability"),
 			Layout:      getEnv("PROM_POST_LAYOUT", "post"),
 			ExportDir:   getEnv("PROM_POST_EXPORT_DIR", filepath.Join(hubDir, "assets", "data", "prometheus")),
-			Schedule:   getEnv("PROM_POST_SCHEDULE", ""),
-			TargetDate: getEnv("PROM_POST_TARGET_DATE", "today"),
+			Schedule:    getEnv("PROM_POST_SCHEDULE", ""),
+			TargetDate:  getEnv("PROM_POST_TARGET_DATE", "today"),
 		},
 		Git: GitConfig{
 			PublishEnabled: getBoolEnv("GIT_PUBLISH_ENABLED", false),

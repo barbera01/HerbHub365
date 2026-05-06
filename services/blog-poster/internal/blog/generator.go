@@ -1,6 +1,7 @@
 package blog
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -282,7 +284,9 @@ func (g *Generator) writePost(day time.Time, title, body string, opts writeOptio
 		}
 		if imageMarkdown != "" {
 			trimmedBody = imageMarkdown + "\n\n" + trimmedBody
-			assetPaths = append(assetPaths, assetPath)
+			if assetPath != "" {
+				assetPaths = append(assetPaths, assetPath)
+			}
 		}
 	}
 
@@ -322,11 +326,24 @@ func (g *Generator) prepareDayImage(day time.Time, slug string) (string, string,
 	}
 	sort.Strings(images)
 	selected := images[rand.New(rand.NewSource(time.Now().UnixNano())).Intn(len(images))]
+	ext := strings.ToLower(filepath.Ext(selected))
+	assetName := fmt.Sprintf("%s-%s%s", day.Format("2006-01-02"), slug, ext)
+
+	// If BlobSASURL is set, upload to Azure Blob Storage via HTTP PUT
+	if strings.TrimSpace(g.blogConfig.BlobSASURL) != "" {
+		publicURL, err := uploadToBlob(selected, assetName, ext, g.blogConfig.BlobSASURL, g.blogConfig.BlobPublicBase)
+		if err != nil {
+			log.Printf("WARNING: failed to upload blog image to blob storage: %v, publishing post without image", err)
+			return "", "", nil
+		}
+		alt := fmt.Sprintf("Timelapse image for %s", day.Format("January 2, 2006"))
+		return fmt.Sprintf("![%s](%s)", alt, publicURL), "", nil
+	}
+
+	// Fallback to local file copy when BlobSASURL is not set
 	if err := os.MkdirAll(g.blogConfig.ImageOutputDir, 0o755); err != nil {
 		return "", "", err
 	}
-	ext := strings.ToLower(filepath.Ext(selected))
-	assetName := fmt.Sprintf("%s-%s%s", day.Format("2006-01-02"), slug, ext)
 	assetPath := filepath.Join(g.blogConfig.ImageOutputDir, assetName)
 	if err := copyFile(selected, assetPath); err != nil {
 		return "", "", err
@@ -351,6 +368,66 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	return out.Close()
+}
+
+func uploadToBlob(localPath, assetName, ext, blobSASURL, blobPublicBase string) (string, error) {
+	// Split SAS URL into base and query parts
+	var base, query string
+	if idx := strings.Index(blobSASURL, "?"); idx != -1 {
+		base = blobSASURL[:idx]
+		query = blobSASURL[idx+1:]
+	} else {
+		base = blobSASURL
+	}
+
+	// Construct full blob URL for upload: base + "/" + assetName + "?" + query
+	blobURL := strings.TrimRight(base, "/") + "/" + assetName
+	if query != "" {
+		blobURL += "?" + query
+	}
+
+	// Read local file
+	data, err := os.ReadFile(localPath)
+	if err != nil {
+		return "", err
+	}
+
+	// Determine content type
+	contentType := "application/octet-stream"
+	switch ext {
+	case ".jpg", ".jpeg":
+		contentType = "image/jpeg"
+	case ".png":
+		contentType = "image/png"
+	case ".webp":
+		contentType = "image/webp"
+	}
+
+	// Create HTTP PUT request
+	req, err := http.NewRequest("PUT", blobURL, bytes.NewReader(data))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("x-ms-blob-type", "BlockBlob")
+	req.Header.Set("Content-Type", contentType)
+
+	// Execute request — 60s timeout is generous for a single image upload
+	client := &http.Client{Timeout: 60 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusCreated {
+		return "", fmt.Errorf("blob upload failed: status %d", resp.StatusCode)
+	}
+
+	// Return public read URL (no SAS token — container has anonymous read)
+	return strings.TrimRight(blobPublicBase, "/") + "/" + assetName, nil
 }
 
 func buildFrontMatter(cfg config.BlogConfig, day time.Time, title, categories, layout string, extras map[string]any) string {

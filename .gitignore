@@ -118,6 +118,9 @@ logs/
 # Blog poster snapshot archive
 /services/blog-poster/data/snapshots/
 
+# Blog post hero images — stored in Azure Blob Storage (herbhub365/blog-images)
+/hub/assets/images/blog/
+
 # Timelapse builder output
 /services/timelapse-builder/output/
 /services/video-narrator/resources/

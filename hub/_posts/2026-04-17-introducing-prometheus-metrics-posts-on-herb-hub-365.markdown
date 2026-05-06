@@ -5,7 +5,7 @@ date: 2026-04-17 13:53:14 +0000
 categories: Platform Update
 ---
 
-![Timelapse image for April 17, 2026](/assets/images/blog/2026-04-17-introducing-prometheus-metrics-posts-on-herb-hub-365.jpg)
+![Timelapse image for April 17, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-17-introducing-prometheus-metrics-posts-on-herb-hub-365.jpg)
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/NyEWS6MApNI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>

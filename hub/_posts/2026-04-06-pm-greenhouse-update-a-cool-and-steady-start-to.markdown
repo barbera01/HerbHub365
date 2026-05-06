@@ -5,7 +5,7 @@ date: 2026-04-06 13:00:58 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 6, 2026](/assets/images/blog/2026-04-06-greenhouse-update-a-cool-and-steady-start-to.jpg)
+![Timelapse image for April 6, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-06-greenhouse-update-a-cool-and-steady-start-to.jpg)
 
 Good afternoon from the Herb Hub 365 greenhouse. As we settle into the morning hours of April 6th, the environment feels quite crisp. Our air temperature started at a comfortable 18.9°C and has been gradually climbing, reaching a peak of 21.6°C by midday. This steady rise is typical for the season, though the humidity has dropped significantly alongside the warming air.
 

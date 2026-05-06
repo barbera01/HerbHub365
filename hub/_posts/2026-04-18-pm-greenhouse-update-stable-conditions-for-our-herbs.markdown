@@ -5,7 +5,7 @@ date: 2026-04-18 18:04:51 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 18, 2026](/assets/images/blog/2026-04-18-greenhouse-update-stable-conditions-for-our-herbs.jpg)
+![Timelapse image for April 18, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-18-greenhouse-update-stable-conditions-for-our-herbs.jpg)
 
 The afternoon readings from the Herb Hub 365 greenhouse show a period of relatively stable conditions as the day wound down. The average temperature held steady throughout the monitoring period, with the recorded highs reaching around 23.91°C.
 

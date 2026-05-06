@@ -5,7 +5,7 @@ date: 2026-04-12 18:01:24 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 12, 2026](/assets/images/blog/2026-04-12-herb-hub-365-greenhouse-update-a-dry-and.jpg)
+![Timelapse image for April 12, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-12-herb-hub-365-greenhouse-update-a-dry-and.jpg)
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/y5t2MoiUe7s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>

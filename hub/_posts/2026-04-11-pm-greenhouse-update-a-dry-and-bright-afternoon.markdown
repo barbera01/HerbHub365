@@ -5,7 +5,7 @@ date: 2026-04-11 18:01:24 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 11, 2026](/assets/images/blog/2026-04-11-greenhouse-update-a-dry-and-bright-afternoon.jpg)
+![Timelapse image for April 11, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-11-greenhouse-update-a-dry-and-bright-afternoon.jpg)
 
 The afternoon at Herb Hub 365 brought a noticeable shift in our growing conditions. As the sun climbed higher, the greenhouse warmed steadily, rising from a comfortable 20.1°C in the morning to a peak of 25.0°C by late afternoon. The basil and oregano plants tracked closely with this rise, reaching their highest point of around 22.5°C as the light levels peaked.
 

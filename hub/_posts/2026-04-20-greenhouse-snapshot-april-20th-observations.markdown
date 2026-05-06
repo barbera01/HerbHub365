@@ -5,7 +5,7 @@ date: 2026-04-20 09:05:56 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 20, 2026](/assets/images/blog/2026-04-20-greenhouse-snapshot-april-20th-observations.jpg)
+![Timelapse image for April 20, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-20-greenhouse-snapshot-april-20th-observations.jpg)
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/uX5--gEkDQQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>

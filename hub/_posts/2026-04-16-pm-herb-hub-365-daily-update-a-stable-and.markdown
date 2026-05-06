@@ -5,7 +5,7 @@ date: 2026-04-16 18:00:51 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 16, 2026](/assets/images/blog/2026-04-16-herb-hub-365-daily-update-a-stable-and.jpg)
+![Timelapse image for April 16, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-16-herb-hub-365-daily-update-a-stable-and.jpg)
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/nDSZZifqgnU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>

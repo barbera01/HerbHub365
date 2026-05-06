@@ -220,7 +220,7 @@ func Load() Config {
 			ImagePublicPath: getEnv("BLOG_IMAGE_PUBLIC_PATH", "/assets/images/blog"),
 			IncludeDayImage: getBoolEnv("BLOG_INCLUDE_DAY_IMAGE", false),
 			BlobSASURL:      os.Getenv("BLOG_IMAGE_BLOB_SAS_URL"),
-			BlobPublicBase:  getEnv("BLOG_IMAGE_BLOB_PUBLIC_BASE", "https://herbhub365.blob.core.windows.net/blog-images"),
+			BlobPublicBase:  getEnv("BLOG_IMAGE_BLOB_PUBLIC_BASE", "https://herbhub365.blob.core.windows.net/blogimages"),
 		},
 		RepoPost: RepoPostConfig{
 			Prompt:        os.Getenv("BLOG_REPO_POST_PROMPT"),

@@ -5,7 +5,7 @@ date: 2026-04-25 09:04:44 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 25, 2026](/assets/images/blog/2026-04-25-greenhouse-snapshot-april-25th-observations.jpg)
+![Timelapse image for April 25, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-25-greenhouse-snapshot-april-25th-observations.jpg)
 
 Good morning, green thumbs! Here is a look at how things were doing in the Herb Hub 365 greenhouse yesterday, April 25th. Overall, the environment remained quite stable throughout the recorded hours.
 

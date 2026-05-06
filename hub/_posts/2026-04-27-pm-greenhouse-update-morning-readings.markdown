@@ -5,7 +5,7 @@ date: 2026-04-27 13:01:24 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 27, 2026](/assets/images/blog/2026-04-27-greenhouse-update-morning-readings.jpg)
+![Timelapse image for April 27, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-27-greenhouse-update-morning-readings.jpg)
 
 Hello Herb Lovers! Here is your afternoon check-in from the Herb Hub 365 greenhouse. We observed a gentle shift in conditions as the morning progressed, giving us a good look at how our herbs are responding to the environment.
 

@@ -5,7 +5,7 @@ date: 2026-05-01 09:00:30 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for May 1, 2026](/assets/images/blog/2026-05-01-steady-morning-greenhouse-rhythms.jpg)
+![Timelapse image for May 1, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-05-01-steady-morning-greenhouse-rhythms.jpg)
 
 It was a calm start at Herb Hub 365 this morning. Between 06:00 and 08:30 UTC, our sensors recorded a gentle rise in ambient temperature from 20.33°C to 21.49°C. This steady warmth provided a stable, inviting environment for the herbs to begin their day.
 

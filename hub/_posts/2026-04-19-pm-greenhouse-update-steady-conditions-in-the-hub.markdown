@@ -5,7 +5,7 @@ date: 2026-04-19 13:05:48 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 19, 2026](/assets/images/blog/2026-04-19-greenhouse-update-steady-conditions-in-the-hub.jpg)
+![Timelapse image for April 19, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-19-greenhouse-update-steady-conditions-in-the-hub.jpg)
 
 Hello Herb Gardeners! Here is your afternoon look at the conditions within the Herb Hub 365 greenhouse, covering the period from early morning through midday yesterday. Overall, the environment remained quite stable, offering our herbs a consistent backdrop for growth.
 

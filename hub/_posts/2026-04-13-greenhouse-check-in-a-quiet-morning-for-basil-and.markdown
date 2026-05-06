@@ -5,7 +5,7 @@ date: 2026-04-13 09:00:40 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 13, 2026](/assets/images/blog/2026-04-13-greenhouse-check-in-a-quiet-morning-for-basil-and.jpg)
+![Timelapse image for April 13, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-13-greenhouse-check-in-a-quiet-morning-for-basil-and.jpg)
 
 Morning light filtered into the greenhouse around 6:00 AM, gradually warming the air and increasing light intensity. By 8:30 AM, ambient light had climbed to 260.8 lux, marking the start of a bright day. The air remained comfortably dry, hovering between 41.6% and 45.2% humidity as the sun continued to warm the space.
 

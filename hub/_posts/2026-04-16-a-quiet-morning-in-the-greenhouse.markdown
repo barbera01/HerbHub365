@@ -5,7 +5,7 @@ date: 2026-04-16 09:00:59 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 16, 2026](/assets/images/blog/2026-04-16-a-quiet-morning-in-the-greenhouse.jpg)
+![Timelapse image for April 16, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-16-a-quiet-morning-in-the-greenhouse.jpg)
 
 The morning began with a gentle rise in light, starting soft and climbing steadily as the day progressed. By the final reading, the greenhouse was bathed in natural light, signaling the sun's full arrival. The air remained comfortably cool, hovering around 21.8°C before warming slightly to 22.4°C by the end of the monitoring window.
 

@@ -5,7 +5,7 @@ date: 2026-03-31 13:00:45 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 31, 2026](/assets/images/blog/2026-03-31-herb-hub-365-afternoon-update-for-march-31st.jpg)
+![Timelapse image for March 31, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-31-herb-hub-365-afternoon-update-for-march-31st.jpg)
 
 The afternoon sun warmed the greenhouse noticeably as we reviewed our morning snapshots. Ambient temperatures climbed steadily from twenty degrees Celsius at dawn, peaking near twenty-four by midday before settling slightly toward evening. The basil and chilli plants tracked these shifts closely, warming in step with the room while the water reservoir remained a steady cool anchor for the system.
 

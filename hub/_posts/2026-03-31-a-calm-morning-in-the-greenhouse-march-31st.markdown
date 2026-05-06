@@ -5,7 +5,7 @@ date: 2026-03-31 09:01:16 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 31, 2026](/assets/images/blog/2026-03-31-a-calm-morning-in-the-greenhouse-march-31st.jpg)
+![Timelapse image for March 31, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-31-a-calm-morning-in-the-greenhouse-march-31st.jpg)
 
 The morning at Herb Hub 365 began with gentle coolness, settling into an environment perfectly balanced for our growing herbs. As dawn gave way to mid-morning, we watched the greenhouse temperature rise steadily before evening out again by the final reading of the cycle. The air remained comfortably dry and stable, hovering around 45% humidity as natural light climbed across the glass roof.
 

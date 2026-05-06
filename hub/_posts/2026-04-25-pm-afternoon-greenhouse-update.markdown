@@ -5,7 +5,7 @@ date: 2026-04-25 13:03:45 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 25, 2026](/assets/images/blog/2026-04-25-afternoon-greenhouse-update.jpg)
+![Timelapse image for April 25, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-25-afternoon-greenhouse-update.jpg)
 
 Hello green thumbs! We've gathered the latest data from the greenhouse, offering a snapshot of how our herbs are doing as we move through the day. Overall, conditions appear quite stable for our wonderful collection of basil, chili, and oregano.
 

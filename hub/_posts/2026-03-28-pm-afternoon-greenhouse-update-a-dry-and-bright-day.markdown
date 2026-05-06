@@ -5,7 +5,7 @@ date: 2026-03-28 18:00:52 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for March 28, 2026](/assets/images/blog/2026-03-28-afternoon-greenhouse-update-a-dry-and-bright-day.jpg)
+![Timelapse image for March 28, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-03-28-afternoon-greenhouse-update-a-dry-and-bright-day.jpg)
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/1fl2Cug4pJs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>

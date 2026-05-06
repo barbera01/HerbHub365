@@ -5,7 +5,7 @@ date: 2026-04-13 18:00:31 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 13, 2026](/assets/images/blog/2026-04-13-greenhouse-update-a-dry-and-bright-day-for.jpg)
+![Timelapse image for April 13, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-13-greenhouse-update-a-dry-and-bright-day-for.jpg)
 <div class="video-embed">
   <iframe src="https://www.youtube.com/embed/JuRrLHgBa1k" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>

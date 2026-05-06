@@ -5,7 +5,7 @@ date: 2026-04-09 13:00:28 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 9, 2026](/assets/images/blog/2026-04-09-april-9-afternoon-update-a-dry-sunny-day.jpg)
+![Timelapse image for April 9, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-09-april-9-afternoon-update-a-dry-sunny-day.jpg)
 
 The sun shone brightly this afternoon, pushing light levels high and driving the temperature up. Ambient heat climbed from a comfortable 23°C in the morning to a peak of 25.6°C by midday, while the basil plant warmed along with the environment to reach 24.2°C.
 

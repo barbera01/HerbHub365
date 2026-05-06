@@ -5,7 +5,7 @@ date: 2026-04-04 18:00:39 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 4, 2026](/assets/images/blog/2026-04-04-a-cool-and-dry-afternoon-in-the-greenhouse.jpg)
+![Timelapse image for April 4, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-04-a-cool-and-dry-afternoon-in-the-greenhouse.jpg)
 
 The afternoon sun warmed our greenhouse steadily, pushing temperatures from a comfortable start near twenty degrees Celsius to peak warmth above thirty-five degrees by late evening. While the air heated nicely throughout the day, we noticed that the water reservoir remained slightly cooler than the surrounding plants during this period of rising heat.
 

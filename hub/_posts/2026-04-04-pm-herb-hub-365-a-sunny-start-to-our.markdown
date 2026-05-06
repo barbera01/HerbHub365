@@ -5,7 +5,7 @@ date: 2026-04-04 13:00:52 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 4, 2026](/assets/images/blog/2026-04-04-herb-hub-365-a-sunny-start-to-our.jpg)
+![Timelapse image for April 4, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-04-herb-hub-365-a-sunny-start-to-our.jpg)
 
 Morning light filtered through our greenhouse glass just after six, bringing a gentle warmth that rose steadily throughout the day. By midday, temperatures had climbed from nineteen point seven degrees Celsius at dawn to twenty-three point one by early afternoon. The air remained dry and crisp, with humidity hovering around thirty-nine percent before dipping slightly as the sun reached its peak intensity.
 

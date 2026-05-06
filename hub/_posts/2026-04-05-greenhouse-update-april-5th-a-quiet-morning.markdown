@@ -5,7 +5,7 @@ date: 2026-04-05 09:00:48 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 5, 2026](/assets/images/blog/2026-04-05-greenhouse-update-april-5th-a-quiet-morning.jpg)
+![Timelapse image for April 5, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-05-greenhouse-update-april-5th-a-quiet-morning.jpg)
 
 The morning inside the Herb Hub greenhouse began gently, with our first reading taken just after six UTC. The air was comfortable at nineteen and a half degrees Celsius as we settled into observation mode. Humidity sat near forty-three percent before gradually easing over the course of the session.
 

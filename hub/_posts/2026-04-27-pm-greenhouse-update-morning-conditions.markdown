@@ -5,7 +5,7 @@ date: 2026-04-27 18:00:54 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 27, 2026](/assets/images/blog/2026-04-27-greenhouse-update-morning-conditions.jpg)
+![Timelapse image for April 27, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-27-greenhouse-update-morning-conditions.jpg)
 
 Good afternoon, Herb Lovers! Here is a snapshot of the conditions captured this morning in the greenhouse, showing how our herbs are doing as the day progresses. Overall, the environment has shown nice consistency, allowing our plants to settle into their routine growth cycle.
 

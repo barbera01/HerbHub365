@@ -5,7 +5,7 @@ date: 2026-04-10 13:00:29 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 10, 2026](/assets/images/blog/2026-04-10-greenhouse-update-a-warm-and-sunny-morning.jpg)
+![Timelapse image for April 10, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-10-greenhouse-update-a-warm-and-sunny-morning.jpg)
 
 The morning sun brought the greenhouse to life, with ambient temperatures climbing steadily from a comfortable 19.9°C at dawn to a peak of 25.3°C by midday. Inside the growing beds, the basil, chilli, and oregano plants tracked this rise closely, with their own micro-climates warming from just under 19.2°C to around 22.5°C. The water reservoir also warmed slightly, settling near 18.9°C, keeping the roots happy as the day progressed.
 

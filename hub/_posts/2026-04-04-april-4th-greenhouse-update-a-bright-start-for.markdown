@@ -5,7 +5,7 @@ date: 2026-04-04 09:00:54 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 4, 2026](/assets/images/blog/2026-04-04-april-4th-greenhouse-update-a-bright-start-for.jpg)
+![Timelapse image for April 4, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-04-april-4th-greenhouse-update-a-bright-start-for.jpg)
 
 The morning sun broke through the greenhouse glass early on April 4, raising light levels to over 500 lux by mid-morning. Inside, temperatures hovered comfortably around 21°C as daylight took hold. Humidity dipped slightly but remained within a healthy range, ensuring our herb leaves stayed crisp without becoming too dry or damp.
 

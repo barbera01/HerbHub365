@@ -5,7 +5,7 @@ date: 2026-04-08 13:00:29 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 8, 2026](/assets/images/blog/2026-04-08-a-warm-afternoon-in-the-greenhouse.jpg)
+![Timelapse image for April 8, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-08-a-warm-afternoon-in-the-greenhouse.jpg)
 
 The afternoon sun brought a gentle rise in temperature to the Herb Hub 365 greenhouse. By midday, the ambient environment warmed from a cool 20.3°C to a pleasant 24.65°C. The individual pots tracked this shift closely, with basil, chilli, and oregano all climbing steadily in the warmth.
 

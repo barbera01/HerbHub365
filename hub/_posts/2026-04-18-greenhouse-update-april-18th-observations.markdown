@@ -5,7 +5,7 @@ date: 2026-04-18 09:05:15 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 18, 2026](/assets/images/blog/2026-04-18-greenhouse-update-april-18th-observations.jpg)
+![Timelapse image for April 18, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-18-greenhouse-update-april-18th-observations.jpg)
 
 Our greenhouse recorded a steady stream of data on April 18th, offering a clear look at the microclimate our herbs are enjoying. Overall, the environment remained quite stable, with temperatures holding nicely in the low 20s Celsius.
 

@@ -5,7 +5,7 @@ date: 2026-04-17 09:00:33 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 17, 2026](/assets/images/blog/2026-04-17-greenhouse-update-a-steady-start-to-april-17th.jpg)
+![Timelapse image for April 17, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-17-greenhouse-update-a-steady-start-to-april-17th.jpg)
 
 The morning began with the greenhouse settling into a comfortable rhythm, capturing six snapshots between 6:00 AM and 8:30 AM. Outside, the air was crisp with humidity hovering around 41%, while the internal environment felt pleasantly warm. Ambient temperatures climbed from a cool 21.36°C to a breezy 23.71°C by mid-morning.
 

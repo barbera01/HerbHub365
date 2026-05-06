@@ -5,7 +5,7 @@ date: 2026-04-11 13:00:33 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 11, 2026](/assets/images/blog/2026-04-11-greenhouse-morning-update-april-11-2026.jpg)
+![Timelapse image for April 11, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-11-greenhouse-morning-update-april-11-2026.jpg)
 
 The morning sun has finally broken through the greenhouse glass, bringing a gentle warmth to our growing space. Temperatures have climbed steadily throughout the day, starting at a cool 20.1°C and reaching a pleasant 23.5°C by midday. Inside the pots, our herbs are enjoying a similar rise, with basil and oregano warming up to over 21°C, while the chilli plant sits comfortably around 21.3°C.
 

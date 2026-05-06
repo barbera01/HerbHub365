@@ -5,7 +5,7 @@ date: 2026-04-07 09:00:46 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 7, 2026](/assets/images/blog/2026-04-07-a-quiet-morning-in-the-greenhouse.jpg)
+![Timelapse image for April 7, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-07-a-quiet-morning-in-the-greenhouse.jpg)
 
 The morning at Herb Hub 365 began with a gentle rise in the greenhouse atmosphere. As the sun crested the horizon, ambient temperatures climbed steadily from 18.48°C to a comfortable 20.42°C by mid-morning. Inside the growing bays, the basil and oregano plants warmed up in sync, reaching 19°C, while the chilli plants followed a slightly slower curve, settling at 18.88°C. The water reservoir remained a cool constant at roughly 17.4°C, providing a stable base for the roots.
 

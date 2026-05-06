@@ -5,7 +5,7 @@ date: 2026-04-06 18:01:51 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 6, 2026](/assets/images/blog/2026-04-06-greenhouse-update-a-dry-and-bright-afternoon-on.jpg)
+![Timelapse image for April 6, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-06-greenhouse-update-a-dry-and-bright-afternoon-on.jpg)
 
 The afternoon sun brought a noticeable shift to the greenhouse atmosphere today. As the day progressed from morning into the late afternoon, the environment warmed up steadily, with ambient temperatures climbing from a cool 18.9°C in the early hours to a peak of 22.7°C. This heat was mirrored by our plants, which saw their internal temperatures rise from around 18°C to nearly 21°C by the evening.
 

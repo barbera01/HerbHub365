@@ -5,7 +5,7 @@ date: 2026-04-09 18:01:15 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 9, 2026](/assets/images/blog/2026-04-09-herb-hub-365-a-cool-and-bright-afternoon.jpg)
+![Timelapse image for April 9, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-09-herb-hub-365-a-cool-and-bright-afternoon.jpg)
 
 The greenhouse settled into a pleasant rhythm today, with temperatures starting at a comfortable 23°C before gradually cooling as the sun set. By late afternoon, the ambient air had dropped to 19°C, while our basil and chilli pots hovered around 19°C to 20°C. The water reservoir stayed cool and stable, ensuring a steady supply for our thirsty herbs.
 

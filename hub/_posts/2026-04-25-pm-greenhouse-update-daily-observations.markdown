@@ -5,7 +5,7 @@ date: 2026-04-25 18:09:37 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 25, 2026](/assets/images/blog/2026-04-25-greenhouse-update-daily-observations.jpg)
+![Timelapse image for April 25, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-25-greenhouse-update-daily-observations.jpg)
 
 Another day has passed here at the Herb Hub 365 greenhouse. Reviewing the data from April 25th reveals a day of steady environmental shifts as the sun moved across the sky.
 

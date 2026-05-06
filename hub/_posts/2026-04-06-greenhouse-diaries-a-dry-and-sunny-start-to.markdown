@@ -5,7 +5,7 @@ date: 2026-04-06 09:01:05 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 6, 2026](/assets/images/blog/2026-04-06-greenhouse-diaries-a-dry-and-sunny-start-to.jpg)
+![Timelapse image for April 6, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-06-greenhouse-diaries-a-dry-and-sunny-start-to.jpg)
 
 The morning at Herb Hub 365 began with a clear sky, climbing from a gentle 61 lux at dawn to a bright 377 lux by midday. Inside, the air stayed comfortably dry around 41% humidity as temperatures warmed from just under 19°C to a pleasant 20.6°C.
 

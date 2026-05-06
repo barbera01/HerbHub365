@@ -5,7 +5,7 @@ date: 2026-04-29 09:01:36 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 29, 2026](/assets/images/blog/2026-04-29-daily-herb-snapshot-april-29th-insights.jpg)
+![Timelapse image for April 29, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-29-daily-herb-snapshot-april-29th-insights.jpg)
 
 What a day of steady growth and changing conditions in the greenhouse! Our monitoring system captured data from early morning until mid-morning, giving us a great look at how the herbs are responding to the environment as the day progressed.
 

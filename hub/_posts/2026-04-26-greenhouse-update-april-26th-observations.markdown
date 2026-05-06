@@ -5,7 +5,7 @@ date: 2026-04-26 09:00:57 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 26, 2026](/assets/images/blog/2026-04-26-greenhouse-update-april-26th-observations.jpg)
+![Timelapse image for April 26, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-26-greenhouse-update-april-26th-observations.jpg)
 
 Good morning, green thumbs! Here is a look at how our herbs settled in overnight and through the morning hours of April 26th. The greenhouse environment saw a gentle temperature rise, peaking around 21.61°C by the final reading, while light levels steadily climbed, signaling a beautiful start to the day's natural cycle.
 

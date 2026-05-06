@@ -5,7 +5,7 @@ date: 2026-05-03 09:01:25 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for May 3, 2026](/assets/images/blog/2026-05-03-herb-hub-365-morning-update-may-3-2026.jpg)
+![Timelapse image for May 3, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-05-03-herb-hub-365-morning-update-may-3-2026.jpg)
 
 It was a calm start to the day at Herb Hub 365, with the greenhouse environment remaining comfortable and stable during our early morning monitoring. The ambient temperature averaged 23.1°C, while humidity levels held steady at approximately 40.6%, providing a consistent atmosphere for the growing herbs.
 

@@ -5,7 +5,7 @@ date: 2026-04-23 18:04:44 +0000
 categories: Herb Hub Update
 ---
 
-![Timelapse image for April 23, 2026](/assets/images/blog/2026-04-23-greenhouse-update-stable-afternoon-conditions.jpg)
+![Timelapse image for April 23, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-04-23-greenhouse-update-stable-afternoon-conditions.jpg)
 
 The greenhouse environment remained quite steady this afternoon, showing consistent data from our early morning readings through to the late afternoon. Overall, the ambient temperature held nicely, averaging around 22.6°C throughout the monitored period.
 

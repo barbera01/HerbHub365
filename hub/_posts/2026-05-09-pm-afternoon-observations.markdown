@@ -3,6 +3,7 @@ layout: post
 title: "Afternoon Observations"
 date: 2026-05-09 18:02:27 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-09-pm-afternoon-observations.mp3
 ---
 
 It was a bright, productive day at the greenhouse. Between 06:00 and 17:30 UTC, sensors recorded a peak light intensity of 1,306.7 lux before the sun dipped, leaving the environment at a quiet 74.2 lux by the final reading. 

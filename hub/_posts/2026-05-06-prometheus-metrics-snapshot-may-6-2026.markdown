@@ -16,6 +16,7 @@ prometheus_chart_exports:
     - /assets/data/prometheus/2026-05-06/herbhub-water-volume-ml.json
     - /assets/data/prometheus/2026-05-06/herbhub-last-run-seconds.json
 prometheus_charts: true
+audio_url: /assets/audio/blog/2026-05-06-prometheus-metrics-snapshot-may-6-2026.mp3
 ---
 
 This metrics post was generated automatically from Prometheus exports for May 6, 2026.

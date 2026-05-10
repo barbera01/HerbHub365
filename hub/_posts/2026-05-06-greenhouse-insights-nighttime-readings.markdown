@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Insights: Nighttime Readings"
 date: 2026-05-06 18:01:07 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-06-greenhouse-insights-nighttime-readings.mp3
 ---
 
 Last night, we checked the greenhouse environment around 6 PM UTC, capturing a stable snapshot as the day settled into its evening cycle. The ambient temperature was a pleasant 21.54°C, and humidity held steady at 36.5%. Light levels were naturally low at 40.8 lux, and air pressure remained constant at 1011 hPa, suggesting calm conditions overnight.

@@ -3,6 +3,7 @@ layout: post
 title: "Morning at the Greenhouse: May 9, 2026"
 date: 2026-05-09 09:02:26 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-09-morning-at-the-greenhouse-may-9-2026.mp3
 ---
 
 Between 6:00 AM and 8:30 AM UTC, light levels at Herb Hub 365 climbed steadily from a soft 243.3 lux to a peak of 507.5 lux. This gentle sunrise provided the perfect start for the daily growth cycle, bathing the herbs in increasing brightness as the morning progressed.

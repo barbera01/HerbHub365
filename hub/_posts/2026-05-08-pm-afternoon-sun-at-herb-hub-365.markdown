@@ -3,6 +3,7 @@ layout: post
 title: "Afternoon Sun at Herb Hub 365"
 date: 2026-05-08 13:03:16 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-08-pm-afternoon-sun-at-herb-hub-365.mp3
 ---
 
 It has been a bright morning in the greenhouse this May 8th. Since our first readings at 06:00 UTC, the environment transitioned from a cool 20.96°C to a warm 27.02°C by midday. This steady climb in temperature was accompanied by a drop in humidity, which started at 41.1% and settled at 31.8% as the afternoon approached.

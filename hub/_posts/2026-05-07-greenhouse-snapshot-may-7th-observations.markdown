@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Snapshot: May 7th Observations"
 date: 2026-05-07 09:01:25 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-07-greenhouse-snapshot-may-7th-observations.mp3
 ---
 
 The Herb Hub greenhouse experienced a gentle progression of conditions yesterday. Temperatures climbed steadily throughout the monitoring period, reaching a peak of 23.12°C by the final reading. Humidity levels also saw a noticeable dip in the morning, starting from a high of 43.1% and settling at 38.5%.

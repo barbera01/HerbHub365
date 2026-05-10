@@ -3,6 +3,7 @@ layout: post
 title: "A Bright Saturday in the Greenhouse"
 date: 2026-05-09 13:02:26 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-09-pm-a-bright-saturday-in-the-greenhouse.mp3
 ---
 
 The morning of May 9th brought a steady surge of energy to the greenhouse. Light levels climbed from a dim 243.3 lux at dawn to a vibrant peak of 1306.7 lux, signaling a productive growth phase for our herbs. Throughout this transition, the atmospheric pressure remained remarkably steady, hovering between 1015 and 1016 hPa.

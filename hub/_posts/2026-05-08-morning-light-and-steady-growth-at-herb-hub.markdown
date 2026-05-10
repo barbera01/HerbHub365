@@ -3,6 +3,7 @@ layout: post
 title: "Morning Light and Steady Growth at Herb Hub"
 date: 2026-05-08 09:02:28 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-08-morning-light-and-steady-growth-at-herb-hub.mp3
 ---
 
 On the morning of May 8th, the greenhouse experienced a bright, steady transition between 06:00 and 08:30 UTC. Light levels climbed significantly, starting at a soft 200 lux and peaking at 1007.5 lux. This influx of morning sun naturally warmed the environment, lifting ambient temperatures from a crisp 20.96°C to a comfortable 23.45°C by the end of the session.

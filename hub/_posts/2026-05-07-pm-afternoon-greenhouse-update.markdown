@@ -3,6 +3,7 @@ layout: post
 title: "Afternoon Greenhouse Update"
 date: 2026-05-07 13:01:44 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-07-pm-afternoon-greenhouse-update.mp3
 ---
 
 The afternoon readings from the greenhouse showcased a beautiful progression of the day's cycles. Light levels peaked today, hitting a maximum of 1604.2 lux, which signals strong natural energy for our herbs. The ambient temperature also climbed, reaching a mid-day high of 26.24°C.

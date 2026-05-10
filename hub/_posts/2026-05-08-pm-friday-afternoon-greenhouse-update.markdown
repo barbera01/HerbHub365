@@ -3,6 +3,7 @@ layout: post
 title: "Friday Afternoon Greenhouse Update"
 date: 2026-05-08 18:02:28 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-08-pm-friday-afternoon-greenhouse-update.mp3
 ---
 
 It has been a bright and productive day at Herb Hub 365. As the sun moved across the greenhouse, ambient temperatures climbed from a morning low of 20.92°C to a warm peak of 27.35°C. The air remained crisp, with humidity levels starting at 41.1% and gradually drying to an average of 34.57% by late afternoon.

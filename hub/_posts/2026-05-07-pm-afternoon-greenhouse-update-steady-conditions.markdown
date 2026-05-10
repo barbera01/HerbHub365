@@ -3,6 +3,7 @@ layout: post
 title: "Afternoon Greenhouse Update: Steady Conditions"
 date: 2026-05-07 18:01:15 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-07-pm-afternoon-greenhouse-update-steady-conditions.mp3
 ---
 
 The afternoon session in the greenhouse showed a beautiful, steady transition as the day wound down. The overall environment remained quite stable, with the average temperature tracking nicely throughout the hours. We observed a gentle dip in the overall temperature, moving from a peak of 26.24°C down to 24.31°C by the final reading.

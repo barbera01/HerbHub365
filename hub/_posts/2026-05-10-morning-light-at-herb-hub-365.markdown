@@ -3,6 +3,7 @@ layout: post
 title: "Morning Light at Herb Hub 365"
 date: 2026-05-10 09:04:13 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-10-morning-light-at-herb-hub-365.mp3
 ---
 
 The greenhouse transitioned into a bright, warm morning this May 10th. Between 6:00 AM and 9:00 AM, light levels surged from a soft 149.2 lux to a peak of 696.7 lux. This increase was accompanied by a gentle rise in ambient temperature, which warmed from 20.28°C to a comfortable 22.67°C, while atmospheric pressure remained perfectly stable at 1018 hPa.

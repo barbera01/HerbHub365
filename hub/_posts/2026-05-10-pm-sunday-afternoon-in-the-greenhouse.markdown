@@ -3,6 +3,7 @@ layout: post
 title: "Sunday Afternoon in the Greenhouse"
 date: 2026-05-10 13:02:34 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-10-pm-sunday-afternoon-in-the-greenhouse.mp3
 ---
 
 Sunday at Herb Hub 365 brought a steady climb in warmth and light. After starting at a cool 20.28°C this morning, the greenhouse reached a midday peak of 26.04°C. This warming trend coincided with a bright surge in light levels, hitting a high of 1,188.3 lux around 11:30 AM and providing the herbs with a healthy dose of energy.

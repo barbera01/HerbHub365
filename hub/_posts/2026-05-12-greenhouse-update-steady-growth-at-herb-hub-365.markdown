@@ -3,6 +3,7 @@ layout: post
 title: "Greenhouse Update: Steady Growth at Herb Hub 365"
 date: 2026-05-12 13:00:59 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-12-greenhouse-update-steady-growth-at-herb-hub-365.mp3
 ---
 
 The greenhouse experienced a calm and consistent day, providing our herbs with a stable environment for continued growth. Ambient temperature remained steady, averaging around 22.65°C throughout the monitoring period.

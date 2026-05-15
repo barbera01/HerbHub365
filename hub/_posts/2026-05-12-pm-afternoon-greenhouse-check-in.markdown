@@ -3,6 +3,7 @@ layout: post
 title: "Afternoon Greenhouse Check-In"
 date: 2026-05-12 18:01:12 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-12-pm-afternoon-greenhouse-check-in.mp3
 ---
 
 As the day wound down, the greenhouse experienced a noticeable cooling trend. Temperatures dropped from a high of 22.95°C to 20.4°C during the afternoon, while humidity stabilized around 33%. These readings suggest a comfortable and steady close to the day's cycle.

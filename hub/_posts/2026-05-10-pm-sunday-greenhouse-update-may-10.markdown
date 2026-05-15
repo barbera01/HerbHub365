@@ -3,6 +3,7 @@ layout: post
 title: "Sunday Greenhouse Update: May 10"
 date: 2026-05-10 18:02:39 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-05-10-pm-sunday-greenhouse-update-may-10.mp3
 ---
 
 It has been a bright and productive Sunday at Herb Hub 365. Our sensors recorded a steady temperature climb from a morning low of 20.28°C to a pleasant peak of 27.85°C. Light levels remained dynamic throughout the day, reaching a high of 1,831.7 lux and providing the herbs with ample energy for growth.

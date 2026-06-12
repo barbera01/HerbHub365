@@ -191,6 +191,26 @@ calc_moisture() {
     echo "scale=1; $m * 100" | bc -l
 }
 
+json_number() {
+    value=${1:-}
+
+    case "$value" in
+        ""|null|error)
+            echo "null"
+            return
+            ;;
+    esac
+
+    # bc can emit values like .5 or -.5, which are not valid JSON numbers.
+    if [[ "$value" =~ ^\.[0-9]+$ ]]; then
+        echo "0$value"
+    elif [[ "$value" =~ ^-\.[0-9]+$ ]]; then
+        echo "-0${value#-}"
+    else
+        echo "$value"
+    fi
+}
+
 write_json_snapshot() {
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     
@@ -220,6 +240,14 @@ write_json_snapshot() {
         water_percent="null"
         water_volume="null"
     fi
+
+    bme_temp=$(json_number "$bme_temp")
+    bme_humidity=$(json_number "$bme_humidity")
+    bme_pressure=$(json_number "$bme_pressure")
+    light=$(json_number "$light")
+    water_level=$(json_number "$water_level")
+    water_percent=$(json_number "$water_percent")
+    water_volume=$(json_number "$water_volume")
     
     # Build JSON
     cat > snapshot.json << EOF
@@ -245,6 +273,7 @@ EOF
         name=${TEMP_MAP[$id]:-unknown}
         temp=$(read_temp "$dev")
         [ -z "$temp" ] && temp="null"
+        temp=$(json_number "$temp")
         
         if [ "$first" = true ]; then
             first=false
@@ -267,6 +296,8 @@ EOF
         [ -z "$v" ] && v="0.0000"
         moisture=$(calc_moisture "$plant" "$v")
         [ -z "$moisture" ] && moisture="null"
+        v=$(json_number "$v")
+        moisture=$(json_number "$moisture")
         
         if [ "$first" = true ]; then
             first=false

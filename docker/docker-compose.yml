@@ -281,17 +281,29 @@ services:
       RABBITMQ_DEFAULT_PASS: yourpassword
     volumes:
       - ./rabbitmq:/var/lib/rabbitmq
+      - ./rabbitmq-enabled-plugins:/etc/rabbitmq/enabled_plugins:ro
     labels:
       - "traefik.enable=true"
+
+      # RabbitMQ Management UI
       - 'traefik.http.routers.rabbitmq.rule=Host("rabbit.herbhub365.com")'
       - "traefik.http.routers.rabbitmq.entrypoints=websecure"
       - "traefik.http.routers.rabbitmq.tls=true"
+      - "traefik.http.routers.rabbitmq.service=rabbitmq"
       - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
 
+      # AMQP
       - "traefik.tcp.routers.rabbitmq-amqp.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp"
+      - "traefik.tcp.routers.rabbitmq-amqp.service=rabbitmq-amqp"
       - "traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672"
 
+      # RabbitMQ Prometheus metrics
+      - 'traefik.http.routers.rabbitmq-metrics.rule=Host("rabbitmq-metrics.herbhub365.com")'
+      - "traefik.http.routers.rabbitmq-metrics.entrypoints=websecure"
+      - "traefik.http.routers.rabbitmq-metrics.tls=true"
+      - "traefik.http.routers.rabbitmq-metrics.service=rabbitmq-metrics"
+      - "traefik.http.services.rabbitmq-metrics.loadbalancer.server.port=15692"
   watering:
     build:
       context: ../services/watering

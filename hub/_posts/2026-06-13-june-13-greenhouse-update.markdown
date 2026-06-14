@@ -3,6 +3,7 @@ layout: post
 title: "June 13 Greenhouse Update"
 date: 2026-06-13 18:03:02 +0000
 categories: Herb Hub Update
+audio_url: /assets/audio/blog/2026-06-13-june-13-greenhouse-update.mp3
 ---
 
 The greenhouse enjoyed a calm transition into evening today. Between 16:00 and 18:00 UTC, light levels softened from a bright 387.5 lux to a quiet 111.7 lux. During this window, the ambient temperature followed a gentle cooling curve, dipping from a warm 26.59°C to a comfortable 24.16°C.

@@ -63,10 +63,12 @@ Important settings:
 - `BLOG_TARGET_DATE`: `today`, `yesterday`, or a `YYYY-MM-DD` date
 - `BLOG_DRAFTS_DIR`: output directory for test drafts, defaults to `hub/_drafts`
 - `BLOG_DRAFT_PREFIX`: filename prefix for draft runs
-- `BLOG_INCLUDE_DAY_IMAGE`: when `true`, pick a random image from the target date folder and include it near the top of the post
+- `BLOG_INCLUDE_DAY_IMAGE`: when `true`, pick a random image from the target date folder, send it to the LLM, and include it near the top of the post
 - `BLOG_IMAGE_SOURCE_DIR`: mounted directory containing dated image folders such as `2026-03-15/`
 - `BLOG_IMAGE_OUTPUT_DIR`: where copied images are written inside the Jekyll site, defaults to `hub/assets/images/blog`
 - `BLOG_IMAGE_PUBLIC_PATH`: public URL prefix for copied blog images, defaults to `/assets/images/blog`
+- `BLOG_IMAGE_BLOB_SAS_URL`: optional Azure Blob SAS URL to upload images instead of copying locally
+- `BLOG_IMAGE_BLOB_PUBLIC_BASE`: public base URL for blob-uploaded images
 - `BLOG_REPO_POST_PROMPT`: ad hoc technical post request for `repo-post` mode
 - `BLOG_REPO_POST_TITLE`: optional preferred title for `repo-post`
 - `BLOG_REPO_POST_PATHS`: comma-separated repo paths to inspect; required for `repo-post`
@@ -197,7 +199,9 @@ export BLOG_INCLUDE_DAY_IMAGE=true
 export BLOG_POSTER_IMAGE_SOURCE_PATH=/mnt/hh01-timelapse
 ```
 
-For a post dated `2026-03-15`, the generator looks for images under `/mnt/hh01-timelapse/2026-03-15/`, copies one random image into `hub/assets/images/blog/`, embeds it near the top of the markdown, and publishes the copied asset alongside the post.
+For a post dated `2026-03-15`, the generator looks for images under `/mnt/hh01-timelapse/2026-03-15/`, selects one random image, sends it to the LLM as visual context, and embeds the same image near the top of the markdown. The asset is then copied into `hub/assets/images/blog/` (or uploaded to Azure Blob when `BLOG_IMAGE_BLOB_SAS_URL` is set) and published alongside the post.
+
+The model is instructed to use both the sensor summary and the attached image as factual sources, so visual changes in the greenhouse can appear in the prose.
 
 Useful Docker-side LLM overrides in `docker/.env`:
 

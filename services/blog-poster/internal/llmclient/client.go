@@ -5,6 +5,7 @@ package llmclient
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -21,6 +22,8 @@ type Client struct {
 type generateRequest struct {
 	SystemPrompt string `json:"system_prompt"`
 	UserPrompt   string `json:"user_prompt"`
+	ImageData    string `json:"image_data,omitempty"`      // base64-encoded image bytes (with optional data URI prefix)
+	ImageMime    string `json:"image_mime_type,omitempty"` // e.g. image/jpeg
 }
 
 type generateResponse struct {
@@ -47,9 +50,17 @@ func (c *Client) GenerateMarkdown(ctx context.Context, prompt string) (string, e
 
 // GenerateMarkdownWithSystemPrompt sends a generation request to llm-service.
 func (c *Client) GenerateMarkdownWithSystemPrompt(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
+	return c.GenerateMarkdownWithImage(ctx, systemPrompt, userPrompt, nil, "")
+}
+
+// GenerateMarkdownWithImage sends a generation request to llm-service that
+// includes a base64-encoded image to let the model reason over visual content.
+func (c *Client) GenerateMarkdownWithImage(ctx context.Context, systemPrompt, userPrompt string, imageData []byte, imageMime string) (string, error) {
 	body, err := json.Marshal(generateRequest{
 		SystemPrompt: systemPrompt,
 		UserPrompt:   userPrompt,
+		ImageData:    base64.StdEncoding.EncodeToString(imageData),
+		ImageMime:    imageMime,
 	})
 	if err != nil {
 		return "", err

@@ -2,10 +2,13 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"HerbHub365/services/llm-service/internal/llm"
@@ -14,6 +17,8 @@ import (
 type generateRequest struct {
 	SystemPrompt string `json:"system_prompt"`
 	UserPrompt   string `json:"user_prompt"`
+	ImageData    string `json:"image_data,omitempty"`      // base64-encoded image bytes (with or without data URI prefix)
+	ImageMime    string `json:"image_mime_type,omitempty"` // e.g. image/jpeg; optional if embedded in ImageData URI
 }
 
 type generateResponse struct {
@@ -61,6 +66,17 @@ func (h *Handler) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	imageBytes, imageMime, err := decodeImageData(req.ImageData, req.ImageMime)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "decode image: "+err.Error())
+		return
+	}
+	if len(imageBytes) > 0 {
+		log.Printf("generate start (prompt_len=%d image_bytes=%d mime=%s)", len(req.UserPrompt), len(imageBytes), imageMime)
+	} else {
+		log.Printf("generate start (prompt_len=%d)", len(req.UserPrompt))
+	}
+
 	// Reject immediately if already at capacity rather than queuing — the
 	// caller (blog-poster) has its own retry logic and a long timeout, so
 	// queuing here would just create a hidden backlog.
@@ -76,9 +92,7 @@ func (h *Handler) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.requestTimeout)
 	defer cancel()
 
-	log.Printf("generate start (prompt_len=%d)", len(req.UserPrompt))
-
-	content, err := h.client.Generate(ctx, req.SystemPrompt, req.UserPrompt)
+	content, err := h.client.Generate(ctx, req.SystemPrompt, req.UserPrompt, imageBytes, imageMime)
 	elapsed := time.Since(start).Round(time.Millisecond)
 
 	if err != nil {
@@ -133,4 +147,40 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 
 func writeError(w http.ResponseWriter, status int, message string) {
 	writeJSON(w, status, errorResponse{Error: message})
+}
+
+// decodeImageData extracts raw image bytes and MIME type from a client payload.
+// It supports both raw base64 strings and data URI prefixes like "data:image/jpeg;base64,/9j/...".
+func decodeImageData(imageData, imageMime string) ([]byte, string, error) {
+	imageData = strings.TrimSpace(imageData)
+	if imageData == "" {
+		return nil, "", nil
+	}
+
+	if strings.HasPrefix(imageData, "data:") {
+		idx := strings.Index(imageData, ",")
+		if idx == -1 {
+			return nil, "", errors.New("invalid data URI: missing comma separator")
+		}
+		meta := imageData[5:idx]
+		data := imageData[idx+1:]
+		// meta is "<mime>;base64" or just ";base64"
+		parts := strings.SplitN(meta, ";", 2)
+		if imageMime == "" && parts[0] != "" {
+			imageMime = parts[0]
+		}
+		imageData = data
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(imageData)
+	if err != nil {
+		return nil, "", fmt.Errorf("decode base64: %w", err)
+	}
+	if len(decoded) == 0 {
+		return nil, "", nil
+	}
+	if imageMime == "" {
+		imageMime = http.DetectContentType(decoded)
+	}
+	return decoded, imageMime, nil
 }

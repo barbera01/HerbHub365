@@ -12,6 +12,7 @@ type Config struct {
 	ListenAddr      string
 	ShutdownTimeout time.Duration
 	MaxConcurrent   int
+	MaxBodyBytes    int64
 	LLM             LLMConfig
 }
 
@@ -38,6 +39,7 @@ func Load() Config {
 		ListenAddr:      getEnv("LLM_SERVICE_LISTEN_ADDR", ":8080"),
 		ShutdownTimeout: getDurationEnv("LLM_SERVICE_SHUTDOWN_TIMEOUT", 25*time.Minute),
 		MaxConcurrent:   getIntEnv("LLM_SERVICE_MAX_CONCURRENT", 1),
+		MaxBodyBytes:    getInt64Env("LLM_SERVICE_MAX_BODY_BYTES", 32*1024*1024), // 32 MiB
 		LLM: LLMConfig{
 			Provider:              getEnv("LLM_PROVIDER", "auto"),
 			BaseURL:               getEnv("LLM_BASE_URL", "http://ollama.la.home-cloud.uk"),
@@ -83,6 +85,18 @@ func getIntEnv(key string, fallback int) int {
 		return fallback
 	}
 	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		panic(fmt.Sprintf("invalid integer for %s: %v", key, err))
+	}
+	return parsed
+}
+
+func getInt64Env(key string, fallback int64) int64 {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+	parsed, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		panic(fmt.Sprintf("invalid integer for %s: %v", key, err))
 	}

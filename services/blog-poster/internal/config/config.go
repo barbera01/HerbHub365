@@ -307,7 +307,7 @@ func startOfDay(t time.Time) time.Time {
 }
 
 func defaultSystemPrompt() string {
-	return "You are writing the daily Herb Hub 365 greenhouse blog entry. Write clear, grounded markdown for a public website. Use the supplied sensor summary only. Do not invent readings. Keep the tone warm, observational, and concise. Return markdown beginning with a level-1 heading for the title, followed by 3 to 6 short paragraphs."
+	return "You are writing the daily Herb Hub 365 greenhouse blog entry. Write clear, grounded markdown for a public website. Use the supplied sensor summary and the attached greenhouse image as your only factual sources. Describe anything visually noteworthy in the image — plant growth, leaf condition, overall vigour, or obvious environmental cues — but only when you can see it clearly. Do not invent sensor readings or visual details. Keep the tone warm, observational, and concise. Return markdown beginning with a level-1 heading for the title, followed by 3 to 6 short paragraphs."
 }
 
 func getEnv(key, fallback string) string {

@@ -13,6 +13,12 @@ import (
 	"HerbHub365/services/llm-service/internal/server"
 )
 
+// maxBodyBytesMiddleware caps the request body size to protect the service
+// from oversized image uploads exhausting memory.
+func maxBodyBytesMiddleware(next http.Handler, maxBytes int64) http.Handler {
+	return http.MaxBytesHandler(next, maxBytes)
+}
+
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -26,7 +32,7 @@ func main() {
 
 	httpServer := &http.Server{
 		Addr:              cfg.ListenAddr,
-		Handler:           mux,
+		Handler:           maxBodyBytesMiddleware(mux, cfg.MaxBodyBytes),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -33,8 +34,21 @@ type chatRequest struct {
 }
 
 type chatMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role    string              `json:"role"`
+	Content string              `json:"content,omitempty"`
+	Images  []string            `json:"images,omitempty"`        // Ollama vision format: base64-encoded image strings
+	Parts   []openAIContentPart `json:"content_parts,omitempty"` // OpenAI vision format (polymorphic content)
+}
+
+// openAIContentPart supports text and image_url parts for OpenAI-compatible vision APIs.
+type openAIContentPart struct {
+	Type     string              `json:"type"`
+	Text     string              `json:"text,omitempty"`
+	ImageURL *openAIImageURLPart `json:"image_url,omitempty"`
+}
+
+type openAIImageURLPart struct {
+	URL string `json:"url"`
 }
 
 type chatResponse struct {
@@ -48,12 +62,18 @@ type chatResponse struct {
 }
 
 type ollamaRequest struct {
-	Model     string        `json:"model"`
-	Messages  []chatMessage `json:"messages"`
-	Stream    bool          `json:"stream"`
-	Options   ollamaOptions `json:"options,omitempty"`
-	KeepAlive string        `json:"keep_alive,omitempty"`
-	Think     *bool         `json:"think,omitempty"`
+	Model     string          `json:"model"`
+	Messages  []ollamaMessage `json:"messages"`
+	Stream    bool            `json:"stream"`
+	Options   ollamaOptions   `json:"options,omitempty"`
+	KeepAlive string          `json:"keep_alive,omitempty"`
+	Think     *bool           `json:"think,omitempty"`
+}
+
+type ollamaMessage struct {
+	Role    string   `json:"role"`
+	Content string   `json:"content"`
+	Images  []string `json:"images,omitempty"` // base64-encoded image strings
 }
 
 type ollamaOptions struct {
@@ -84,7 +104,13 @@ type geminiContent struct {
 }
 
 type geminiPart struct {
-	Text string `json:"text"`
+	Text       string            `json:"text,omitempty"`
+	InlineData *geminiInlineData `json:"inlineData,omitempty"`
+}
+
+type geminiInlineData struct {
+	MimeType string `json:"mimeType"`
+	Data     string `json:"data"` // base64-encoded
 }
 
 type geminiGenerationConfig struct {
@@ -122,27 +148,30 @@ func NewClient(cfg config.LLMConfig) *Client {
 	}
 }
 
-func (c *Client) Generate(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
-	content, err := c.generatePrimary(ctx, systemPrompt, userPrompt)
+func (c *Client) Generate(ctx context.Context, systemPrompt, userPrompt string, imageData []byte, imageMime string) (string, error) {
+	content, err := c.generatePrimary(ctx, systemPrompt, userPrompt, imageData, imageMime)
 	if err == nil {
 		return content, nil
 	}
-	if !c.shouldTryConfiguredFallback(ctx, err) {
+	if !c.shouldTryConfiguredFallback(ctx, err, len(imageData) > 0) {
 		return "", err
 	}
 
-	log.Printf("primary LLM unavailable, trying %s fallback: %v", c.config.FallbackProvider, err)
-	fallbackContent, fallbackErr := c.generateFallback(ctx, systemPrompt, userPrompt)
+	// When image fallback is triggered we route to a vision-capable provider,
+	// otherwise we preserve the original fallback provider choice.
+	fallbackProvider := c.visionFallbackProvider(len(imageData) > 0)
+	log.Printf("primary LLM unavailable, trying %s fallback: %v", fallbackProvider, err)
+	fallbackContent, fallbackErr := c.generateFallback(ctx, systemPrompt, userPrompt, imageData, imageMime, fallbackProvider)
 	if fallbackErr != nil {
-		return "", fmt.Errorf("primary LLM failed: %v; fallback %s failed: %w", err, c.config.FallbackProvider, fallbackErr)
+		return "", fmt.Errorf("primary LLM failed: %v; fallback %s failed: %w", err, fallbackProvider, fallbackErr)
 	}
 	return fallbackContent, nil
 }
 
-func (c *Client) generatePrimary(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
+func (c *Client) generatePrimary(ctx context.Context, systemPrompt, userPrompt string, imageData []byte, imageMime string) (string, error) {
 	switch strings.ToLower(strings.TrimSpace(c.config.Provider)) {
 	case "", "auto":
-		content, err := c.generateOpenAICompatible(ctx, systemPrompt, userPrompt)
+		content, err := c.generateOpenAICompatible(ctx, systemPrompt, userPrompt, imageData, imageMime)
 		if err == nil {
 			return content, nil
 		}
@@ -150,28 +179,28 @@ func (c *Client) generatePrimary(ctx context.Context, systemPrompt, userPrompt s
 			return "", err
 		}
 
-		content, ollamaErr := c.generateOllamaStreaming(ctx, systemPrompt, userPrompt)
+		content, ollamaErr := c.generateOllamaStreaming(ctx, systemPrompt, userPrompt, imageData, imageMime)
 		if ollamaErr != nil {
 			return "", fmt.Errorf("openai-compatible call failed: %v; ollama fallback failed: %w", err, ollamaErr)
 		}
 
 		return content, nil
 	case "ollama":
-		return c.generateOllamaStreaming(ctx, systemPrompt, userPrompt)
+		return c.generateOllamaStreaming(ctx, systemPrompt, userPrompt, imageData, imageMime)
 	case "openai", "openai-compatible":
-		return c.generateOpenAICompatible(ctx, systemPrompt, userPrompt)
+		return c.generateOpenAICompatible(ctx, systemPrompt, userPrompt, imageData, imageMime)
 	case "gemini", "google", "google-gemini":
-		return c.generateGemini(ctx, systemPrompt, userPrompt, c.config.BaseURL, c.config.APIKey, c.config.Model)
+		return c.generateGemini(ctx, systemPrompt, userPrompt, imageData, imageMime, c.config.BaseURL, c.config.APIKey, c.config.Model)
 	default:
 		return "", fmt.Errorf("unsupported LLM_PROVIDER %q", c.config.Provider)
 	}
 }
 
-func (c *Client) shouldTryConfiguredFallback(ctx context.Context, err error) bool {
+func (c *Client) shouldTryConfiguredFallback(ctx context.Context, err error, hasImage bool) bool {
 	if err == nil || ctx.Err() != nil {
 		return false
 	}
-	provider := strings.ToLower(strings.TrimSpace(c.config.FallbackProvider))
+	provider := c.visionFallbackProvider(hasImage)
 	if provider == "" || provider == "none" || provider == "disabled" {
 		return false
 	}
@@ -185,6 +214,22 @@ func (c *Client) shouldTryConfiguredFallback(ctx context.Context, err error) boo
 	return IsAvailabilityError(err) || c.primaryIsLocalProvider()
 }
 
+// visionFallbackProvider returns the effective fallback provider. When an image
+// is supplied and the configured fallback is not vision-capable, it defaults to
+// Gemini because Gemini reliably supports image input in its chat API.
+func (c *Client) visionFallbackProvider(hasImage bool) string {
+	provider := strings.ToLower(strings.TrimSpace(c.config.FallbackProvider))
+	if !hasImage {
+		return provider
+	}
+	switch provider {
+	case "gemini", "google", "google-gemini", "openai", "openai-compatible", "ollama":
+		return provider
+	default:
+		return "gemini"
+	}
+}
+
 func (c *Client) primaryIsLocalProvider() bool {
 	switch strings.ToLower(strings.TrimSpace(c.config.Provider)) {
 	case "", "auto", "ollama":
@@ -194,35 +239,36 @@ func (c *Client) primaryIsLocalProvider() bool {
 	}
 }
 
-func (c *Client) generateFallback(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
-	switch provider := strings.ToLower(strings.TrimSpace(c.config.FallbackProvider)); provider {
+func (c *Client) generateFallback(ctx context.Context, systemPrompt, userPrompt string, imageData []byte, imageMime, fallbackProvider string) (string, error) {
+	switch provider := strings.ToLower(strings.TrimSpace(fallbackProvider)); provider {
 	case "gemini", "google", "google-gemini":
-		return c.generateGemini(ctx, systemPrompt, userPrompt, c.config.FallbackBaseURL, c.config.FallbackAPIKey, c.config.FallbackModel)
+		return c.generateGemini(ctx, systemPrompt, userPrompt, imageData, imageMime, c.config.FallbackBaseURL, c.config.FallbackAPIKey, c.config.FallbackModel)
 	case "openai", "openai-compatible":
 		fallback := *c
 		fallback.config.Provider = provider
 		fallback.config.BaseURL = c.config.FallbackBaseURL
 		fallback.config.APIKey = c.config.FallbackAPIKey
 		fallback.config.Model = c.config.FallbackModel
-		return fallback.generateOpenAICompatible(ctx, systemPrompt, userPrompt)
+		return fallback.generateOpenAICompatible(ctx, systemPrompt, userPrompt, imageData, imageMime)
 	case "ollama":
 		fallback := *c
 		fallback.config.Provider = provider
 		fallback.config.BaseURL = c.config.FallbackBaseURL
 		fallback.config.APIKey = c.config.FallbackAPIKey
 		fallback.config.Model = c.config.FallbackModel
-		return fallback.generateOllamaStreaming(ctx, systemPrompt, userPrompt)
+		return fallback.generateOllamaStreaming(ctx, systemPrompt, userPrompt, imageData, imageMime)
 	default:
 		return "", fmt.Errorf("unsupported LLM_FALLBACK_PROVIDER %q", c.config.FallbackProvider)
 	}
 }
 
-func (c *Client) generateOpenAICompatible(ctx context.Context, systemPrompt, prompt string) (string, error) {
+func (c *Client) generateOpenAICompatible(ctx context.Context, systemPrompt, prompt string, imageData []byte, imageMime string) (string, error) {
+	userMessage := c.buildOpenAIUserMessage(prompt, imageData, imageMime)
 	body, err := json.Marshal(chatRequest{
 		Model: c.config.Model,
 		Messages: []chatMessage{
 			{Role: "system", Content: systemPrompt},
-			{Role: "user", Content: prompt},
+			userMessage,
 		},
 		Temperature: c.config.Temperature,
 		MaxTokens:   c.config.MaxTokens,
@@ -279,7 +325,7 @@ func (c *Client) generateOpenAICompatible(ctx context.Context, systemPrompt, pro
 	return strings.TrimSpace(content), nil
 }
 
-func (c *Client) generateGemini(ctx context.Context, systemPrompt, prompt, baseURL, apiKey, model string) (string, error) {
+func (c *Client) generateGemini(ctx context.Context, systemPrompt, prompt string, imageData []byte, imageMime, baseURL, apiKey, model string) (string, error) {
 	if strings.TrimSpace(apiKey) == "" {
 		return "", fmt.Errorf("Gemini API key is required")
 	}
@@ -287,10 +333,20 @@ func (c *Client) generateGemini(ctx context.Context, systemPrompt, prompt, baseU
 		return "", fmt.Errorf("Gemini model is required")
 	}
 
+	parts := []geminiPart{{Text: prompt}}
+	if len(imageData) > 0 {
+		parts = append(parts, geminiPart{
+			InlineData: &geminiInlineData{
+				MimeType: imageMime,
+				Data:     base64.StdEncoding.EncodeToString(imageData),
+			},
+		})
+	}
+
 	body, err := json.Marshal(geminiRequest{
 		SystemInstruction: geminiContent{Parts: []geminiPart{{Text: systemPrompt}}},
 		Contents: []geminiContent{
-			{Role: "user", Parts: []geminiPart{{Text: prompt}}},
+			{Role: "user", Parts: parts},
 		},
 		GenerationConfig: geminiGenerationConfig{
 			Temperature:     c.config.Temperature,
@@ -344,9 +400,9 @@ func (c *Client) generateGemini(ctx context.Context, systemPrompt, prompt, baseU
 		return "", fmt.Errorf("gemini returned no candidates")
 	}
 
-	parts := parsed.Candidates[0].Content.Parts
-	texts := make([]string, 0, len(parts))
-	for _, part := range parts {
+	contentParts := parsed.Candidates[0].Content.Parts
+	texts := make([]string, 0, len(contentParts))
+	for _, part := range contentParts {
 		texts = append(texts, part.Text)
 	}
 	content := extractMarkdownContent(strings.Join(texts, ""))
@@ -364,7 +420,7 @@ func (c *Client) WarmModel(ctx context.Context) error {
 	}
 	body, err := json.Marshal(ollamaRequest{
 		Model: c.config.Model,
-		Messages: []chatMessage{
+		Messages: []ollamaMessage{
 			{Role: "system", Content: "Warm the model and return a short response."},
 			{Role: "user", Content: "hi"},
 		},
@@ -399,12 +455,16 @@ func (c *Client) WarmModel(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) generateOllamaStreaming(ctx context.Context, systemPrompt, prompt string) (string, error) {
+func (c *Client) generateOllamaStreaming(ctx context.Context, systemPrompt, prompt string, imageData []byte, imageMime string) (string, error) {
+	userImages := []string{}
+	if len(imageData) > 0 {
+		userImages = append(userImages, base64.StdEncoding.EncodeToString(imageData))
+	}
 	body, err := json.Marshal(ollamaRequest{
 		Model: c.config.Model,
-		Messages: []chatMessage{
+		Messages: []ollamaMessage{
 			{Role: "system", Content: systemPrompt},
-			{Role: "user", Content: prompt},
+			{Role: "user", Content: prompt, Images: userImages},
 		},
 		Stream: true,
 		Options: ollamaOptions{
@@ -474,6 +534,20 @@ func (c *Client) generateOllamaStreaming(ctx context.Context, systemPrompt, prom
 	}
 
 	return content, nil
+}
+
+func (c *Client) buildOpenAIUserMessage(prompt string, imageData []byte, imageMime string) chatMessage {
+	if len(imageData) == 0 {
+		return chatMessage{Role: "user", Content: prompt}
+	}
+	url := fmt.Sprintf("data:%s;base64,%s", imageMime, base64.StdEncoding.EncodeToString(imageData))
+	return chatMessage{
+		Role: "user",
+		Parts: []openAIContentPart{
+			{Type: "text", Text: prompt},
+			{Type: "image_url", ImageURL: &openAIImageURLPart{URL: url}},
+		},
+	}
 }
 
 func completionsURL(base string) string {

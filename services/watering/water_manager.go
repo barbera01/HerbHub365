@@ -1,356 +1,521 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
-	"math"
 	"net/http"
 	"os"
 	"os/signal"
-	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
-	amqp "github.com/streadway/amqp"
+	"github.com/warthog618/go-gpiocdev"
 )
 
-// Constants
 const (
-	defaultMetricsURL  = "http://hh-02:9100/metrics"
-	defaultRabbitMQURL = "amqp://admin:yourpassword@rabbitmq:5672/"
-	Exchange           = "herbhub.watering"
-	QueueName          = "watering.queue"
-	ServerPort         = ":8787"
-	defaultThreshold   = 40.0
-	defaultInterval    = 30 * time.Minute
+	chip       = "gpiochip0"
+	listenAddr = ":8181"
+	// Safety cap: no single pulse/cycle may run longer than this.
+	maxDuration = 10 * time.Minute
 )
 
-var (
-	minSoilMoistureThreshold float64
-	metricsURL               string
-	rabbitMQURL              string
-	monitorInterval          time.Duration
-	promPattern              = regexp.MustCompile(`herbhub_soil_percent\{plant="([^"]+)"\}\s+([0-9.]+)`)
-)
-
-// PrometheusMetric holds parsed metric data
-type PrometheusMetric struct {
-	Plant string
-	Value float64
+var relays = map[string]int{
+	"BASIL":   21,
+	"CHILLI":  26,
+	"OREGANO": 20,
 }
 
-func main() {
-	// Load configuration from environment variables
-	if envThreshold := os.Getenv("SOIL_MOISTURE_THRESHOLD"); envThreshold != "" {
-		minSoilMoistureThreshold, _ = strconv.ParseFloat(envThreshold, 64)
-	}
-	if minSoilMoistureThreshold <= 0 {
-		minSoilMoistureThreshold = defaultThreshold
+// Relay board is active-low.
+const (
+	onValue  = 0
+	offValue = 1
+)
+
+// ---------------------------------------------------------------------------
+// Controller: owns the GPIO lines, all access serialised via mutex
+// ---------------------------------------------------------------------------
+
+// job represents a background pulse/cycle. Ownership of a channel is tracked
+// by pointer identity, which (unlike comparing CancelFuncs with %p) is a
+// reliable comparison.
+type job struct {
+	cancel context.CancelFunc
+}
+
+type controller struct {
+	mu     sync.Mutex
+	lines  *gpiocdev.Lines
+	index  map[string]int  // channel -> offset position in request
+	state  map[string]bool // channel -> currently on?
+	values []int           // shadow of hardware line values, indexed by index
+	jobs   map[string]*job // channel -> owning background job
+	closed bool
+}
+
+func newController() (*controller, error) {
+	offsets := make([]int, 0, len(relays))
+	index := make(map[string]int, len(relays))
+	for name, pin := range relays {
+		index[name] = len(offsets)
+		offsets = append(offsets, pin)
 	}
 
-	metricsURL = os.Getenv("METRICS_URL")
-	if metricsURL == "" {
-		metricsURL = defaultMetricsURL
+	initial := make([]int, len(offsets))
+	for i := range initial {
+		initial[i] = offValue
 	}
 
-	rabbitMQURL = os.Getenv("RABBITMQ_URL")
-	if rabbitMQURL == "" {
-		rabbitMQURL = defaultRabbitMQURL
+	lines, err := gpiocdev.RequestLines(
+		chip,
+		offsets,
+		gpiocdev.AsOutput(initial...),
+		gpiocdev.WithConsumer("relay-api"),
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	monitorInterval = defaultInterval
-	if v := os.Getenv("MONITOR_INTERVAL"); v != "" {
-		if d, err := time.ParseDuration(v); err == nil && d > 0 {
-			monitorInterval = d
-		} else {
-			log.Printf("Invalid MONITOR_INTERVAL %q, using default %s", v, defaultInterval)
+	state := make(map[string]bool, len(relays))
+	for name := range relays {
+		state[name] = false
+	}
+
+	return &controller{
+		lines:  lines,
+		index:  index,
+		state:  state,
+		values: initial,
+		jobs:   make(map[string]*job),
+	}, nil
+}
+
+func (c *controller) close() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for _, j := range c.jobs {
+		j.cancel()
+	}
+	c.jobs = make(map[string]*job)
+	c.setAllLocked(false)
+	c.closed = true // block any late writes from cancelled goroutines
+	c.lines.Close()
+}
+
+// cancelJobLocked stops any background pulse/cycle owning this channel.
+func (c *controller) cancelJobLocked(channel string) {
+	if j, ok := c.jobs[channel]; ok {
+		j.cancel()
+		delete(c.jobs, channel)
+	}
+}
+
+func (c *controller) setLocked(channel string, on bool) error {
+	if c.closed {
+		return errors.New("controller closed")
+	}
+	v := offValue
+	if on {
+		v = onValue
+	}
+	c.values[c.index[channel]] = v
+	if err := c.lines.SetValues(c.values); err != nil {
+		return err
+	}
+	c.state[channel] = on
+	return nil
+}
+
+func (c *controller) setAllLocked(on bool) error {
+	var firstErr error
+	for name := range relays {
+		if err := c.setLocked(name, on); err != nil && firstErr == nil {
+			firstErr = err
 		}
 	}
+	return firstErr
+}
 
-	log.Printf("Initialized with moisture threshold: %.2f%%", minSoilMoistureThreshold)
-	log.Printf("Metrics URL: %s", metricsURL)
-	log.Printf("RabbitMQ URL: %s", rabbitMQURL)
-	log.Printf("Monitor interval: %s", monitorInterval)
+// Set switches channels on/off immediately, cancelling any running job on them.
+func (c *controller) Set(channels []string, on bool) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for _, ch := range channels {
+		c.cancelJobLocked(ch)
+		if err := c.setLocked(ch, on); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
-	// Setup channels for signal handling
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+// Pulse turns channels on for d, then off, in the background.
+func (c *controller) Pulse(channels []string, d time.Duration) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	// Create context with cancel
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// Start monitoring in background (manages its own connection with reconnect)
-	go monitorLoop(ctx)
-
-	// Start HTTP server for health checks
-	go httpServer(ctx)
-
-	// Wait for shutdown signal
-	<-stop
-	log.Println("Shutting down...")
-	cancel()
-	time.Sleep(2 * time.Second) // Give time for cleanup
-}
-
-func connectToRabbitMQ(ctx context.Context) (*amqp.Connection, error) {
-	conn, err := amqp.Dial(rabbitMQURL)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to RabbitMQ: %w", err)
-	}
-
-	log.Println("Connected to RabbitMQ")
-	return conn, nil
-}
-
-func monitorLoop(ctx context.Context) {
-	ticker := time.NewTicker(monitorInterval)
-	defer ticker.Stop()
-
-	log.Println("Starting monitoring loop")
-
-	var conn *amqp.Connection
-
-	connect := func() bool {
-		if conn != nil && !conn.IsClosed() {
-			return true
+	j := &job{cancel: cancel}
+	for i, ch := range channels {
+		c.cancelJobLocked(ch)
+		if err := c.setLocked(ch, true); err != nil {
+			cancel()
+			// Roll back channels we already switched on for this job.
+			for _, prev := range channels[:i] {
+				delete(c.jobs, prev)
+				c.setLocked(prev, false)
+			}
+			return err
 		}
-		var err error
-		conn, err = connectToRabbitMQ(ctx)
-		if err != nil {
-			log.Printf("RabbitMQ reconnect failed: %v", err)
-			return false
-		}
-		return true
+		c.jobs[ch] = j
 	}
 
-	// Initial check
-	if connect() {
-		checkAndPost(ctx, conn)
-	}
-
-	for {
+	go func() {
 		select {
-		case <-ticker.C:
-			if connect() {
-				checkAndPost(ctx, conn)
-			}
+		case <-time.After(d):
 		case <-ctx.Done():
-			log.Println("Monitor loop stopped")
-			if conn != nil {
-				conn.Close()
-			}
-			return
 		}
-	}
+		c.mu.Lock()
+		defer c.mu.Unlock()
+		for _, ch := range channels {
+			// Only touch channels this job still owns: another job or a
+			// manual Set may have taken over since.
+			if c.jobs[ch] == j {
+				delete(c.jobs, ch)
+				if err := c.setLocked(ch, false); err != nil {
+					log.Printf("pulse: failed to switch %s off: %v", ch, err)
+				}
+			}
+		}
+	}()
+	return nil
 }
 
-func checkAndPost(ctx context.Context, rabbitConn *amqp.Connection) {
-	log.Println("Fetching metrics...")
-
-	// Fetch metrics from Prometheus
-	metrics, err := fetchMetrics(ctx)
-	if err != nil {
-		log.Printf("Failed to fetch metrics: %v", err)
-		return
+// Cycle rotates through all relays, each on for onDur, until total elapses.
+func (c *controller) Cycle(total, onDur time.Duration) error {
+	c.mu.Lock()
+	// A cycle owns every channel.
+	ctx, cancel := context.WithCancel(context.Background())
+	j := &job{cancel: cancel}
+	for name := range relays {
+		c.cancelJobLocked(name)
+		c.jobs[name] = j
 	}
+	c.mu.Unlock()
 
-	// Create channel for RabbitMQ
-	ch, err := rabbitConn.Channel()
-	if err != nil {
-		log.Printf("Failed to get RabbitMQ channel: %v", err)
-		return
-	}
-	defer ch.Close()
+	order := channelNames()
 
-	// Declare exchange (idempotent)
-	err = ch.ExchangeDeclare(
-		Exchange,
-		"topic", // type
-		true,    // durable
-		false,   // auto-deleted
-		false,   // internal
-		false,   // no-wait
-		nil,
-	)
-	if err != nil {
-		log.Printf("Failed to declare exchange: %v", err)
-		return
-	}
-
-	// Declare queue (idempotent)
-	_, err = ch.QueueDeclare(
-		QueueName,
-		true,  // durable
-		false, // delete when unused
-		false, // exclusive
-		false, // no-wait
-		nil,   // arguments
-	)
-	if err != nil {
-		log.Printf("Failed to declare queue: %v", err)
-		return
-	}
-
-	// Bind queue to exchange with wildcard routing key
-	err = ch.QueueBind(
-		QueueName,
-		"watering.#",
-		Exchange,
-		false,
-		nil,
-	)
-	if err != nil {
-		log.Printf("Failed to bind queue: %v", err)
-		return
-	}
-
-	// Process each plant and make decisions
-	for _, metric := range metrics {
-		var decision struct {
-			Plant  string  `json:"plant"`
-			Action string  `json:"action"` // "water" or "skip"
-			Value  float64 `json:"value"`  // current moisture value
-		}
-
-		if metric.Value < minSoilMoistureThreshold {
-			decision = struct {
-				Plant  string  `json:"plant"`
-				Action string  `json:"action"`
-				Value  float64 `json:"value"`
-			}{
-				Plant:  metric.Plant,
-				Action: "water",
-				Value:  metric.Value,
+	go func() {
+		defer func() {
+			c.mu.Lock()
+			for name := range relays {
+				if c.jobs[name] == j {
+					delete(c.jobs, name)
+					if err := c.setLocked(name, false); err != nil {
+						log.Printf("cycle: failed to switch %s off: %v", name, err)
+					}
+				}
 			}
-			log.Printf("Plant %s needs water: %.2f%% (threshold: %.2f%%)", metric.Plant, metric.Value, minSoilMoistureThreshold)
-		} else {
-			decision = struct {
-				Plant  string  `json:"plant"`
-				Action string  `json:"action"`
-				Value  float64 `json:"value"`
-			}{
-				Plant:  metric.Plant,
-				Action: "skip",
-				Value:  metric.Value,
+			c.mu.Unlock()
+			log.Println("cycle finished")
+		}()
+
+		deadline := time.Now().Add(total)
+		for time.Now().Before(deadline) {
+			for _, name := range order {
+				remaining := time.Until(deadline)
+				if remaining <= 0 || ctx.Err() != nil {
+					return
+				}
+
+				c.mu.Lock()
+				// Skip channels another job has taken over.
+				if c.jobs[name] != j {
+					c.mu.Unlock()
+					continue
+				}
+				if err := c.setLocked(name, true); err != nil {
+					log.Printf("cycle: failed to switch %s on: %v", name, err)
+					c.mu.Unlock()
+					return
+				}
+				c.mu.Unlock()
+
+				// Don't sleep past the deadline.
+				sleep := onDur
+				if remaining < sleep {
+					sleep = remaining
+				}
+				select {
+				case <-time.After(sleep):
+				case <-ctx.Done():
+					return
+				}
+
+				c.mu.Lock()
+				if c.jobs[name] == j {
+					if err := c.setLocked(name, false); err != nil {
+						log.Printf("cycle: failed to switch %s off: %v", name, err)
+					}
+				}
+				c.mu.Unlock()
 			}
-			log.Printf("Plant %s OK: %.2f%% (threshold: %.2f%%)", metric.Plant, metric.Value, minSoilMoistureThreshold)
 		}
-
-		// Send to RabbitMQ
-		body, err := json.Marshal(decision)
-		if err != nil {
-			log.Printf("Failed to marshal decision: %v", err)
-			continue
-		}
-
-		err = ch.Publish(
-			Exchange, // exchange
-			fmt.Sprintf("watering.%s", strings.ToLower(decision.Plant)), // routing key
-			false, // mandatory
-			false, // immediate
-			amqp.Publishing{
-				ContentType: "application/json",
-				Body:        body,
-			},
-		)
-		if err != nil {
-			log.Printf("Failed to send message for %s: %v", decision.Plant, err)
-		} else {
-			log.Printf("Sent decision for %s to queue: %s", decision.Plant, decision.Action)
-		}
-	}
+	}()
+	return nil
 }
 
-func fetchMetrics(ctx context.Context) ([]PrometheusMetric, error) {
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "GET", metricsURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch metrics: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("metrics endpoint returned status: %d", resp.StatusCode)
-	}
-
-	// Parse Prometheus text format
-	var metrics []PrometheusMetric
-	scanner := bufio.NewScanner(resp.Body)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		matches := promPattern.FindStringSubmatch(line)
-		if len(matches) == 3 {
-			plant := matches[1]
-			value, err := strconv.ParseFloat(matches[2], 64)
-			if err != nil {
-				continue
-			}
-
-			metrics = append(metrics, PrometheusMetric{
-				Plant: plant,
-				Value: math.Round(value*100) / 100, // Round to 2 decimals
-			})
+// Status returns a snapshot of relay states and active jobs.
+func (c *controller) Status() map[string]any {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	channels := make(map[string]any, len(relays))
+	for name, pin := range relays {
+		_, jobActive := c.jobs[name]
+		channels[name] = map[string]any{
+			"pin":       pin,
+			"on":        c.state[name],
+			"jobActive": jobActive,
 		}
 	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("failed to read metrics: %w", err)
-	}
-
-	return metrics, nil
+	return map[string]any{"chip": chip, "channels": channels}
 }
 
-func httpServer(ctx context.Context) {
+func channelNames() []string {
+	names := make([]string, 0, len(relays))
+	for name := range relays {
+		names = append(names, name)
+	}
+	sort.Strings(names) // deterministic cycle order
+	return names
+}
+
+// ---------------------------------------------------------------------------
+// HTTP layer
+// ---------------------------------------------------------------------------
+
+type apiError struct {
+	status int
+	msg    string
+}
+
+func (e apiError) Error() string { return e.msg }
+
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(v)
+}
+
+func writeErr(w http.ResponseWriter, err error) {
+	var ae apiError
+	if errors.As(err, &ae) {
+		writeJSON(w, ae.status, map[string]string{"error": ae.msg})
+		return
+	}
+	writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+}
+
+func parseChannel(raw string) (string, error) {
+	ch := strings.ToUpper(raw)
+	if _, ok := relays[ch]; !ok {
+		return "", apiError{http.StatusNotFound, fmt.Sprintf("unknown channel %q", raw)}
+	}
+	return ch, nil
+}
+
+func parseDuration(raw string) (time.Duration, error) {
+	secs, err := strconv.ParseFloat(raw, 64)
+	if err != nil || secs <= 0 {
+		return 0, apiError{http.StatusBadRequest, "seconds must be a positive number"}
+	}
+	d := time.Duration(secs * float64(time.Second))
+	if d > maxDuration {
+		return 0, apiError{
+			http.StatusBadRequest,
+			fmt.Sprintf("duration exceeds safety cap of %s", maxDuration),
+		}
+	}
+	return d, nil
+}
+
+func newServer(ctrl *controller) http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+	mux.HandleFunc("GET /status", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, http.StatusOK, ctrl.Status())
 	})
 
-	mux.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Ready"))
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
+
+	// POST /relay/{channel}/on
+	mux.HandleFunc("POST /relay/{channel}/on", func(w http.ResponseWriter, r *http.Request) {
+		ch, err := parseChannel(r.PathValue("channel"))
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+		if err := ctrl.Set([]string{ch}, true); err != nil {
+			writeErr(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"channel": ch, "on": true})
+	})
+
+	// POST /relay/{channel}/off
+	mux.HandleFunc("POST /relay/{channel}/off", func(w http.ResponseWriter, r *http.Request) {
+		ch, err := parseChannel(r.PathValue("channel"))
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+		if err := ctrl.Set([]string{ch}, false); err != nil {
+			writeErr(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"channel": ch, "on": false})
+	})
+
+	// POST /relay/{channel}/pulse?seconds=3
+	mux.HandleFunc("POST /relay/{channel}/pulse", func(w http.ResponseWriter, r *http.Request) {
+		ch, err := parseChannel(r.PathValue("channel"))
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+		d, err := parseDuration(r.URL.Query().Get("seconds"))
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+		if err := ctrl.Pulse([]string{ch}, d); err != nil {
+			writeErr(w, err)
+			return
+		}
+		writeJSON(w, http.StatusAccepted, map[string]any{
+			"channel": ch, "pulseSeconds": d.Seconds(),
+		})
+	})
+
+	// POST /pulsecombo?channels=BASIL,CHILLI&seconds=3
+	mux.HandleFunc("POST /pulsecombo", func(w http.ResponseWriter, r *http.Request) {
+		raw := r.URL.Query().Get("channels")
+		if raw == "" {
+			writeErr(w, apiError{http.StatusBadRequest, "channels query param required"})
+			return
+		}
+		var channels []string
+		for _, part := range strings.Split(raw, ",") {
+			ch, err := parseChannel(strings.TrimSpace(part))
+			if err != nil {
+				writeErr(w, err)
+				return
+			}
+			channels = append(channels, ch)
+		}
+		d, err := parseDuration(r.URL.Query().Get("seconds"))
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+		if err := ctrl.Pulse(channels, d); err != nil {
+			writeErr(w, err)
+			return
+		}
+		writeJSON(w, http.StatusAccepted, map[string]any{
+			"channels": channels, "pulseSeconds": d.Seconds(),
+		})
+	})
+
+	// POST /cycle?total=30&on=3
+	mux.HandleFunc("POST /cycle", func(w http.ResponseWriter, r *http.Request) {
+		total, err := parseDuration(r.URL.Query().Get("total"))
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+		onDur, err := parseDuration(r.URL.Query().Get("on"))
+		if err != nil {
+			writeErr(w, err)
+			return
+		}
+		if err := ctrl.Cycle(total, onDur); err != nil {
+			writeErr(w, err)
+			return
+		}
+		writeJSON(w, http.StatusAccepted, map[string]any{
+			"totalSeconds": total.Seconds(), "onSeconds": onDur.Seconds(),
+		})
+	})
+
+	// POST /all/on and /all/off
+	mux.HandleFunc("POST /all/{action}", func(w http.ResponseWriter, r *http.Request) {
+		action := r.PathValue("action")
+		if action != "on" && action != "off" {
+			writeErr(w, apiError{http.StatusNotFound, "action must be on or off"})
+			return
+		}
+		if err := ctrl.Set(channelNames(), action == "on"); err != nil {
+			writeErr(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"all": action})
+	})
+
+	return logMiddleware(mux)
+}
+
+func logMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		log.Printf("%s %s (%s)", r.Method, r.URL.Path, time.Since(start).Round(time.Millisecond))
+	})
+}
+
+// ---------------------------------------------------------------------------
+// main
+// ---------------------------------------------------------------------------
+
+func main() {
+	ctrl, err := newController()
+	if err != nil {
+		log.Fatalf("failed to request GPIO lines: %v", err)
+	}
 
 	srv := &http.Server{
-		Addr:         ServerPort,
-		Handler:      mux,
-		ReadTimeout:  10 * time.Second,
+		Addr:         listenAddr,
+		Handler:      newServer(ctrl),
+		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
-	log.Printf("Health server starting on %s", ServerPort)
-
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Printf("HTTP server error: %v", err)
+		log.Printf("relay API listening on %s", listenAddr)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("server error: %v", err)
 		}
 	}()
 
-	// Wait for shutdown
-	<-ctx.Done()
-	log.Println("HTTP server shutting down...")
+	// Graceful shutdown: relays off, lines released.
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+	<-sig
+	log.Println("shutting down...")
 
-	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	srv.Shutdown(ctxWithTimeout)
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("http shutdown: %v", err)
+	}
+	ctrl.close()
+	log.Println("relays off, lines released, bye")
 }

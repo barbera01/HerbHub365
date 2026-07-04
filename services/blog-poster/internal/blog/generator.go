@@ -33,6 +33,7 @@ const maxGenerateAttempts = 3
 type markdownGenerator interface {
 	GenerateMarkdown(ctx context.Context, prompt string) (string, error)
 	GenerateMarkdownWithSystemPrompt(ctx context.Context, systemPrompt, prompt string) (string, error)
+	GenerateMarkdownWithImage(ctx context.Context, systemPrompt, prompt string, imageData []byte, imageMime string) (string, error)
 }
 
 type Generator struct {
@@ -114,7 +115,7 @@ func (g *Generator) GenerateDraft(ctx context.Context, day time.Time, snapshots 
 }
 
 func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt, titleHint string, draft bool, categories string) (PostResult, error) {
-	markdown, err := g.generateWithRetry(ctx, repoPostSystemPrompt(), prompt, validateRepoPostMarkdown)
+	markdown, err := g.generateWithRetry(ctx, repoPostSystemPrompt(), prompt, validateRepoPostMarkdown, nil, "")
 	if err != nil {
 		return PostResult{}, err
 	}
@@ -124,11 +125,11 @@ func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt,
 		title = strings.TrimSpace(titleHint)
 	}
 
-	return g.writePost(day, title, body, writeOptions{draft: draft, categories: categories})
+	return g.writePost(dayImageAttachment{}, day, title, body, writeOptions{draft: draft, categories: categories})
 }
 
 func (g *Generator) GeneratePrometheusPost(day time.Time, title, body string, draft bool, categories, layout string, assetPaths, publicChartPaths []string) (PostResult, error) {
-	result, err := g.writePost(day, title, body, writeOptions{
+	result, err := g.writePost(dayImageAttachment{}, day, title, body, writeOptions{
 		draft:      draft,
 		categories: categories,
 		layout:     layout,
@@ -155,18 +156,30 @@ func (g *Generator) generateFromSnapshots(ctx context.Context, plan GeneratePlan
 		return PostResult{}, err
 	}
 
-	markdown, err := g.generateWithRetry(ctx, g.promptConfig.SystemPrompt, prompt, validateDailyPostMarkdown)
+	// Select the day image up-front so the same image can be shown to the LLM
+	// and embedded in the final post.
+	var imageData []byte
+	var imageMime string
+	var selectedImagePath string
+	if g.blogConfig.IncludeDayImage {
+		selectedImagePath, imageData, imageMime, err = g.selectAndReadDayImage(plan.Day)
+		if err != nil {
+			return PostResult{}, err
+		}
+	}
+
+	markdown, err := g.generateWithRetry(ctx, g.promptConfig.SystemPrompt, prompt, validateDailyPostMarkdown, imageData, imageMime)
 	if err != nil {
 		return PostResult{}, err
 	}
-	refined, err := g.refinePost(ctx, markdown)
+	refined, err := g.refinePost(ctx, markdown, imageData, imageMime)
 	if err != nil {
 		log.Printf("refinement pass failed, using raw draft: %v", err)
 		refined = markdown
 	}
 
 	title, body := splitMarkdown(refined, plan.Day)
-	result, err := g.writePost(plan.Day, title, body, opts)
+	result, err := g.writePost(dayImageAttachment{day: plan.Day, selectedPath: selectedImagePath}, plan.Day, title, body, opts)
 	if err != nil {
 		return PostResult{}, err
 	}
@@ -182,13 +195,26 @@ func (g *Generator) generateFromSnapshots(ctx context.Context, plan GeneratePlan
 	return result, nil
 }
 
-func (g *Generator) generateWithRetry(ctx context.Context, systemPrompt, prompt string, validate func(string) error) (string, error) {
+// dayImageAttachment carries a pre-selected image through to writePost so the
+// same image shown to the LLM is embedded in the post.
+type dayImageAttachment struct {
+	day          time.Time
+	selectedPath string
+}
+
+func (g *Generator) generateWithRetry(ctx context.Context, systemPrompt, prompt string, validate func(string) error, imageData []byte, imageMime string) (string, error) {
 	var lastErr error
 	for attempt := 1; attempt <= maxGenerateAttempts; attempt++ {
 		if err := ctx.Err(); err != nil {
 			return "", err
 		}
-		markdown, err := g.llm.GenerateMarkdownWithSystemPrompt(ctx, systemPrompt, prompt)
+		var markdown string
+		var err error
+		if len(imageData) > 0 {
+			markdown, err = g.llm.GenerateMarkdownWithImage(ctx, systemPrompt, prompt, imageData, imageMime)
+		} else {
+			markdown, err = g.llm.GenerateMarkdownWithSystemPrompt(ctx, systemPrompt, prompt)
+		}
 		if err != nil {
 			lastErr = err
 			log.Printf("generate attempt %d/%d failed: %v", attempt, maxGenerateAttempts, err)
@@ -218,8 +244,14 @@ func refineUserPrompt(draft string) string {
 	return "Clean up this draft blog post:\n\n" + draft
 }
 
-func (g *Generator) refinePost(ctx context.Context, draft string) (string, error) {
-	refined, err := g.llm.GenerateMarkdownWithSystemPrompt(ctx, refineSystemPrompt(), refineUserPrompt(draft))
+func (g *Generator) refinePost(ctx context.Context, draft string, imageData []byte, imageMime string) (string, error) {
+	var refined string
+	var err error
+	if len(imageData) > 0 {
+		refined, err = g.llm.GenerateMarkdownWithImage(ctx, refineSystemPrompt(), refineUserPrompt(draft), imageData, imageMime)
+	} else {
+		refined, err = g.llm.GenerateMarkdownWithSystemPrompt(ctx, refineSystemPrompt(), refineUserPrompt(draft))
+	}
 	if err != nil {
 		return "", err
 	}
@@ -232,7 +264,7 @@ func (g *Generator) refinePost(ctx context.Context, draft string) (string, error
 
 func (g *Generator) buildPrompt(plan GeneratePlan, summaryPayload []byte) (string, error) {
 	return fmt.Sprintf(
-		"Write a %s blog post for %s (%s). The site URL is %s. Focus only on the data captured between %s and %s UTC. Use the JSON summary below as the only factual source. Mention noteworthy changes in moisture, water level, temperature, light, or warnings when present. Keep it readable for a public blog and do not use bullet lists unless clearly helpful.\n\n%s",
+		"Write a %s blog post for %s (%s). The site URL is %s. Focus on the data captured between %s and %s UTC. Use the JSON summary and the attached greenhouse image as your only factual sources. Mention noteworthy changes in moisture, water level, temperature, light, or warnings when present, and describe anything clearly visible in the image. Keep it readable for a public blog and do not use bullet lists unless clearly helpful.\n\n%s",
 		plan.PromptLabel,
 		g.promptConfig.PromptPlantName,
 		g.promptConfig.PromptSiteName,
@@ -243,7 +275,7 @@ func (g *Generator) buildPrompt(plan GeneratePlan, summaryPayload []byte) (strin
 	), nil
 }
 
-func (g *Generator) writePost(day time.Time, title, body string, opts writeOptions) (PostResult, error) {
+func (g *Generator) writePost(img dayImageAttachment, day time.Time, title, body string, opts writeOptions) (PostResult, error) {
 	slug := slugify(title, g.blogConfig.SlugMaxWords)
 	if slug == "" {
 		slug = day.Format("2006-01-02")
@@ -277,8 +309,8 @@ func (g *Generator) writePost(day time.Time, title, body string, opts writeOptio
 
 	assetPaths := []string{}
 	trimmedBody := strings.TrimSpace(body)
-	if g.blogConfig.IncludeDayImage {
-		imageMarkdown, assetPath, err := g.prepareDayImage(day, slug)
+	if g.blogConfig.IncludeDayImage && img.selectedPath != "" {
+		imageMarkdown, assetPath, err := g.prepareSelectedDayImage(img.selectedPath, day, slug)
 		if err != nil {
 			return PostResult{}, err
 		}
@@ -296,6 +328,56 @@ func (g *Generator) writePost(day time.Time, title, body string, opts writeOptio
 	}
 
 	return PostResult{Path: path, AssetPaths: assetPaths}, nil
+}
+
+// selectAndReadDayImage picks a random image for the day and reads it into memory.
+// Returns the original disk path, the raw image bytes, and a MIME type derived from the extension.
+func (g *Generator) selectAndReadDayImage(day time.Time) (string, []byte, string, error) {
+	if strings.TrimSpace(g.blogConfig.ImageSourceDir) == "" {
+		return "", nil, "", nil
+	}
+	dayDir := filepath.Join(g.blogConfig.ImageSourceDir, day.Format("2006-01-02"))
+	entries, err := os.ReadDir(dayDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil, "", nil
+		}
+		return "", nil, "", err
+	}
+	images := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		ext := strings.ToLower(filepath.Ext(entry.Name()))
+		switch ext {
+		case ".jpg", ".jpeg", ".png", ".webp":
+			images = append(images, filepath.Join(dayDir, entry.Name()))
+		}
+	}
+	if len(images) == 0 {
+		return "", nil, "", nil
+	}
+	sort.Strings(images)
+	selected := images[rand.New(rand.NewSource(time.Now().UnixNano())).Intn(len(images))]
+	data, err := os.ReadFile(selected)
+	if err != nil {
+		return "", nil, "", err
+	}
+	return selected, data, imageMimeType(selected), nil
+}
+
+func imageMimeType(path string) string {
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	case ".webp":
+		return "image/webp"
+	default:
+		return "image/jpeg"
+	}
 }
 
 func (g *Generator) prepareDayImage(day time.Time, slug string) (string, string, error) {
@@ -326,6 +408,16 @@ func (g *Generator) prepareDayImage(day time.Time, slug string) (string, string,
 	}
 	sort.Strings(images)
 	selected := images[rand.New(rand.NewSource(time.Now().UnixNano())).Intn(len(images))]
+	return g.prepareSelectedDayImage(selected, day, slug)
+}
+
+func (g *Generator) prepareSelectedDayImage(selected string, day time.Time, slug string) (string, string, error) {
+	if strings.TrimSpace(g.blogConfig.ImageSourceDir) == "" {
+		return "", "", nil
+	}
+	if _, err := os.Stat(selected); err != nil {
+		return "", "", err
+	}
 	ext := strings.ToLower(filepath.Ext(selected))
 	assetName := fmt.Sprintf("%s-%s%s", day.Format("2006-01-02"), slug, ext)
 

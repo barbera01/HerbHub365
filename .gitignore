@@ -126,6 +126,7 @@ logs/
 /services/video-narrator/resources/
 # Video assets (large files — not tracked in git)
 /Resources/video/
+/support-tools/watering-tui/cmd/config.json
 
 # ====================
 # OpenCode (local tooling)

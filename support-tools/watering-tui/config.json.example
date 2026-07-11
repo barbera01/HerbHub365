@@ -1,0 +1,21 @@
+{
+  "default": {
+    "host": "wattering api endpoint",
+    "pollInterval": 2
+  },
+  "channels": {
+    "enabled": true,
+    "entries": [
+      {"name": "BASIL", "pin": 1},
+      {"name": "CHILLI", "pin": 2},
+      {"name": "OREGANO", "pin": 3}
+    ]
+  },
+  "add": {
+    "enabled": true
+  },
+  "admin": {
+    "enabled": true,
+    "actions": ["reset_all", "ping", "version"]
+  }
+}

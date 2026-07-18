@@ -3,28 +3,23 @@
 
 updated_at: 12:30 — Jul 17, 2026
 env:
-    temp: 25.5°C
-    humidity: 40%
-    light: 682 lux
-    reservoir_temp: –
+  temp: 25.5°C
+  humidity: 40%
+  light: 682 lux
+  reservoir_temp: –
 herbs:
-    - name: Basil
-      icon: basil
-      temp: –
-      moisture: 88%
-      status: healthy
-    - name: Chilli
-      icon: chilli
-      temp: –
-      moisture: 100%
-      status: healthy
-    - name: Oregano
-      icon: oregano
-      temp: –
-      moisture: 10%
-      status: alert
-    - name: Unknown
-      icon: unknown
-      temp: –
-      moisture: –
-      status: healthy
+  - name: Basil
+    icon: basil
+    temp: –
+    moisture: 88%
+    status: healthy
+  - name: Chilli
+    icon: chilli
+    temp: –
+    moisture: 100%
+    status: healthy
+  - name: Oregano
+    icon: oregano
+    temp: –
+    moisture: 10%
+    status: alert

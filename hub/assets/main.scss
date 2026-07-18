@@ -1413,6 +1413,118 @@ a:hover { color: var(--canopy); }
   gap: 8px;
 }
 
+.footer-link {
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  font-size: 0.82rem;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover { color: #fff; }
+
+.footer-link--button {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.footer-separator {
+  display: inline-block;
+  margin: 0 8px;
+  color: rgba(255,255,255,0.28);
+}
+
+/* ── Consent Panel (privacy-conscious analytics) ──────────── */
+.analytics-consent {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(680px, calc(100% - 24px));
+  z-index: 120;
+  pointer-events: none;
+}
+
+.analytics-consent[hidden] {
+  display: none !important;
+}
+
+.analytics-consent__card {
+  pointer-events: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 44px rgba(26, 61, 43, 0.20);
+  padding: 18px;
+}
+
+.analytics-consent h2 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.analytics-consent p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.analytics-consent__actions {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.analytics-consent__button {
+  appearance: none;
+  border-radius: 999px;
+  border: 1px solid var(--canopy);
+  background: rgba(74, 124, 89, 0.10);
+  color: var(--forest);
+  min-height: 44px;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.analytics-consent__button:hover {
+  background: rgba(74, 124, 89, 0.18);
+}
+
+.analytics-consent__button--accept,
+.analytics-consent__button--reject {
+  border-color: var(--leaf);
+  background: rgba(74, 124, 89, 0.10);
+  color: var(--forest);
+}
+
+.analytics-consent__status {
+  min-height: 1.3em;
+  margin-top: 10px;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.analytics-consent a,
+.analytics-consent button,
+.footer-link,
+.footer-link--button {
+  &:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+}
+
 /* ── Floating botanical elements ────────────────────────── */
 .botanical-bg-leaf {
   position: fixed;
@@ -1450,6 +1562,11 @@ a:hover { color: var(--canopy); }
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .analytics-consent__button,
+  .footer-link {
+    transition: none !important;
   }
 }
 
@@ -1517,6 +1634,23 @@ a:hover { color: var(--canopy); }
   .botanical-content { padding: 0 12px; }
 
   .hero-cta-row { flex-direction: column; align-items: flex-start; }
+
+  .footer-separator {
+    margin: 0 6px;
+  }
+
+  .analytics-consent {
+    bottom: 10px;
+    width: calc(100% - 16px);
+  }
+
+  .analytics-consent__card {
+    padding: 14px;
+  }
+
+  .analytics-consent__actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -2155,6 +2289,40 @@ a:hover { color: var(--canopy); }
   /* Footer stays dark — just slightly deepen */
   .botanical-footer {
     background: #080f0b;
+  }
+
+  .footer-link {
+    color: rgba(232, 240, 234, 0.78);
+  }
+
+  .footer-separator {
+    color: rgba(232, 240, 234, 0.3);
+  }
+
+  .analytics-consent__card {
+    background: rgba(15, 31, 21, 0.95);
+    border-color: var(--border);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.42);
+  }
+
+  .analytics-consent h2 {
+    color: #e8f0ea;
+  }
+
+  .analytics-consent p,
+  .analytics-consent__status {
+    color: var(--ink-soft);
+  }
+
+  .analytics-consent__button--accept,
+  .analytics-consent__button--reject {
+    background: rgba(95, 168, 112, 0.14);
+    border-color: rgba(95, 168, 112, 0.60);
+    color: #e8f0ea;
+  }
+
+  .analytics-consent__button:hover {
+    background: rgba(95, 168, 112, 0.24);
   }
 }
 

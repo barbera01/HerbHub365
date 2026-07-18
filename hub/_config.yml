@@ -26,6 +26,7 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://www.herbhub365.com" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jekyllrb
 github_username: barbera01
+google_analytics: G-CYF38MD43R
 header_pages:
   - herbs.markdown
   - platform-architecture.markdown

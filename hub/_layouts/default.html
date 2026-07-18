@@ -112,6 +112,7 @@
             <li><a href="{{ '/platform-architecture/' | relative_url }}">Platform Architecture</a></li>
             <li><a href="{{ '/metrics/' | relative_url }}">Metrics Monitoring</a></li>
             <li><a href="{{ '/about/' | relative_url }}">About</a></li>
+            <li><a href="{{ '/privacy/' | relative_url }}">Privacy</a></li>
           </ul>
         </nav>
 
@@ -127,9 +128,15 @@
 
       <div class="footer-bottom">
         <span>&copy; {{ 'now' | date: "%Y" }} {{ site.title | escape }}. Grown with care.</span>
-        <span>{{ site.description | truncate: 60 }}</span>
+        <span>
+          <a class="footer-link" href="{{ '/privacy/' | relative_url }}">Privacy</a>
+          <span class="footer-separator" aria-hidden="true">•</span>
+          <button class="footer-link footer-link--button" type="button" data-analytics-open-settings>Cookie settings</button>
+        </span>
       </div>
     </footer>
+
+    {%- include analytics-consent.html -%}
 
     <!-- ── Scroll-aware nav enhancement ─────────────────── -->
     <script>

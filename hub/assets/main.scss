@@ -3563,9 +3563,9 @@ a:hover { color: var(--canopy); }
 }
 
 .about-tile:hover {
-  border-color: rgba(74, 124, 89, 0.42);
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 10px 26px rgba(26, 61, 43, 0.14);
+  border-color: rgba(74, 124, 89, 0.5);
+  background: rgba(228, 239, 230, 0.84);
+  box-shadow: 0 8px 22px rgba(26, 61, 43, 0.12);
 }
 
 .about-tile h3 {
@@ -3693,6 +3693,12 @@ a:hover { color: var(--canopy); }
   .about-tile p,
   .about-section p {
     color: var(--ink-soft);
+  }
+
+  .about-tile:hover {
+    background: rgba(27, 52, 36, 0.96);
+    border-color: rgba(125, 186, 144, 0.42);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.26);
   }
 
   .about-section h2,

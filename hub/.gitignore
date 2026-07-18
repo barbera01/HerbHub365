@@ -3,3 +3,10 @@ _site
 .jekyll-cache
 .jekyll-metadata
 vendor
+
+# Generated blog assets live in Azure Blob Storage, not GitHub.
+assets/data/**
+assets/audio/**
+!assets/audio/
+!assets/audio/blog/
+!assets/audio/blog/.gitkeep

@@ -2,7 +2,7 @@
   <div class="prometheus-charts-header">
     <p class="eyebrow">Metrics</p>
     <h2 id="prometheus-charts-heading">Prometheus Charts</h2>
-    <p>Rendered from exported Prometheus JSON snapshots committed with this post.</p>
+    <p>Rendered from exported Prometheus JSON snapshots stored in Azure Blob Storage.</p>
   </div>
 
   <div class="prometheus-chart-grid" id="prometheus-chart-grid"></div>
@@ -12,6 +12,7 @@
     (function () {
       var exportPaths = {{ page.prometheus_chart_exports | jsonify }};
       if (!Array.isArray(exportPaths) || exportPaths.length === 0) return;
+      var dataBaseUrl = {{ site.asset_base_urls.data | jsonify }};
       var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       var grid = document.getElementById('prometheus-chart-grid');
@@ -245,7 +246,7 @@
         card.innerHTML = '<div class="prometheus-chart-status">Loading chart…</div>';
         grid.appendChild(card);
 
-        fetch(path)
+        fetch(resolveDataUrl(path))
           .then(function (res) {
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
@@ -298,6 +299,18 @@
           .catch(function (err) {
             card.innerHTML = '<div class="prometheus-chart-status prometheus-chart-status--error">Unable to load chart export: ' + String(err) + '</div>';
           });
+      }
+
+      function resolveDataUrl(path) {
+        var value = String(path || '');
+        if (/^https?:\/\//i.test(value)) return value;
+        if (value.indexOf('/assets/data') === 0) {
+          return dataBaseUrl + value.substring('/assets/data'.length);
+        }
+        if (value.indexOf('assets/data') === 0) {
+          return dataBaseUrl + value.substring('assets/data'.length);
+        }
+        return value;
       }
 
       for (var i = 0; i < exportPaths.length; i++) {

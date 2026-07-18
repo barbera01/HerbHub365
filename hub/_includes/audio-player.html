@@ -1,4 +1,8 @@
 {% if page.audio_url %}
+{% assign audio_src = page.audio_url %}
+{% unless audio_src contains '://' %}
+  {% assign audio_src = audio_src | replace: '/assets/audio', site.asset_base_urls.audio %}
+{% endunless %}
 <div class="audio-player" aria-label="Listen to this post">
   <div class="audio-player__inner">
     <svg class="audio-player__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="18" height="18" aria-hidden="true">
@@ -11,7 +15,7 @@
       preload="none"
       aria-label="Audio narration of: {{ page.title | escape }}"
     >
-      <source src="{{ page.audio_url | relative_url }}" type="audio/mpeg">
+      <source src="{{ audio_src }}" type="audio/mpeg">
       Your browser does not support audio playback.
     </audio>
   </div>

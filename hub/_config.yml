@@ -30,6 +30,13 @@ header_pages:
   - herbs.markdown
   - platform-architecture.markdown
 
+# Public Azure Blob endpoints for generated blog assets. Keep large/generated
+# media and telemetry data out of the GitHub repo while preserving stable URLs.
+asset_base_urls:
+  images: "https://herbhub365.blob.core.windows.net/blogimages"
+  data: "https://herbhub365.blob.core.windows.net/data"
+  audio: "https://herbhub365.blob.core.windows.net/audio"
+
 # Build settings
 theme: minima
 plugins:

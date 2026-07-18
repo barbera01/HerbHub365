@@ -36,6 +36,7 @@ permalink: /about/
     <article class="about-tile" role="listitem">
       <h3>AI experimentation</h3>
       <p>Exploring computer vision and generated content while keeping the real plants and measurements at the centre of the story.</p>
+      <p><a class="about-inline-cta" href="https://www.youtube.com/@gardener-HerbHub-365" target="_blank" rel="noopener noreferrer" aria-label="Watch Herb Hub 365 AI-generated videos on YouTube (opens in a new tab)">Watch the AI-generated videos</a></p>
     </article>
   </div>
 </section>

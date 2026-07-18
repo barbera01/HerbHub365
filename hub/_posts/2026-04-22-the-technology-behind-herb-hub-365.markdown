@@ -3,7 +3,7 @@ layout: post
 title: "The Technology Behind Herb Hub 365"
 date: 2026-04-22 12:00:00 +0000
 categories: Platform Update
-image: /assets/images/herbhub-home.png
+image: /assets/images/thehub.png
 image_alt: "The Herb Hub 365 hardware setup — Raspberry Pi, sensors, and relay board"
 ---
 

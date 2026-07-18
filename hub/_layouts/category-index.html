@@ -2,45 +2,288 @@
 layout: default
 ---
 
-<div class="category-shell">
+{% assign listing_style = page.listing_style | default: 'herbs' %}
+{% assign match_count = 0 %}
+{% assign featured_post = '' %}
 
-  <header class="category-header">
-    <p class="eyebrow">Category</p>
+{% for post in site.posts %}
+  {% assign matches = false %}
+  {% for category_name in page.category_filters %}
+    {% if post.categories contains category_name %}
+      {% assign matches = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+  {% if matches %}
+    {% assign match_count = match_count | plus: 1 %}
+    {% if featured_post == '' %}
+      {% assign featured_post = post %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+<div class="category-archive category-archive--{{ listing_style }}">
+  <header class="archive-header">
+    <p class="archive-kicker">{{ page.listing_kicker | default: 'Editorial archive' }}</p>
     <h1>{{ page.title }}</h1>
     {% if page.description %}
-      <p class="category-description">{{ page.description }}</p>
+      <p class="archive-description">{{ page.description }}</p>
     {% endif %}
+    {% if page.listing_intro %}
+      <p class="archive-intro">{{ page.listing_intro }}</p>
+    {% endif %}
+
+    <dl class="archive-meta" aria-label="{{ page.title }} archive statistics">
+      <div>
+        <dt>Articles</dt>
+        <dd>{{ match_count }}</dd>
+      </div>
+      <div>
+        <dt>Latest</dt>
+        <dd>
+          {% if featured_post != '' %}
+            <time datetime="{{ featured_post.date | date_to_xmlschema }}">{{ featured_post.date | date: "%b %-d, %Y" }}</time>
+          {% else %}
+            —
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Identity</dt>
+        <dd>{{ page.listing_accent | default: page.title }}</dd>
+      </div>
+    </dl>
+
+    <nav class="archive-nav" aria-label="Article listing pages">
+      <ul>
+        <li>
+          <a href="{{ '/herbs/' | relative_url }}"{% if listing_style == 'herbs' %} aria-current="page"{% endif %}>Herbs</a>
+        </li>
+        <li>
+          <a href="{{ '/metrics/' | relative_url }}"{% if listing_style == 'metrics' %} aria-current="page"{% endif %}>Metrics</a>
+        </li>
+        <li>
+          <a href="{{ '/platform-architecture/' | relative_url }}"{% if listing_style == 'platform' %} aria-current="page"{% endif %}>Platform</a>
+        </li>
+      </ul>
+    </nav>
   </header>
 
-  <ul class="category-list post-list" aria-label="Posts in {{ page.title }}">
-    {% assign match_count = 0 %}
-    {% for post in site.posts %}
-      {% assign matches = false %}
-      {% for category_name in page.category_filters %}
-        {% if post.categories contains category_name %}
-          {% assign matches = true %}
-          {% break %}
-        {% endif %}
-      {% endfor %}
-      {% if matches %}
-        {% assign match_count = match_count | plus: 1 %}
-        <li>
-          <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-          <h2><a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h2>
-          {% if post.categories %}
-            <p class="post-taxonomy">{{ post.categories | join: " / " }}</p>
-          {% endif %}
-          {% if post.excerpt %}
-            <p>{{ post.excerpt | strip_html | truncate: 200 }}</p>
-          {% endif %}
-        </li>
-      {% endif %}
-    {% endfor %}
-    {% if match_count == 0 %}
-      <li>
-        <p style="color:var(--ink-muted); font-size:0.95rem; padding:8px 0;">No posts have been published in this category yet — the greenhouse is growing.</p>
-      </li>
+  {% if match_count == 0 %}
+    <p class="archive-empty">No posts have been published in this archive yet.</p>
+  {% elsif listing_style == 'metrics' %}
+    {% assign chart_count = featured_post.prometheus_chart_exports | size | default: 0 %}
+    {% assign featured_excerpt = featured_post.excerpt | strip_html | strip %}
+    {% if featured_excerpt == '' %}
+      {% assign featured_excerpt = featured_post.content | strip_html | strip | truncate: 240 %}
     {% endif %}
-  </ul>
 
+    <section class="archive-metrics-feature" aria-labelledby="metrics-latest-title">
+      <p class="archive-section-label">Latest snapshot</p>
+      <article class="archive-card archive-card--metrics-feature">
+        <p class="archive-card-date"><time datetime="{{ featured_post.date | date_to_xmlschema }}">{{ featured_post.date | date: "%B %-d, %Y" }}</time></p>
+        <h2 id="metrics-latest-title">
+          <a class="archive-card-title-link" href="{{ featured_post.url | relative_url }}">{{ featured_post.title | escape }}</a>
+        </h2>
+        <div class="archive-metric-row">
+          <span class="archive-badge archive-badge--charts">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7.5 15.75v-3m4.5 3v-7.5m4.5 7.5v-5.25"/>
+            </svg>
+            {{ chart_count }} chart{% if chart_count != 1 %}s{% endif %}
+          </span>
+          <span class="archive-badge archive-badge--data">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3h10.5a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 17.25 21H6.75a2.25 2.25 0 0 1-2.25-2.25V5.25A2.25 2.25 0 0 1 6.75 3Zm3 4.5h4.5m-4.5 4.5h4.5m-4.5 4.5h2.25"/>
+            </svg>
+            Charts + data
+          </span>
+        </div>
+        <p>{{ featured_excerpt }}</p>
+      </article>
+    </section>
+
+    <section aria-labelledby="metrics-all-title">
+      <h2 id="metrics-all-title" class="archive-section-label">All snapshots</h2>
+      <ul class="archive-metrics-list" aria-label="All metrics snapshot posts">
+        {% for post in site.posts %}
+          {% assign matches = false %}
+          {% for category_name in page.category_filters %}
+            {% if post.categories contains category_name %}
+              {% assign matches = true %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {% if matches %}
+            {% assign chart_count = post.prometheus_chart_exports | size | default: 0 %}
+            <li>
+              <article class="archive-card archive-card--metrics-row">
+                <div class="archive-metrics-main">
+                  <p class="archive-card-date"><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time></p>
+                  <h3><a class="archive-card-title-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+                </div>
+                <div class="archive-metrics-meta" aria-label="Snapshot metadata">
+                  <span class="archive-badge archive-badge--charts">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7.5 15.75v-3m4.5 3v-7.5m4.5 7.5v-5.25"/>
+                    </svg>
+                    {{ chart_count }}
+                  </span>
+                  <span class="archive-badge archive-badge--data">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.75A2.25 2.25 0 0 1 6.75 4.5h10.5a2.25 2.25 0 0 1 2.25 2.25v10.5a2.25 2.25 0 0 1-2.25 2.25H6.75a2.25 2.25 0 0 1-2.25-2.25V6.75Z"/>
+                    </svg>
+                    Data
+                  </span>
+                </div>
+              </article>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </section>
+  {% elsif listing_style == 'platform' %}
+    <section aria-labelledby="platform-all-title">
+      <h2 id="platform-all-title" class="archive-section-label">Platform editorials</h2>
+      <ul class="archive-platform-grid" aria-label="Platform architecture posts">
+        {% for post in site.posts %}
+          {% assign matches = false %}
+          {% for category_name in page.category_filters %}
+            {% if post.categories contains category_name %}
+              {% assign matches = true %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {% if matches %}
+            {% assign extracted_image = '' %}
+            {% assign post_image_fragment = post.content | split: '<img' | slice: 1, 1 | first %}
+            {% if post_image_fragment contains 'src="' %}
+              {% assign extracted_image = post_image_fragment | split: 'src="' | slice: 1, 1 | first | split: '"' | first %}
+            {% elsif post_image_fragment contains "src='" %}
+              {% assign extracted_image = post_image_fragment | split: "src='" | slice: 1, 1 | first | split: "'" | first %}
+            {% endif %}
+
+            {% assign card_image = '' %}
+            {% if post.image %}
+              {% assign card_image = post.image %}
+            {% elsif extracted_image != '' %}
+              {% assign card_image = extracted_image %}
+            {% else %}
+              {% assign card_image = '/assets/images/thehub.png' %}
+            {% endif %}
+
+            {% assign card_excerpt = post.excerpt | strip_html | strip %}
+            {% if card_excerpt == '' %}
+              {% assign card_excerpt = post.content | strip_html | strip | truncate: 240 %}
+            {% endif %}
+
+            <li>
+              <article class="archive-card archive-card--platform">
+                <div class="archive-card-media" aria-hidden="true">
+                  {% if card_image contains '://' %}
+                    <img src="{{ card_image }}" alt="" loading="lazy">
+                  {% else %}
+                    <img src="{{ card_image | relative_url }}" alt="" loading="lazy">
+                  {% endif %}
+                </div>
+                <div class="archive-card-body">
+                  <p class="archive-card-date"><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time></p>
+                  <h3><a class="archive-card-title-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+                  {% if post.categories %}
+                    <p class="archive-card-cues">{{ post.categories | join: " • " }}</p>
+                  {% endif %}
+                  <p>{{ card_excerpt }}</p>
+                </div>
+              </article>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </section>
+  {% else %}
+    {% assign featured_image = '' %}
+    {% assign featured_image_fragment = featured_post.content | split: '<img' | slice: 1, 1 | first %}
+    {% if featured_image_fragment contains 'src="' %}
+      {% assign featured_image = featured_image_fragment | split: 'src="' | slice: 1, 1 | first | split: '"' | first %}
+    {% elsif featured_image_fragment contains "src='" %}
+      {% assign featured_image = featured_image_fragment | split: "src='" | slice: 1, 1 | first | split: "'" | first %}
+    {% endif %}
+
+    {% assign featured_excerpt = featured_post.excerpt | strip_html | strip %}
+    {% if featured_excerpt == '' %}
+      {% assign featured_excerpt = featured_post.content | strip_html | strip | truncate: 220 %}
+    {% endif %}
+
+    <section class="archive-herbs-feature" aria-labelledby="herbs-featured-title">
+      <p class="archive-section-label">Featured entry</p>
+      <article class="archive-card archive-card--herbs-feature">
+        <div class="archive-card-media">
+          {% if featured_image != '' %}
+            {% if featured_image contains '://' %}
+              <img src="{{ featured_image }}" alt="Greenhouse photo from {{ featured_post.title | escape }}" loading="eager">
+            {% else %}
+              <img src="{{ featured_image | relative_url }}" alt="Greenhouse photo from {{ featured_post.title | escape }}" loading="eager">
+            {% endif %}
+          {% else %}
+            <img src="{{ '/assets/images/logo.png' | relative_url }}" alt="Herb Hub 365 botanical mark" loading="eager">
+          {% endif %}
+        </div>
+        <div class="archive-card-body">
+          <p class="archive-card-date"><time datetime="{{ featured_post.date | date_to_xmlschema }}">{{ featured_post.date | date: "%B %-d, %Y" }}</time></p>
+          <h2 id="herbs-featured-title"><a class="archive-card-title-link" href="{{ featured_post.url | relative_url }}">{{ featured_post.title | escape }}</a></h2>
+          <p>{{ featured_excerpt }}</p>
+        </div>
+      </article>
+    </section>
+
+    <section aria-labelledby="herbs-all-title">
+      <h2 id="herbs-all-title" class="archive-section-label">All greenhouse journal entries</h2>
+      <ul class="archive-herbs-grid" aria-label="All herb journal posts">
+        {% for post in site.posts %}
+          {% assign matches = false %}
+          {% for category_name in page.category_filters %}
+            {% if post.categories contains category_name %}
+              {% assign matches = true %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {% if matches and post.url != featured_post.url %}
+            {% assign extracted_image = '' %}
+            {% assign post_image_fragment = post.content | split: '<img' | slice: 1, 1 | first %}
+            {% if post_image_fragment contains 'src="' %}
+              {% assign extracted_image = post_image_fragment | split: 'src="' | slice: 1, 1 | first | split: '"' | first %}
+            {% elsif post_image_fragment contains "src='" %}
+              {% assign extracted_image = post_image_fragment | split: "src='" | slice: 1, 1 | first | split: "'" | first %}
+            {% endif %}
+
+            {% assign card_excerpt = post.excerpt | strip_html | strip %}
+            {% if card_excerpt == '' %}
+              {% assign card_excerpt = post.content | strip_html | strip | truncate: 170 %}
+            {% endif %}
+
+            <li>
+              <article class="archive-card archive-card--herbs">
+                <div class="archive-card-media">
+                  {% if extracted_image != '' %}
+                    {% if extracted_image contains '://' %}
+                      <img src="{{ extracted_image }}" alt="Greenhouse photo from {{ post.title | escape }}" loading="lazy">
+                    {% else %}
+                      <img src="{{ extracted_image | relative_url }}" alt="Greenhouse photo from {{ post.title | escape }}" loading="lazy">
+                    {% endif %}
+                  {% else %}
+                    <div class="archive-illustration" role="img" aria-label="Botanical illustration placeholder for {{ post.title | escape }}"></div>
+                  {% endif %}
+                </div>
+                <div class="archive-card-body">
+                  <p class="archive-card-date"><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time></p>
+                  <h3><a class="archive-card-title-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+                  <p>{{ card_excerpt }}</p>
+                </div>
+              </article>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
 </div>

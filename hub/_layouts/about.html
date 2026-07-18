@@ -1,0 +1,116 @@
+---
+layout: default
+---
+
+{%- assign ls = site.data.live_sensors -%}
+{%- assign about_hero_image = '/assets/images/thehub.png' -%}
+{%- assign about_hero_alt = 'Herb Hub 365 greenhouse and platform project image' -%}
+
+{%- for post in site.posts -%}
+  {%- assign about_image_fragment = post.content | split: '<img' | slice: 1, 1 | first -%}
+  {%- assign about_image_raw = '' -%}
+
+  {%- if about_image_fragment contains 'src="' -%}
+    {%- assign about_image_raw = about_image_fragment | split: 'src="' | slice: 1, 1 | first | split: '"' | first -%}
+  {%- elsif about_image_fragment contains "src='" -%}
+    {%- assign about_image_raw = about_image_fragment | split: "src='" | slice: 1, 1 | first | split: "'" | first -%}
+  {%- endif -%}
+
+  {%- if about_image_raw != '' -%}
+    {%- assign about_hero_image = about_image_raw -%}
+    {%- assign about_hero_alt = 'Greenhouse journal image from: ' | append: post.title | escape -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<article class="about-page" aria-labelledby="about-title">
+  <header class="about-hero" aria-labelledby="about-title">
+    <div class="about-hero-media-wrap">
+      {% if about_hero_image contains '://' %}
+        <img
+          class="about-hero-media"
+          src="{{ about_hero_image }}"
+          alt="{{ about_hero_alt }}"
+          loading="eager"
+          fetchpriority="high"
+        >
+      {% else %}
+        <img
+          class="about-hero-media"
+          src="{{ about_hero_image | relative_url }}"
+          alt="{{ about_hero_alt }}"
+          loading="eager"
+          fetchpriority="high"
+        >
+      {% endif %}
+      <div class="about-hero-shade" aria-hidden="true"></div>
+    </div>
+
+    <div class="about-hero-content">
+      <p class="about-eyebrow">About Herb Hub 365</p>
+      <h1 id="about-title">A personal greenhouse learning and development project.</h1>
+      <p class="about-hero-copy">Herb Hub 365 connects a real greenhouse with software engineering, sensors, cloud infrastructure, observability, automation, and AI in one practical environment.</p>
+      <div class="about-cta-row">
+        <a class="about-btn about-btn-primary" href="{{ '/herbs/' | relative_url }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+          </svg>
+          Read greenhouse journal
+        </a>
+        <a class="about-btn about-btn-secondary" href="https://github.com/barbera01/HerbHub365">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 21 3m0 0h-3.75M21 3v3.75M21 13.5v4.75A1.75 1.75 0 0 1 19.25 20H5.75A1.75 1.75 0 0 1 4 18.25V4.75A1.75 1.75 0 0 1 5.75 3h4.75"/>
+          </svg>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <section class="about-signals" aria-label="Project facts and signals">
+    <dl>
+      <div>
+        <dt>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 0 0-.75.75v4.19l-2.22 2.22a.75.75 0 1 0 1.06 1.06l2.44-2.44c.14-.14.22-.33.22-.53V7.5a.75.75 0 0 0-.75-.75Z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+          Journal entries
+        </dt>
+        <dd>{{ site.posts | size }}</dd>
+      </div>
+      <div>
+        <dt>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+          Sensor snapshot
+        </dt>
+        <dd>{% if ls.updated_at %}Updated {{ ls.updated_at }}{% else %}Data file available{% endif %}</dd>
+      </div>
+      <div>
+        <dt>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5h10.5m-10.5 4.5h10.5m-10.5 4.5h6"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.25A2.25 2.25 0 0 1 6.75 3h10.5A2.25 2.25 0 0 1 19.5 5.25v13.5A2.25 2.25 0 0 1 17.25 21H6.75A2.25 2.25 0 0 1 4.5 18.75V5.25Z"/>
+          </svg>
+          Project mode
+        </dt>
+        <dd>Iterative and learning in public</dd>
+      </div>
+      <div>
+        <dt>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 21 3m0 0h-3.75M21 3v3.75M21 13.5v4.75A1.75 1.75 0 0 1 19.25 20H5.75A1.75 1.75 0 0 1 4 18.25V4.75A1.75 1.75 0 0 1 5.75 3h4.75"/>
+          </svg>
+          Source
+        </dt>
+        <dd>Open-source repository</dd>
+      </div>
+    </dl>
+  </section>
+
+  <div class="about-body" aria-label="About page editorial content">
+    {{ content }}
+  </div>
+</article>

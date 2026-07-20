@@ -73,6 +73,8 @@ services:
       PROM_POST_CATEGORIES: ${PROM_POST_CATEGORIES:-Metrics Observability}
       PROM_POST_LAYOUT: ${PROM_POST_LAYOUT:-post}
       PROM_POST_EXPORT_DIR: ${PROM_POST_EXPORT_DIR:-/repo/hub/assets/data/prometheus}
+      PROM_POST_DATA_BLOB_SAS_URL: ${PROM_POST_DATA_BLOB_SAS_URL:-}
+      PROM_POST_DATA_BLOB_PUBLIC_BASE: ${PROM_POST_DATA_BLOB_PUBLIC_BASE:-https://herbhub365.blob.core.windows.net/data}
       BLOG_INCLUDE_DAY_IMAGE: ${BLOG_INCLUDE_DAY_IMAGE:-false}
       BLOG_IMAGE_SOURCE_DIR: /timelapse
       BLOG_IMAGE_OUTPUT_DIR: ${BLOG_IMAGE_OUTPUT_DIR:-/repo/hub/assets/images/blog}
@@ -119,6 +121,8 @@ services:
       BLOG_POSTS_DIR: /repo/hub/_posts
       TTS_AUDIO_DIR: /repo/hub/assets/audio/blog
       TTS_AUDIO_PUBLIC_PATH: /assets/audio/blog
+      TTS_AUDIO_BLOB_SAS_URL: ${TTS_AUDIO_BLOB_SAS_URL:-}
+      TTS_AUDIO_BLOB_PUBLIC_BASE: ${TTS_AUDIO_BLOB_PUBLIC_BASE:-https://herbhub365.blob.core.windows.net/audio}
       GIT_PUBLISH_ENABLED: ${TTS_GIT_PUBLISH_ENABLED:-false}
       GIT_REPO_DIR: /repo
       GIT_REMOTE_NAME: ${TTS_GIT_REMOTE_NAME:-origin}

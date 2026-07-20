@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"HerbHub365/services/tts-narrator/internal/azureblob"
 	"HerbHub365/services/tts-narrator/internal/config"
 	"HerbHub365/services/tts-narrator/internal/gitpublish"
 	"HerbHub365/services/tts-narrator/internal/post"
@@ -256,17 +257,27 @@ func narratePost(
 	}
 	log.Printf("wrote %s (%d bytes)", audioPath, len(audioBytes))
 
-	// 4. Patch audio_url into post front matter.
+	// 4. Upload the MP3 to Azure Blob Storage when configured; otherwise fall
+	// back to the local Jekyll-served path (dev/local preview only — this
+	// path is gitignored and never reaches the deployed site).
 	audioURL := cfg.Post.AudioPublicPath + "/" + audioFilename
+	if strings.TrimSpace(cfg.Post.AudioBlobSASURL) != "" {
+		blobName := "blog/" + audioFilename
+		if err := azureblob.Upload(audioPath, blobName, "audio/mpeg", cfg.Post.AudioBlobSASURL); err != nil {
+			return fmt.Errorf("upload audio to blob storage: %w", err)
+		}
+		audioURL = azureblob.PublicURL(cfg.Post.AudioBlobPublicBase, blobName)
+	}
+
+	// 5. Patch audio_url into post front matter.
 	if _, err := post.PatchAudioURL(p, audioURL); err != nil {
 		return fmt.Errorf("patch audio_url: %w", err)
 	}
 	log.Printf("patched audio_url: %s", audioURL)
 
-	// 5. Git commit + push.
+	// 6. Git commit + push (post markdown only — the MP3 lives in blob storage).
 	result := gitpublish.Result{
-		PostPath:  p.Path,
-		AudioPath: audioPath,
+		PostPath: p.Path,
 	}
 	if err := publisher.PublishNarration(ctx, result, p.Date); err != nil {
 		return fmt.Errorf("git publish: %w", err)

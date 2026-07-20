@@ -13,12 +13,11 @@ import (
 	"HerbHub365/services/tts-narrator/internal/config"
 )
 
-// Result carries the paths that need to be committed.
+// Result carries the paths that need to be committed. The MP3 itself lives
+// in Azure Blob Storage (or a gitignored local path in dev), never in git.
 type Result struct {
 	// PostPath is the (possibly patched) Jekyll post file.
 	PostPath string
-	// AudioPath is the generated MP3 file.
-	AudioPath string
 }
 
 // Publisher commits and pushes narration results to the git repo.
@@ -42,22 +41,18 @@ func (p *Publisher) PublishNarration(ctx context.Context, result Result, day tim
 		return fmt.Errorf("resolve repo dir: %w", err)
 	}
 
-	// Build repo-relative paths for the post and the audio file.
-	pathsToAdd := make([]string, 0, 2)
-	for _, abs := range []string{result.PostPath, result.AudioPath} {
-		if abs == "" {
-			continue
-		}
-		absPath, err := filepath.Abs(abs)
-		if err != nil {
-			continue
-		}
-		rel, err := filepath.Rel(repoDir, absPath)
-		if err != nil || strings.HasPrefix(rel, "..") {
-			return fmt.Errorf("path %s is outside git repo %s", abs, repoDir)
-		}
-		pathsToAdd = append(pathsToAdd, rel)
+	if result.PostPath == "" {
+		return fmt.Errorf("PostPath is required")
 	}
+	absPostPath, err := filepath.Abs(result.PostPath)
+	if err != nil {
+		return fmt.Errorf("resolve post path: %w", err)
+	}
+	relPostPath, err := filepath.Rel(repoDir, absPostPath)
+	if err != nil || strings.HasPrefix(relPostPath, "..") {
+		return fmt.Errorf("path %s is outside git repo %s", result.PostPath, repoDir)
+	}
+	pathsToAdd := []string{relPostPath}
 
 	gitEnv := p.gitEnv(repoDir)
 

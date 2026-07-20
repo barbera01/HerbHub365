@@ -70,7 +70,16 @@ type PostConfig struct {
 	// AudioDir is where MP3 files are written, e.g. /repo/hub/assets/audio/blog
 	AudioDir string
 	// AudioPublicPath is the URL-path prefix served by Jekyll, e.g. /assets/audio/blog
+	// Used only when AudioBlobSASURL is unset (local/dev fallback).
 	AudioPublicPath string
+	// AudioBlobSASURL is the full Azure Blob SAS URL for the audio container,
+	// e.g. https://herbhub365.blob.core.windows.net/audio?sv=...&sig=...
+	// When set, narration MP3s are uploaded to blob storage instead of being
+	// served from the (gitignored) local repo path.
+	AudioBlobSASURL string
+	// AudioBlobPublicBase is the public base URL used to build audio_url once
+	// a file has been uploaded to blob storage.
+	AudioBlobPublicBase string
 }
 
 // GitConfig mirrors blog-poster's GitConfig.
@@ -108,10 +117,12 @@ func Load() Config {
 			ResponseFormat: getEnv("TTS_FORMAT", "mp3"),
 		},
 		Post: PostConfig{
-			HubDir:          hubDir,
-			PostsDir:        postsDir,
-			AudioDir:        audioDir,
-			AudioPublicPath: getEnv("TTS_AUDIO_PUBLIC_PATH", "/assets/audio/blog"),
+			HubDir:              hubDir,
+			PostsDir:            postsDir,
+			AudioDir:            audioDir,
+			AudioPublicPath:     getEnv("TTS_AUDIO_PUBLIC_PATH", "/assets/audio/blog"),
+			AudioBlobSASURL:     os.Getenv("TTS_AUDIO_BLOB_SAS_URL"),
+			AudioBlobPublicBase: getEnv("TTS_AUDIO_BLOB_PUBLIC_BASE", "https://herbhub365.blob.core.windows.net/audio"),
 		},
 		Git: GitConfig{
 			PublishEnabled: getBoolEnv("GIT_PUBLISH_ENABLED", false),

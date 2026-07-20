@@ -1,7 +1,6 @@
 package blog
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -10,7 +9,6 @@ import (
 	"log"
 	"math"
 	"math/rand"
-	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -19,6 +17,7 @@ import (
 	"time"
 
 	"HerbHub365/services/blog-poster/internal/archive"
+	"HerbHub365/services/blog-poster/internal/azureblob"
 	"HerbHub365/services/blog-poster/internal/config"
 	"HerbHub365/services/blog-poster/internal/model"
 	"HerbHub365/services/blog-poster/internal/sensordata"
@@ -128,8 +127,12 @@ func (g *Generator) GenerateRepoPost(ctx context.Context, day time.Time, prompt,
 	return g.writePost(dayImageAttachment{}, day, title, body, writeOptions{draft: draft, categories: categories})
 }
 
-func (g *Generator) GeneratePrometheusPost(day time.Time, title, body string, draft bool, categories, layout string, assetPaths, publicChartPaths []string) (PostResult, error) {
-	result, err := g.writePost(dayImageAttachment{}, day, title, body, writeOptions{
+// GeneratePrometheusPost writes the post markdown only. The chart JSON
+// exports referenced by publicChartPaths live in Azure Blob Storage (or a
+// gitignored local path in dev), never in git, so they're intentionally not
+// added to result.AssetPaths for the publisher to commit.
+func (g *Generator) GeneratePrometheusPost(day time.Time, title, body string, draft bool, categories, layout string, publicChartPaths []string) (PostResult, error) {
+	return g.writePost(dayImageAttachment{}, day, title, body, writeOptions{
 		draft:      draft,
 		categories: categories,
 		layout:     layout,
@@ -138,11 +141,6 @@ func (g *Generator) GeneratePrometheusPost(day time.Time, title, body string, dr
 			"prometheus_chart_exports": publicChartPaths,
 		},
 	})
-	if err != nil {
-		return PostResult{}, err
-	}
-	result.AssetPaths = append(result.AssetPaths, assetPaths...)
-	return result, nil
 }
 
 func (g *Generator) generateFromSnapshots(ctx context.Context, plan GeneratePlan, snapshots []model.Snapshot, opts writeOptions) (PostResult, error) {
@@ -423,7 +421,7 @@ func (g *Generator) prepareSelectedDayImage(selected string, day time.Time, slug
 
 	// If BlobSASURL is set, upload to Azure Blob Storage via HTTP PUT
 	if strings.TrimSpace(g.blogConfig.BlobSASURL) != "" {
-		publicURL, err := uploadToBlob(selected, assetName, ext, g.blogConfig.BlobSASURL, g.blogConfig.BlobPublicBase)
+		publicURL, err := uploadImageToBlob(selected, assetName, ext, g.blogConfig.BlobSASURL, g.blogConfig.BlobPublicBase)
 		if err != nil {
 			log.Printf("WARNING: failed to upload blog image to blob storage: %v, publishing post without image", err)
 			return "", "", nil
@@ -462,29 +460,7 @@ func copyFile(src, dst string) error {
 	return out.Close()
 }
 
-func uploadToBlob(localPath, assetName, ext, blobSASURL, blobPublicBase string) (string, error) {
-	// Split SAS URL into base and query parts
-	var base, query string
-	if idx := strings.Index(blobSASURL, "?"); idx != -1 {
-		base = blobSASURL[:idx]
-		query = blobSASURL[idx+1:]
-	} else {
-		base = blobSASURL
-	}
-
-	// Construct full blob URL for upload: base + "/" + assetName + "?" + query
-	blobURL := strings.TrimRight(base, "/") + "/" + assetName
-	if query != "" {
-		blobURL += "?" + query
-	}
-
-	// Read local file
-	data, err := os.ReadFile(localPath)
-	if err != nil {
-		return "", err
-	}
-
-	// Determine content type
+func uploadImageToBlob(localPath, assetName, ext, blobSASURL, blobPublicBase string) (string, error) {
 	contentType := "application/octet-stream"
 	switch ext {
 	case ".jpg", ".jpeg":
@@ -495,31 +471,12 @@ func uploadToBlob(localPath, assetName, ext, blobSASURL, blobPublicBase string) 
 		contentType = "image/webp"
 	}
 
-	// Create HTTP PUT request
-	req, err := http.NewRequest("PUT", blobURL, bytes.NewReader(data))
-	if err != nil {
+	if err := azureblob.Upload(localPath, assetName, contentType, blobSASURL); err != nil {
 		return "", err
 	}
-	req.Header.Set("x-ms-blob-type", "BlockBlob")
-	req.Header.Set("Content-Type", contentType)
 
-	// Execute request — 60s timeout is generous for a single image upload
-	client := &http.Client{Timeout: 60 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		_, _ = io.Copy(io.Discard, resp.Body)
-		resp.Body.Close()
-	}()
-
-	if resp.StatusCode != http.StatusCreated {
-		return "", fmt.Errorf("blob upload failed: status %d", resp.StatusCode)
-	}
-
-	// Return public read URL (no SAS token — container has anonymous read)
-	return strings.TrimRight(blobPublicBase, "/") + "/" + assetName, nil
+	// Public read URL (no SAS token — container has anonymous read)
+	return azureblob.PublicURL(blobPublicBase, assetName), nil
 }
 
 func buildFrontMatter(cfg config.BlogConfig, day time.Time, title, categories, layout string, extras map[string]any) string {

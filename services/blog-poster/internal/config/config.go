@@ -110,6 +110,12 @@ type PromPostConfig struct {
 	ExportDir   string
 	Schedule    string
 	TargetDate  string
+	// BlobSASURL is the full Azure Blob SAS URL for the metrics data
+	// container, e.g. https://herbhub365.blob.core.windows.net/data?sv=...&sig=...
+	// When set, exported chart JSON is uploaded to blob storage instead of
+	// being served from the (gitignored) local repo path.
+	BlobSASURL     string
+	BlobPublicBase string
 }
 
 // SensorDataConfig controls writing of hub/_data/live_sensors.yml after each
@@ -233,18 +239,20 @@ func Load() Config {
 			MaxTotalBytes: getIntEnv("BLOG_REPO_POST_MAX_TOTAL_BYTES", 48000),
 		},
 		PromPost: PromPostConfig{
-			BaseURL:     getEnv("PROM_POST_BASE_URL", "https://prometheus.home-cloud.uk"),
-			QueryPath:   getEnv("PROM_POST_PATH", "/api/v1/query_range"),
-			QueryFile:   getEnv("PROM_POST_QUERY_FILE", filepath.Join("/repo", "services", "blog-poster", "config", "prom-queries.json")),
-			DefaultSpan: getDurationEnv("PROM_POST_RANGE", 24*time.Hour),
-			DefaultStep: getDurationEnv("PROM_POST_STEP", 5*time.Minute),
-			Timeout:     getDurationEnv("PROM_POST_TIMEOUT", 30*time.Second),
-			Draft:       getBoolEnv("PROM_POST_DRAFT", true),
-			Categories:  getEnv("PROM_POST_CATEGORIES", "Metrics Observability"),
-			Layout:      getEnv("PROM_POST_LAYOUT", "post"),
-			ExportDir:   getEnv("PROM_POST_EXPORT_DIR", filepath.Join(hubDir, "assets", "data", "prometheus")),
-			Schedule:    getEnv("PROM_POST_SCHEDULE", ""),
-			TargetDate:  getEnv("PROM_POST_TARGET_DATE", "today"),
+			BaseURL:        getEnv("PROM_POST_BASE_URL", "https://prometheus.home-cloud.uk"),
+			QueryPath:      getEnv("PROM_POST_PATH", "/api/v1/query_range"),
+			QueryFile:      getEnv("PROM_POST_QUERY_FILE", filepath.Join("/repo", "services", "blog-poster", "config", "prom-queries.json")),
+			DefaultSpan:    getDurationEnv("PROM_POST_RANGE", 24*time.Hour),
+			DefaultStep:    getDurationEnv("PROM_POST_STEP", 5*time.Minute),
+			Timeout:        getDurationEnv("PROM_POST_TIMEOUT", 30*time.Second),
+			Draft:          getBoolEnv("PROM_POST_DRAFT", true),
+			Categories:     getEnv("PROM_POST_CATEGORIES", "Metrics Observability"),
+			Layout:         getEnv("PROM_POST_LAYOUT", "post"),
+			ExportDir:      getEnv("PROM_POST_EXPORT_DIR", filepath.Join(hubDir, "assets", "data", "prometheus")),
+			Schedule:       getEnv("PROM_POST_SCHEDULE", ""),
+			TargetDate:     getEnv("PROM_POST_TARGET_DATE", "today"),
+			BlobSASURL:     os.Getenv("PROM_POST_DATA_BLOB_SAS_URL"),
+			BlobPublicBase: getEnv("PROM_POST_DATA_BLOB_PUBLIC_BASE", "https://herbhub365.blob.core.windows.net/data"),
 		},
 		Git: GitConfig{
 			PublishEnabled: getBoolEnv("GIT_PUBLISH_ENABLED", false),

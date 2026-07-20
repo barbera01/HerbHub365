@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"HerbHub365/services/blog-poster/internal/azureblob"
 	"HerbHub365/services/blog-poster/internal/config"
 )
 
@@ -129,8 +131,22 @@ func Generate(day time.Time, cfg config.PromPostConfig, siteName string) (Export
 			return ExportResult{}, fmt.Errorf("write export %s: %w", assetPath, writeErr)
 		}
 
+		publicPath := "/assets/data/prometheus/" + dateDir + "/" + slug + ".json"
+		if strings.TrimSpace(cfg.BlobSASURL) != "" {
+			blobName := "prometheus/" + dateDir + "/" + slug + ".json"
+			if uploadErr := azureblob.Upload(assetPath, blobName, "application/json", cfg.BlobSASURL); uploadErr != nil {
+				log.Printf("WARNING: failed to upload metrics chart %s to blob storage: %v, publishing post without this chart", query.ID, uploadErr)
+				continue
+			}
+			publicPath = azureblob.PublicURL(cfg.BlobPublicBase, blobName)
+		}
+
 		assetPaths = append(assetPaths, assetPath)
-		publicPaths = append(publicPaths, "/assets/data/prometheus/"+dateDir+"/"+slug+".json")
+		publicPaths = append(publicPaths, publicPath)
+	}
+
+	if len(publicPaths) == 0 {
+		return ExportResult{}, fmt.Errorf("no chart exports available for %s: all queries failed to fetch or upload", day.Format("2006-01-02"))
 	}
 
 	title := fmt.Sprintf("Prometheus Metrics Snapshot — %s", day.Format("January 2, 2006"))

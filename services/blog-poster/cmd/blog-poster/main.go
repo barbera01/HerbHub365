@@ -87,7 +87,6 @@ func runPromPost(ctx context.Context, cfg config.Config, generator *blog.Generat
 		cfg.PromPost.Draft,
 		cfg.PromPost.Categories,
 		cfg.PromPost.Layout,
-		export.AssetPaths,
 		export.PublicPaths,
 	)
 	if err != nil {

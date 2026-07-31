@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for July 31, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-07-31-sun-drenched-at-herb-hub-365.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/1SORmOYaPzI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 July 31st brought a significant surge of solar energy to the greenhouse. While the morning began with a soft glow of 730 lux, the brightness peaked at a brilliant 13,897 lux by midday. This influx of light is clearly fueling the plants, visible in the vibrant green canopy currently filling the frame.
 

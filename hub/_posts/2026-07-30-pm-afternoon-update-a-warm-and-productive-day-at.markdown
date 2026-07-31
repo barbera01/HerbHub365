@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for July 30, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-07-30-afternoon-update-a-warm-and-productive-day-at.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/JbFVZlb9K6U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The greenhouse saw plenty of activity today as temperatures climbed steadily throughout the afternoon. Our sensors recorded an air temperature peak of nearly 29°C, though conditions have begun to cool down to a comfortable 23.68°C this evening. Humidity levels followed a downward trend as the day progressed, starting at a humid 51.2% and settling at a much drier 34.5% by the final reading.
 

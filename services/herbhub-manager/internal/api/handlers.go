@@ -630,6 +630,14 @@ func (h *handlers) handleTimelapsePublish(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusBadRequest, "to_date is required")
 		return
 	}
+	if !validISODate(req.ToDate) {
+		writeError(w, http.StatusBadRequest, "to_date must use YYYY-MM-DD")
+		return
+	}
+	if req.FromDate != "" && !validISODate(req.FromDate) {
+		writeError(w, http.StatusBadRequest, "from_date must use YYYY-MM-DD")
+		return
+	}
 
 	slug := "timelapse-" + req.ToDate
 
@@ -658,13 +666,33 @@ func (h *handlers) handleTimelapsePublish(w http.ResponseWriter, r *http.Request
 	})
 }
 
+func validISODate(value string) bool {
+	parsed, err := time.Parse("2006-01-02", value)
+	return err == nil && parsed.Format("2006-01-02") == value
+}
+
 func (h *handlers) timelapseVideoURL(filename string) string {
-	base := strings.TrimRight(strings.TrimSpace(h.cfg.Timelapse.PublicURL), "/")
+	base := strings.TrimRight(strings.TrimSpace(h.cfg.Timelapse.InternalURL), "/")
 	filename = strings.TrimSpace(filename)
 	if base == "" || filename == "" {
 		return ""
 	}
-	return base + "/api/timelapse/videos/" + url.PathEscape(filename)
+	return base + "/internal/timelapse/videos/" + url.PathEscape(filename)
+}
+
+func (h *handlers) handleInternalTimelapseVideo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	filename := strings.TrimPrefix(r.URL.Path, "/internal/timelapse/videos/")
+	if filename == "" || strings.Contains(filename, "..") || strings.Contains(filename, "/") {
+		writeError(w, http.StatusBadRequest, "invalid filename")
+		return
+	}
+	if err := h.timelapseClient.ProxyVideoFile(w, filename); err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
+	}
 }
 
 func (h *handlers) createTimelapsePost(req timelapsePublishRequest, slug string) error {
@@ -790,6 +818,7 @@ func (h *handlers) handlePublish(w http.ResponseWriter, r *http.Request) {
 
 type queueAddRequest struct {
 	Slugs            []string `json:"slugs"`
+	TextOverride     string   `json:"text_override,omitempty"`
 	AvatarID         string   `json:"avatar_id,omitempty"`
 	ConcatEnabled    bool     `json:"concat_enabled"`
 	ConcatIntro      string   `json:"concat_intro,omitempty"`
@@ -833,6 +862,7 @@ func (h *handlers) handleQueue(w http.ResponseWriter, r *http.Request) {
 			addReqs = append(addReqs, queue.AddRequest{
 				Slug:             slug,
 				Title:            titleBySlug[slug],
+				TextOverride:     req.TextOverride,
 				AvatarID:         req.AvatarID,
 				ConcatEnabled:    req.ConcatEnabled,
 				ConcatIntro:      req.ConcatIntro,

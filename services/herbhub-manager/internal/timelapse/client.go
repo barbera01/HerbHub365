@@ -45,7 +45,9 @@ func (c *Client) Build(req BuildRequest) (string, error) {
 	defer resp.Body.Close()
 	raw, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		var e struct{ Error string `json:"error"` }
+		var e struct {
+			Error string `json:"error"`
+		}
 		if json.Unmarshal(raw, &e) == nil && e.Error != "" {
 			return "", fmt.Errorf("timelapse-builder %d: %s", resp.StatusCode, e.Error)
 		}

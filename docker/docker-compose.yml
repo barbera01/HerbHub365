@@ -133,11 +133,11 @@ services:
     volumes:
       - ..:/repo
 
-  herbhub-manager:
+  herbhub-manager-api:
     build:
       context: ../services/herbhub-manager
-      dockerfile: Dockerfile
-    container_name: herbhub-manager
+      dockerfile: Dockerfile.api
+    container_name: herbhub-manager-api
     restart: unless-stopped
     networks:
       - herbhub
@@ -157,11 +157,59 @@ services:
       BLOG_PLANT_NAME: ${BLOG_PLANT_NAME:-herbs}
       TIMELAPSE_SERVICE_URL: ${TIMELAPSE_SERVICE_URL:-http://timelapse-builder:8082}
       TIMELAPSE_PUBLIC_URL: ${TIMELAPSE_PUBLIC_URL:-https://manager.herbhub365.com}
+      TIMELAPSE_INTERNAL_URL: ${TIMELAPSE_INTERNAL_URL:-http://herbhub-manager-api:8080}
       RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
+      AUTH_DISABLED: ${MANAGER_AUTH_DISABLED:-false}
+      AUTH_ISSUER_URL: ${MANAGER_AUTH_ISSUER_URL:-}
+      AUTH_DISCOVERY_URL: ${MANAGER_AUTH_DISCOVERY_URL:-}
+      AUTH_AUDIENCE: ${MANAGER_AUTH_AUDIENCE:-}
+      AUTH_REQUIRED_ROLE: ${MANAGER_AUTH_REQUIRED_ROLE:-Manager.Operator}
+      ALLOWED_ORIGIN: ${MANAGER_ALLOWED_ORIGIN:-}
     volumes:
       - ..:/repo
       - ${HERBHUB_VIDEO_OUTPUT_PATH:-/mnt/herbhub-video/Video/Output}:/mnt/herbhub-video/Video/Output
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  herbhub-manager-client:
+    build:
+      context: ../services/herbhub-manager
+      dockerfile: Dockerfile.client
+    container_name: herbhub-manager-client
+    restart: unless-stopped
+    networks:
+      - herbhub
+    environment:
+      SPA_AUTH_DISABLED: ${SPA_AUTH_DISABLED:-false}
+      SPA_AUTH_AUTHORITY: ${SPA_AUTH_AUTHORITY:-}
+      SPA_AUTH_CLIENT_ID: ${SPA_AUTH_CLIENT_ID:-}
+      SPA_AUTH_REDIRECT_URI: ${SPA_AUTH_REDIRECT_URI:-https://manager.herbhub365.com/}
+      SPA_AUTH_POST_LOGOUT_REDIRECT_URI: ${SPA_AUTH_POST_LOGOUT_REDIRECT_URI:-https://manager.herbhub365.com/}
+      SPA_AUTH_API_SCOPE: ${SPA_AUTH_API_SCOPE:-}
+      SPA_AUTH_API_AUDIENCE: ${SPA_AUTH_API_AUDIENCE:-}
+      SPA_AUTH_REQUIRED_ROLE: ${SPA_AUTH_REQUIRED_ROLE:-Manager.Operator}
+    depends_on:
+      herbhub-manager-api:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.herbhub-manager.rule=Host(`manager.herbhub365.com`)"

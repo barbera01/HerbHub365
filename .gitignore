@@ -80,6 +80,8 @@ docker-compose.override.yml
 # Docker specific files
 
 .dockerignore
+!/services/herbhub-manager/.dockerignore
+!/services/herbhub-manager/apps/client/.dockerignore
 
 # Docker volumes and caches
 *.tar
@@ -124,6 +126,9 @@ logs/
 # Timelapse builder output
 /services/timelapse-builder/output/
 /services/video-narrator/resources/
+/services/herbhub-manager/apps/client/node_modules/
+/services/herbhub-manager/apps/client/dist/
+/services/herbhub-manager/apps/client/*.tsbuildinfo
 # Video assets (large files — not tracked in git)
 /Resources/video/
 /support-tools/watering-tui/cmd/config.json

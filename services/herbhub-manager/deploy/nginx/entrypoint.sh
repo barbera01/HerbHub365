@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+: "${SPA_AUTH_AUTHORITY:=}"
+: "${SPA_AUTH_DISABLED:=false}"
+: "${SPA_AUTH_CLIENT_ID:=}"
+: "${SPA_AUTH_REDIRECT_URI:=}"
+: "${SPA_AUTH_POST_LOGOUT_REDIRECT_URI:=}"
+: "${SPA_AUTH_API_SCOPE:=}"
+: "${SPA_AUTH_API_AUDIENCE:=}"
+: "${SPA_AUTH_REQUIRED_ROLE:=Manager.Operator}"
+
+envsubst '${SPA_AUTH_DISABLED} ${SPA_AUTH_AUTHORITY} ${SPA_AUTH_CLIENT_ID} ${SPA_AUTH_REDIRECT_URI} ${SPA_AUTH_POST_LOGOUT_REDIRECT_URI} ${SPA_AUTH_API_SCOPE} ${SPA_AUTH_API_AUDIENCE} ${SPA_AUTH_REQUIRED_ROLE}' \
+  < /usr/share/nginx/html/env.js.template \
+  > /usr/share/nginx/html/env.js

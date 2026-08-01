@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 	"time"
 )
 
@@ -13,9 +14,22 @@ type Config struct {
 	OutputDir      string
 	PollInterval   time.Duration
 	RequestTimeout time.Duration
+	AllowedOrigin  string
 	Blog           BlogConfig
 	Timelapse      TimelapseConfig
 	RabbitMQ       RabbitMQConfig
+	Auth           AuthConfig
+}
+
+// AuthConfig holds workforce Entra token validation configuration.
+type AuthConfig struct {
+	Disabled     bool
+	IssuerURL    string
+	Audience     string
+	RequiredRole string
+	DiscoveryURL string
+	JWKSRefresh  time.Duration
+	HTTPTimeout  time.Duration
 }
 
 // RabbitMQConfig holds settings for publishing to the video.produced queue.
@@ -41,9 +55,10 @@ type BlogConfig struct {
 
 // TimelapseConfig holds settings for calling timelapse-builder.
 type TimelapseConfig struct {
-	ServiceURL string
-	PublicURL  string
-	Timeout    time.Duration
+	ServiceURL  string
+	PublicURL   string
+	InternalURL string
+	Timeout     time.Duration
 }
 
 // Load reads configuration from environment variables with sensible defaults.
@@ -57,15 +72,17 @@ func Load() Config {
 		OutputDir:      getEnv("VIDEO_OUTPUT_DIR", "/output/video"),
 		PollInterval:   getDurationEnv("POLL_INTERVAL", 3*time.Second),
 		RequestTimeout: getDurationEnv("REQUEST_TIMEOUT", 120*time.Second),
+		AllowedOrigin:  strings.TrimSpace(os.Getenv("ALLOWED_ORIGIN")),
 
 		Post: PostConfig{
 			PostsDir: postsDir,
 		},
 
 		Timelapse: TimelapseConfig{
-			ServiceURL: getEnv("TIMELAPSE_SERVICE_URL", "http://timelapse-builder:8082"),
-			PublicURL:  getEnv("TIMELAPSE_PUBLIC_URL", "https://manager.herbhub365.com"),
-			Timeout:    getDurationEnv("TIMELAPSE_SERVICE_TIMEOUT", 30*time.Second),
+			ServiceURL:  getEnv("TIMELAPSE_SERVICE_URL", "http://timelapse-builder:8082"),
+			PublicURL:   getEnv("TIMELAPSE_PUBLIC_URL", "https://manager.herbhub365.com"),
+			InternalURL: getEnv("TIMELAPSE_INTERNAL_URL", "http://localhost:8080"),
+			Timeout:     getDurationEnv("TIMELAPSE_SERVICE_TIMEOUT", 30*time.Second),
 		},
 
 		RabbitMQ: RabbitMQConfig{
@@ -80,6 +97,16 @@ func Load() Config {
 			SiteName:      getEnv("BLOG_SITE_NAME", "HerbHub365"),
 			SiteURL:       getEnv("BLOG_SITE_URL", "https://herbhub365.com"),
 			PlantName:     getEnv("BLOG_PLANT_NAME", "herbs"),
+		},
+
+		Auth: AuthConfig{
+			Disabled:     getBoolEnv("AUTH_DISABLED", false),
+			IssuerURL:    strings.TrimRight(strings.TrimSpace(os.Getenv("AUTH_ISSUER_URL")), "/"),
+			Audience:     strings.TrimSpace(os.Getenv("AUTH_AUDIENCE")),
+			RequiredRole: getEnv("AUTH_REQUIRED_ROLE", "Manager.Operator"),
+			DiscoveryURL: strings.TrimSpace(os.Getenv("AUTH_DISCOVERY_URL")),
+			JWKSRefresh:  getDurationEnv("AUTH_JWKS_MIN_REFRESH", time.Minute),
+			HTTPTimeout:  getDurationEnv("AUTH_HTTP_TIMEOUT", 10*time.Second),
 		},
 	}
 }
@@ -103,4 +130,16 @@ func getDurationEnv(key string, fallback time.Duration) time.Duration {
 		return fallback
 	}
 	return parsed
+}
+
+func getBoolEnv(key string, fallback bool) bool {
+	v := strings.TrimSpace(strings.ToLower(os.Getenv(key)))
+	switch v {
+	case "1", "true", "yes", "on":
+		return true
+	case "0", "false", "no", "off":
+		return false
+	default:
+		return fallback
+	}
 }

@@ -30,6 +30,7 @@ type Item struct {
 	ID               string     `json:"id"`
 	Slug             string     `json:"slug"`
 	Title            string     `json:"title"`
+	TextOverride     string     `json:"-"`
 	AvatarID         string     `json:"avatar_id,omitempty"`
 	ConcatEnabled    bool       `json:"concat_enabled"`
 	ConcatIntro      string     `json:"concat_intro,omitempty"`
@@ -48,6 +49,7 @@ type Item struct {
 type AddRequest struct {
 	Slug             string `json:"slug"`
 	Title            string `json:"title"`
+	TextOverride     string `json:"text_override,omitempty"`
 	AvatarID         string `json:"avatar_id,omitempty"`
 	ConcatEnabled    bool   `json:"concat_enabled"`
 	ConcatIntro      string `json:"concat_intro,omitempty"`
@@ -82,6 +84,7 @@ func (m *Manager) Add(reqs []AddRequest) []*Item {
 			ID:               newID(),
 			Slug:             r.Slug,
 			Title:            r.Title,
+			TextOverride:     r.TextOverride,
 			AvatarID:         r.AvatarID,
 			ConcatEnabled:    r.ConcatEnabled,
 			ConcatIntro:      r.ConcatIntro,
@@ -112,13 +115,15 @@ func (m *Manager) Cancel(id string) bool {
 	return false
 }
 
-// Items returns a snapshot of all queue items.
-func (m *Manager) Items() []*Item {
+// Items returns value copies so callers cannot race with worker mutations.
+func (m *Manager) Items() []Item {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	out := make([]*Item, len(m.items))
-	copy(out, m.items)
+	out := make([]Item, len(m.items))
+	for i, item := range m.items {
+		out[i] = *item
+	}
 	return out
 }
 
@@ -185,16 +190,18 @@ func (m *Manager) process(ctx context.Context, item *Item) {
 		return
 	}
 
-	var text string
-	for _, p := range posts {
-		if p.Slug == item.Slug {
-			text = p.RawContent
-			break
-		}
-	}
+	text := item.TextOverride
 	if text == "" {
-		m.setFailed(item, "post not found for slug: "+item.Slug)
-		return
+		for _, p := range posts {
+			if p.Slug == item.Slug {
+				text = p.RawContent
+				break
+			}
+		}
+		if text == "" {
+			m.setFailed(item, "post not found for slug: "+item.Slug)
+			return
+		}
 	}
 
 	boolPtr := func(b bool) *bool { return &b }

@@ -73,7 +73,7 @@ You must provision:
 - `SPA_AUTH_API_AUDIENCE`
 - `SPA_AUTH_REQUIRED_ROLE`
 
-Do **not** bake tenant/client IDs into the built bundle; they are injected at container runtime.
+Do **not** bake tenant/client IDs into the built bundle; they are injected at container runtime. The generated `env.js` is written to the `/tmp` tmpfs so nginx can keep a read-only root filesystem.
 
 ## Timelapse server-to-server media handoff
 

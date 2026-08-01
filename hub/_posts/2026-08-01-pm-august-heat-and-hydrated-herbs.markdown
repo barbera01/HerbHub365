@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for August 1, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-08-01-august-heat-and-hydrated-herbs.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/9vSE-bDxNrg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 August 1st brought a bright, warm start to the month here at Herb Hub 365. Greenhouse temperatures climbed to a peak of 30.65°C, while humidity levels averaged around 34% following a much more humid early morning.
 

@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for August 1, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-08-01-a-bright-start-to-august.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/TSuQp_2h3x0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 It has been a productive morning at Herb Hub 365. As we moved through the early hours of August 1st, the greenhouse saw a significant increase in light levels, climbing from a soft 315 lux at dawn to a much brighter 1383 lux by 9:00 AM. This steady morning glow provided a wonderful boost to the plants as they began their day.
 

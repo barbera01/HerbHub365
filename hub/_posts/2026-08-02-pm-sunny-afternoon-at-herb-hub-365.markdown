@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for August 2, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-08-02-sunny-afternoon-at-herb-hub-365.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/m0RGTGdPXSY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 Today, August 2nd, the greenhouse warmed up significantly as the afternoon progressed. After a cool morning low of 15.06°C, the ambient temperature climbed to a peak of 31.25°C. Despite this external heat, our basil, chilli, and oregano remained comfortable, with internal plant temperatures topping out at a more moderate 22°C.
 

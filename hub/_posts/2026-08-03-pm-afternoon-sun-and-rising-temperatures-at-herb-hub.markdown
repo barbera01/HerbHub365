@@ -6,6 +6,10 @@ categories: Herb Hub Update
 ---
 
 ![Timelapse image for August 3, 2026](https://herbhub365.blob.core.windows.net/blogimages/2026-08-03-afternoon-sun-and-rising-temperatures-at-herb-hub.jpg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/-HPaydf-We4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 The greenhouse saw a significant shift in conditions throughout the day on August 3, 2026. As the morning progressed into the afternoon, the air temperature climbed steadily from a cool 20.11°C to a peak of 31.29°C. This warming trend was accompanied by a sharp drop in humidity, which started at a moist 63% and dipped to 25.7% by the final reading of the session.
 

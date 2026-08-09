@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">iHH watering app dashboard</title>
+  <desc id="desc">Illustrated preview of the Herb Hub 365 iPhone app showing connected pump controls, pulse timing and multi-pump watering.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#153523"/>
+      <stop offset="0.55" stop-color="#2d5a3d"/>
+      <stop offset="1" stop-color="#6b9e78"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#faf6ee"/>
+      <stop offset="1" stop-color="#eef5f0"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#0b1d12" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <ellipse cx="1460" cy="90" rx="310" ry="165" fill="#9dc4a5" opacity="0.16" transform="rotate(-18 1460 90)"/>
+  <ellipse cx="110" cy="930" rx="340" ry="145" fill="#c8a45a" opacity="0.12" transform="rotate(22 110 930)"/>
+  <g fill="none" stroke="#d4e8d9" stroke-width="7" opacity="0.18">
+    <path d="M80 240C210 150 315 100 440 90"/>
+    <path d="M180 172c35-75 96-90 152-83-15 60-61 98-152 83Z"/>
+    <path d="M280 116c38-67 99-74 151-61-23 55-72 84-151 61Z"/>
+  </g>
+
+  <g transform="translate(120 170)">
+    <text x="0" y="0" fill="#e8cc8a" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="24" font-weight="700" letter-spacing="5">PLATFORM UPDATE</text>
+    <text x="0" y="90" fill="#ffffff" font-family="Georgia,'Times New Roman',serif" font-size="82" font-weight="700">Watering,</text>
+    <text x="0" y="178" fill="#ffffff" font-family="Georgia,'Times New Roman',serif" font-size="82" font-weight="700">from iPhone.</text>
+    <text x="0" y="245" fill="#d4e8d9" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="29">A native controller for the</text>
+    <text x="0" y="285" fill="#d4e8d9" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="29">Herb Hub watering API.</text>
+    <g transform="translate(0 350)">
+      <rect width="290" height="58" rx="29" fill="#c8a45a"/>
+      <circle cx="36" cy="29" r="10" fill="#1a3d2b"/>
+      <path d="M31 29c5-11 14-13 21-11-2 8-8 13-21 11Z" fill="#1a3d2b"/>
+      <text x="62" y="38" fill="#1a3d2b" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="22" font-weight="750">Herb Hub 365</text>
+    </g>
+  </g>
+
+  <g transform="translate(845 65)" filter="url(#shadow)">
+    <rect width="520" height="880" rx="78" fill="#101b14"/>
+    <rect x="17" y="17" width="486" height="846" rx="63" fill="url(#screen)"/>
+    <rect x="184" y="31" width="152" height="34" rx="17" fill="#101b14"/>
+    <text x="62" y="105" fill="#1a3d2b" font-family="Georgia,'Times New Roman',serif" font-size="27" font-weight="700">HerbHub</text>
+    <line x1="17" y1="125" x2="503" y2="125" stroke="#d4e8d9"/>
+    <g transform="translate(48 153)">
+      <rect width="424" height="83" rx="22" fill="#f5efe2" stroke="#d4e8d9"/>
+      <circle cx="40" cy="41" r="23" fill="#2d5a3d"/>
+      <path d="M30 42c9-18 25-20 37-15-5 14-16 21-37 15Z" fill="#eef5f0"/>
+      <text x="78" y="34" fill="#1a2e1e" font-family="Georgia,'Times New Roman',serif" font-size="22" font-weight="700">Herb Hub 365</text>
+      <text x="78" y="58" fill="#6b8070" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15">Irrigation Dashboard</text>
+      <circle cx="388" cy="39" r="8" fill="#c8a45a"/>
+    </g>
+    <g transform="translate(48 254)">
+      <rect width="424" height="72" rx="20" fill="#f5efe2" stroke="#d4e8d9"/>
+      <circle cx="30" cy="27" r="7" fill="#4a7c59"/>
+      <text x="48" y="33" fill="#1a3d2b" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="19" font-weight="700">Connected</text>
+      <text x="24" y="56" fill="#6b8070" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13">Last updated: 12:42:08</text>
+    </g>
+    <text x="48" y="369" fill="#1a2e1e" font-family="Georgia,'Times New Roman',serif" font-size="26" font-weight="700">Pumps</text>
+
+    <g transform="translate(48 390)">
+      <rect width="424" height="195" rx="22" fill="#f5efe2" stroke="#9dc4a5" stroke-width="2"/>
+      <text x="22" y="35" fill="#1a2e1e" font-family="Georgia,'Times New Roman',serif" font-size="21" font-weight="700">Basil</text>
+      <text x="22" y="58" fill="#6b8070" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14">Pin 17</text>
+      <circle cx="356" cy="34" r="11" fill="#4a7c59"/>
+      <text x="375" y="40" fill="#4a7c59" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="700">On</text>
+      <rect x="22" y="78" width="182" height="44" rx="22" fill="#9dc4a5" stroke="#4a7c59"/>
+      <text x="103" y="106" text-anchor="middle" fill="#1a3d2b" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="700">On</text>
+      <rect x="220" y="78" width="182" height="44" rx="22" fill="#d4e8d9" stroke="#6b9e78"/>
+      <text x="311" y="106" text-anchor="middle" fill="#1a3d2b" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="700">Off</text>
+      <text x="22" y="158" fill="#3d5445" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="650">Pulse</text>
+      <rect x="93" y="137" width="120" height="38" rx="19" fill="#eef5f0" stroke="#d4e8d9"/>
+      <text x="153" y="162" text-anchor="middle" fill="#1a2e1e" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15">−  30 sec  +</text>
+      <rect x="272" y="135" width="130" height="42" rx="21" fill="#f5efe2" stroke="#d4e8d9"/>
+      <text x="337" y="162" text-anchor="middle" fill="#3d5445" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="700">Run</text>
+    </g>
+
+    <g transform="translate(48 604)">
+      <rect width="424" height="173" rx="26" fill="#f5efe2" stroke="#d4e8d9"/>
+      <text x="22" y="38" fill="#1a2e1e" font-family="Georgia,'Times New Roman',serif" font-size="22" font-weight="700">Multi Pump</text>
+      <text x="22" y="72" fill="#3d5445" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16">Basil</text>
+      <rect x="356" y="53" width="48" height="28" rx="14" fill="#4a7c59"/>
+      <circle cx="390" cy="67" r="11" fill="#ffffff"/>
+      <text x="22" y="105" fill="#3d5445" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16">Oregano</text>
+      <rect x="356" y="86" width="48" height="28" rx="14" fill="#4a7c59"/>
+      <circle cx="390" cy="100" r="11" fill="#ffffff"/>
+      <rect x="22" y="123" width="382" height="40" rx="20" fill="#2d5a3d" stroke="#4a7c59"/>
+      <text x="213" y="149" text-anchor="middle" fill="#eef5f0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="700">Run Pump Combo</text>
+    </g>
+    <g transform="translate(17 803)">
+      <rect width="486" height="60" fill="#faf6ee"/>
+      <text x="122" y="27" text-anchor="middle" fill="#2d5a3d" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="20">⌂</text>
+      <text x="122" y="48" text-anchor="middle" fill="#2d5a3d" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="700">Dashboard</text>
+      <text x="364" y="27" text-anchor="middle" fill="#6b8070" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="20">⚙</text>
+      <text x="364" y="48" text-anchor="middle" fill="#6b8070" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12">Settings</text>
+    </g>
+  </g>
+</svg>

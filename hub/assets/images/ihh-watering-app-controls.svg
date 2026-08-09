@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">iHH watering controls and settings</title>
+  <desc id="desc">Two illustrated iPhone app screens showing cycle and emergency pump controls beside the local watering API configuration screen.</desc>
+  <defs>
+    <linearGradient id="canvas" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eef5f0"/><stop offset="1" stop-color="#e8d5b5"/></linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#faf6ee"/><stop offset="1" stop-color="#eef5f0"/></linearGradient>
+    <filter id="phoneShadow" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#1a3d2b" flood-opacity="0.24"/></filter>
+  </defs>
+  <rect width="1500" height="900" rx="40" fill="url(#canvas)"/>
+  <path d="M0 710C280 600 410 850 730 730s510-30 770-170v340H0Z" fill="#9dc4a5" opacity="0.24"/>
+  <g transform="translate(105 65)" filter="url(#phoneShadow)">
+    <rect width="500" height="770" rx="67" fill="#142118"/>
+    <rect x="16" y="16" width="468" height="738" rx="54" fill="url(#screen)"/>
+    <rect x="174" y="27" width="152" height="30" rx="15" fill="#142118"/>
+    <text x="250" y="96" text-anchor="middle" fill="#1a3d2b" font-family="Georgia,serif" font-size="25" font-weight="700">HerbHub</text>
+    <line x1="16" y1="116" x2="484" y2="116" stroke="#d4e8d9"/>
+    <g transform="translate(42 142)">
+      <rect width="416" height="78" rx="22" fill="#f5efe2" stroke="#d4e8d9"/>
+      <circle cx="38" cy="39" r="22" fill="#2d5a3d"/>
+      <path d="M28 41c10-18 25-19 37-14-5 14-16 20-37 14Z" fill="#eef5f0"/>
+      <text x="74" y="33" fill="#1a2e1e" font-family="Georgia,serif" font-size="21" font-weight="700">Herb Hub 365</text>
+      <text x="74" y="56" fill="#6b8070" font-family="-apple-system,sans-serif" font-size="14">Irrigation Dashboard</text>
+    </g>
+    <g transform="translate(42 246)">
+      <rect width="416" height="220" rx="26" fill="#f5efe2" stroke="#d4e8d9"/>
+      <text x="22" y="40" fill="#1a2e1e" font-family="Georgia,serif" font-size="24" font-weight="700">Cycle</text>
+      <text x="22" y="82" fill="#3d5445" font-family="-apple-system,sans-serif" font-size="16" font-weight="650">Total</text>
+      <rect x="190" y="58" width="202" height="43" rx="21" fill="#eef5f0" stroke="#d4e8d9"/>
+      <text x="291" y="85" text-anchor="middle" fill="#1a2e1e" font-family="-apple-system,sans-serif" font-size="15">−   120 sec   +</text>
+      <text x="22" y="132" fill="#3d5445" font-family="-apple-system,sans-serif" font-size="16" font-weight="650">On per pump</text>
+      <rect x="190" y="108" width="202" height="43" rx="21" fill="#eef5f0" stroke="#d4e8d9"/>
+      <text x="291" y="135" text-anchor="middle" fill="#1a2e1e" font-family="-apple-system,sans-serif" font-size="15">−    30 sec    +</text>
+      <rect x="22" y="166" width="370" height="42" rx="21" fill="#d4e8d9" stroke="#6b9e78"/>
+      <text x="207" y="193" text-anchor="middle" fill="#1a3d2b" font-family="-apple-system,sans-serif" font-size="16" font-weight="700">Run Cycle</text>
+    </g>
+    <g transform="translate(42 488)">
+      <rect width="416" height="172" rx="26" fill="#f5efe2" stroke="#d4e8d9"/>
+      <text x="22" y="40" fill="#1a2e1e" font-family="Georgia,serif" font-size="24" font-weight="700">Emergency</text>
+      <rect x="22" y="58" width="370" height="43" rx="21" fill="#b13f2b" stroke="#c0714a"/>
+      <text x="207" y="85" text-anchor="middle" fill="#ffffff" font-family="-apple-system,sans-serif" font-size="16" font-weight="700">All Off</text>
+      <rect x="22" y="115" width="370" height="43" rx="21" fill="#f5efe2" stroke="#d4e8d9"/>
+      <text x="207" y="142" text-anchor="middle" fill="#3d5445" font-family="-apple-system,sans-serif" font-size="16" font-weight="700">All On</text>
+    </g>
+    <text x="250" y="713" text-anchor="middle" fill="#6b8070" font-family="-apple-system,sans-serif" font-size="13">Confirmation required for all-pump actions</text>
+  </g>
+
+  <g transform="translate(895 65)" filter="url(#phoneShadow)">
+    <rect width="500" height="770" rx="67" fill="#142118"/>
+    <rect x="16" y="16" width="468" height="738" rx="54" fill="url(#screen)"/>
+    <rect x="174" y="27" width="152" height="30" rx="15" fill="#142118"/>
+    <text x="250" y="96" text-anchor="middle" fill="#1a3d2b" font-family="Georgia,serif" font-size="25" font-weight="700">Settings</text>
+    <line x1="16" y1="116" x2="484" y2="116" stroke="#d4e8d9"/>
+    <g transform="translate(42 142)">
+      <rect width="416" height="78" rx="22" fill="#f5efe2" stroke="#d4e8d9"/>
+      <circle cx="38" cy="39" r="22" fill="#2d5a3d"/>
+      <path d="M28 41c10-18 25-19 37-14-5 14-16 20-37 14Z" fill="#eef5f0"/>
+      <text x="74" y="33" fill="#1a2e1e" font-family="Georgia,serif" font-size="21" font-weight="700">Herb Hub 365</text>
+      <text x="74" y="56" fill="#6b8070" font-family="-apple-system,sans-serif" font-size="14">Configuration</text>
+    </g>
+    <g transform="translate(42 246)">
+      <rect width="416" height="330" rx="27" fill="#f5efe2" stroke="#d4e8d9"/>
+      <text x="22" y="42" fill="#1a2e1e" font-family="Georgia,serif" font-size="24" font-weight="700">API</text>
+      <text x="22" y="77" fill="#6b8070" font-family="-apple-system,sans-serif" font-size="13" font-weight="650">BASE URL</text>
+      <rect x="22" y="90" width="372" height="54" rx="14" fill="#eef5f0" stroke="#d4e8d9"/>
+      <text x="40" y="123" fill="#1a2e1e" font-family="ui-monospace,SFMono-Regular,monospace" font-size="16">http://hh-02:8181</text>
+      <rect x="22" y="162" width="180" height="44" rx="22" fill="#2d5a3d" stroke="#4a7c59"/>
+      <text x="112" y="190" text-anchor="middle" fill="#eef5f0" font-family="-apple-system,sans-serif" font-size="16" font-weight="700">Save</text>
+      <rect x="214" y="162" width="180" height="44" rx="22" fill="#d4e8d9" stroke="#6b9e78"/>
+      <text x="304" y="190" text-anchor="middle" fill="#1a3d2b" font-family="-apple-system,sans-serif" font-size="16" font-weight="700">Reset Default</text>
+      <text x="22" y="235" fill="#6b8070" font-family="-apple-system,sans-serif" font-size="14">Using: http://hh-02:8181</text>
+      <rect x="22" y="254" width="372" height="48" rx="24" fill="#f5efe2" stroke="#d4e8d9"/>
+      <circle cx="69" cy="278" r="8" fill="none" stroke="#4a7c59" stroke-width="3"/>
+      <path d="M61 272c-9-8-18 1-12 10M77 272c9-8 18 1 12 10" fill="none" stroke="#4a7c59" stroke-width="3" stroke-linecap="round"/>
+      <text x="219" y="284" text-anchor="middle" fill="#3d5445" font-family="-apple-system,sans-serif" font-size="16" font-weight="700">Test Connection</text>
+    </g>
+    <g transform="translate(64 605)">
+      <circle cx="12" cy="12" r="8" fill="#4a7c59"/>
+      <text x="34" y="18" fill="#4a7c59" font-family="-apple-system,sans-serif" font-size="16" font-weight="700">Connection OK</text>
+      <text x="0" y="58" fill="#6b8070" font-family="-apple-system,sans-serif" font-size="14">The app talks directly to the local API.</text>
+    </g>
+  </g>
+
+  <g transform="translate(660 285)">
+    <circle cx="90" cy="90" r="76" fill="#1a3d2b" opacity="0.95"/>
+    <path d="M65 98c16-37 48-47 76-37-8 31-31 48-76 37Z" fill="#9dc4a5"/>
+    <path d="M83 97c18 2 35-7 53-30" fill="none" stroke="#1a3d2b" stroke-width="5" stroke-linecap="round"/>
+    <text x="90" y="196" text-anchor="middle" fill="#1a3d2b" font-family="Georgia,serif" font-size="24" font-weight="700">Local by design</text>
+    <text x="90" y="226" text-anchor="middle" fill="#3d5445" font-family="-apple-system,sans-serif" font-size="16">iPhone → API → relays</text>
+  </g>
+</svg>

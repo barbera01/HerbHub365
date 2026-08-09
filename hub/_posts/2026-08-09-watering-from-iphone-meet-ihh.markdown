@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Watering from the iPhone: Meet iHH"
-date: 2026-08-09 12:00:00 +0000
+date: 2026-08-09 08:00:00 +0000
 categories: Platform Update
 image: /assets/images/ihh-watering-app-overview.svg
 image_alt: "Preview of the iHH iPhone watering dashboard with connected pump controls"

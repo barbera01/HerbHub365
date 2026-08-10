@@ -12,6 +12,10 @@ Herb Hub 365 now has a native iPhone companion: **iHH**, a focused SwiftUI app f
 The app is designed for the practical moments when standing next to the herbs matters more than sitting at a terminal: checking whether a pump is active, delivering a measured pulse of water, running several pumps together, or stopping every channel quickly.
 
 ![The main iHH irrigation dashboard showing connection status, pump controls and a multi-pump action](/assets/images/ihh-watering-app-overview.svg)
+<div class="video-embed">
+  <iframe src="https://www.youtube.com/embed/9KgJ3sq-eNQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 
 <p style="margin-top:-0.8rem;color:var(--ink-muted);font-size:0.82rem;text-align:center;">The main irrigation dashboard, based on the current SwiftUI interface.</p>
 

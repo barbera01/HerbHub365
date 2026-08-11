@@ -1,8 +1,19 @@
 import { useAuthStore } from '@/session/auth'
 
 type FetchOptions = {
-  method?: 'GET' | 'POST' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   body?: unknown
+  headers?: Record<string, string>
+}
+
+export class ApiError extends Error {
+  status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
 }
 
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
@@ -10,9 +21,14 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
   const token = auth.authDisabled ? '' : await auth.acquireToken()
 
   const headers: Record<string, string> = {
+    ...(options.headers ?? {}),
     ...(options.body ? { 'Content-Type': 'application/json' } : {}),
   }
-  if (token) headers.Authorization = `Bearer ${token}`
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  } else {
+    delete headers.Authorization
+  }
 
   const res = await fetch(path, {
     method: options.method ?? 'GET',
@@ -28,7 +44,7 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
     } catch {
       // ignore
     }
-    throw new Error(message)
+    throw new ApiError(message, res.status)
   }
 
   if (res.status === 204) {

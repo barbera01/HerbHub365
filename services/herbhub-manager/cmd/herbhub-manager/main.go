@@ -13,9 +13,11 @@ import (
 
 	"HerbHub365/services/herbhub-manager/internal/api"
 	"HerbHub365/services/herbhub-manager/internal/auth"
+	"HerbHub365/services/herbhub-manager/internal/autowatering"
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
 	"HerbHub365/services/herbhub-manager/internal/messaging"
+	"HerbHub365/services/herbhub-manager/internal/prometheus"
 	"HerbHub365/services/herbhub-manager/internal/publisher"
 	"HerbHub365/services/herbhub-manager/internal/queue"
 	"HerbHub365/services/herbhub-manager/internal/rabbitmq"
@@ -78,7 +80,27 @@ func main() {
 		}
 	}
 
-	router := api.NewRouter(cfg, verifier, videoClient, blogClient, timelapseClient, pubClient, queueManager, messagingSvc)
+	autoManager := autowatering.NewFaultedManager("automatic watering unavailable")
+	bootstrap, bootstrapErr := autowatering.BootstrapFromEnv()
+	if strings.TrimSpace(cfg.AutoWatering.StatePath) != "" {
+		bootstrap.Path = strings.TrimSpace(cfg.AutoWatering.StatePath)
+	}
+	if bootstrapErr != nil {
+		log.Printf("automatic watering bootstrap config invalid: %v", bootstrapErr)
+		autoManager = autowatering.NewFaultedManager("automatic watering bootstrap config invalid")
+	} else {
+		store, storeErr := autowatering.NewStore(bootstrap)
+		if storeErr != nil {
+			log.Printf("automatic watering state init failed: %v", storeErr)
+			autoManager = autowatering.NewFaultedManager("automatic watering state unavailable")
+		} else {
+			evaluator := autowatering.NewEvaluator(store, prometheus.NewClient(cfg.Messaging.Prometheus.URL, time.Duration(bootstrap.Config.PrometheusTimeoutSeconds)*time.Second), messagingSvc)
+			autoManager = autowatering.NewManager(store, evaluator)
+			autoManager.Start(ctx)
+		}
+	}
+
+	router := api.NewRouter(cfg, verifier, videoClient, blogClient, timelapseClient, pubClient, queueManager, messagingSvc, autoManager)
 	server := &http.Server{
 		Addr:         cfg.ListenAddr,
 		Handler:      router,
@@ -93,6 +115,10 @@ func main() {
 		defer cancel()
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			log.Printf("http shutdown: %v", err)
+		}
+		autoManager.Wait()
+		if err := autoManager.Close(); err != nil {
+			log.Printf("automatic watering close: %v", err)
 		}
 	}()
 

@@ -20,6 +20,11 @@ type Config struct {
 	RabbitMQ       RabbitMQConfig
 	Messaging      MessagingConfig
 	Auth           AuthConfig
+	AutoWatering   AutoWateringBootstrapConfig
+}
+
+type AutoWateringBootstrapConfig struct {
+	StatePath string
 }
 
 // AuthConfig holds workforce Entra token validation configuration.
@@ -147,6 +152,10 @@ func Load() Config {
 			DiscoveryURL: strings.TrimSpace(os.Getenv("AUTH_DISCOVERY_URL")),
 			JWKSRefresh:  getDurationEnv("AUTH_JWKS_MIN_REFRESH", time.Minute),
 			HTTPTimeout:  getDurationEnv("AUTH_HTTP_TIMEOUT", 10*time.Second),
+		},
+
+		AutoWatering: AutoWateringBootstrapConfig{
+			StatePath: strings.TrimSpace(os.Getenv("AUTOWATERING_STATE_PATH")),
 		},
 	}
 }

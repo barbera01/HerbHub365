@@ -118,6 +118,105 @@ All messaging routes are protected by workforce auth (`Manager.Operator`) throug
   - Returns: `{ "message_id", "exchange", "routing_key", "routed" }`
   - `404` unknown template, `400` validation error, `409` confirmation required for physical watering, `503` unavailable.
 
+### Automatic watering API (operator protected)
+
+- `GET /api/messaging/automatic-watering`
+  - Returns:
+    ```json
+    {
+      "config_revision": 1,
+      "config": {
+        "enabled": false,
+        "evaluation_interval_seconds": 300,
+        "cooldown_seconds": 21600,
+        "max_metric_age_seconds": 900,
+        "prometheus_timeout_seconds": 10,
+        "message_expiry_seconds": 300,
+        "moisture_metric": "herbhub_soil_percent",
+        "plant_label": "plant",
+        "plants": {
+          "basil": {"enabled": true, "threshold_percent": 30, "metric_label_value": "basil"},
+          "chilli": {"enabled": true, "threshold_percent": 30, "metric_label_value": "chilli"},
+          "oregano": {"enabled": true, "threshold_percent": 30, "metric_label_value": "oregano"}
+        }
+      },
+      "runtime_status": {
+        "running": true,
+        "faulted": false,
+        "fault": "",
+        "instance_id": "hostname-or-container-id",
+        "next_evaluation_at": "2026-08-11T19:15:00Z"
+      },
+      "state": {
+        "basil": {
+          "last_evaluated_at": "2026-08-11T19:10:00Z",
+          "last_sample_at": "2026-08-11T19:09:45Z",
+          "last_value": 22.4,
+          "last_decision": "water_published",
+          "last_error": "",
+          "cooldown_until": "2026-08-12T01:10:00Z",
+          "last_message_id": "..."
+        },
+        "chilli": {},
+        "oregano": {}
+      }
+    }
+    ```
+  - Response includes `ETag: "<config_revision>"`.
+
+- `PUT /api/messaging/automatic-watering`
+  - Requires `If-Match: "<current revision>"`.
+  - Body (strict full replacement):
+    ```json
+    {
+      "config": { "...": "complete config object required" },
+      "confirm_enable": false
+    }
+    ```
+  - Enabling from disabled requires `confirm_enable=true`.
+  - Statuses:
+    - `428` missing `If-Match`
+    - `400` invalid `If-Match` or invalid body/config
+    - `412` stale revision
+    - `503` store faulted/unsafe
+    - `200` success (returns updated document + new `ETag`)
+
+### Automatic watering safety/operations
+
+- Decision engine is in Manager; watering service remains a separate consumer.
+- **Single-replica invariant:** automatic watering supports exactly one Manager instance writing one shared state volume (`/var/lib/herbhub-manager`). This is an operational lock invariant, not distributed leadership.
+- Automation default is **disabled** and persists in `/var/lib/herbhub-manager/automatic-watering.json`.
+- Manager publishes only actionable `water`; it never auto-publishes `skip`.
+- Physical watering publish requires exactly one observed `watering.queue` consumer. This is an operational safety check only (consumer count is not cryptographic identity).
+- Before enablement, verify Prometheus metric identity/freshness semantics:
+  - metric name and plant label key/values are correct for your scrape target,
+  - sample timestamps reflect source freshness (not only scrape time),
+  - one and only one series is returned per fixed plant.
+- If state store cannot initialize or faults later, HTTP API remains available and automatic watering is reported faulted/unsafe.
+
+Freshness interpretation details:
+
+- Evaluator uses a single evaluation timestamp per cycle and executes both:
+  - raw selector query for moisture value, and
+  - `timestamp(selector)` query for source sample Unix time.
+- Staleness/future checks are applied to the source sample timestamp from `timestamp(...)`, not the instant-vector envelope timestamp.
+
+Bootstrap environment values (used only for first state creation):
+
+- `AUTOWATERING_STATE_PATH` (default `/var/lib/herbhub-manager/automatic-watering.json`)
+- `AUTOWATERING_ENABLED` (strict bool; default `false`)
+- `AUTOWATERING_EVALUATION_INTERVAL_SECONDS` (default `300`, range `60..3600`)
+- `AUTOWATERING_COOLDOWN_SECONDS` (default `21600`, range `3600..604800`)
+- `AUTOWATERING_MAX_METRIC_AGE_SECONDS` (default `900`, range `60..3600`, must be `>= evaluation interval`)
+- `AUTOWATERING_PROMETHEUS_TIMEOUT_SECONDS` (default `10`, range `1..30`)
+- `AUTOWATERING_MESSAGE_EXPIRY_SECONDS` (default `300`, range `30..300`)
+- `AUTOWATERING_MOISTURE_METRIC` (default `herbhub_soil_percent`, Prometheus identifier only)
+- `AUTOWATERING_PLANT_LABEL` (default `plant`, Prometheus identifier only)
+- Per-plant fixed keys (`basil|chilli|oregano`):
+  - `AUTOWATERING_PLANT_<PLANT>_ENABLED`
+  - `AUTOWATERING_PLANT_<PLANT>_THRESHOLD_PERCENT` (range `5..80`)
+  - `AUTOWATERING_PLANT_<PLANT>_METRIC_LABEL_VALUE` (safe label value only)
+
 Templates:
 
 - `watering-water`

@@ -101,7 +101,7 @@ func messagingEnabledConfig() config.Config {
 }
 
 func TestMessagingOverviewDisabled(t *testing.T) {
-	r := NewRouter(config.Config{Auth: config.AuthConfig{Disabled: true}}, nil, nil, nil, nil, nil, nil, nil)
+	r := NewRouter(config.Config{Auth: config.AuthConfig{Disabled: true}}, nil, nil, nil, nil, nil, nil, nil, nil)
 	req := httptest.NewRequest(http.MethodGet, "/api/messaging/overview", nil)
 	resp := httptest.NewRecorder()
 	r.ServeHTTP(resp, req)
@@ -113,7 +113,7 @@ func TestMessagingOverviewDisabled(t *testing.T) {
 func TestMessagingProvisionUnknownCatalogue(t *testing.T) {
 	fr := &apiFakeRabbit{exchanges: map[string]rabbitmq.Exchange{}, queues: map[string]rabbitmq.Queue{}, bindings: map[string][]rabbitmq.Binding{}, publish: rabbitmq.PublishResponse{Routed: true}}
 	svc := messaging.NewService(messagingEnabledConfig().Messaging, fr)
-	r := NewRouter(messagingEnabledConfig(), nil, nil, nil, nil, nil, nil, svc)
+	r := NewRouter(messagingEnabledConfig(), nil, nil, nil, nil, nil, nil, svc, nil)
 	req := httptest.NewRequest(http.MethodPost, "/api/messaging/catalogues/unknown/provision", nil)
 	resp := httptest.NewRecorder()
 	r.ServeHTTP(resp, req)
@@ -127,7 +127,7 @@ func TestMessagingTemplatePublishValidationAndUnknown(t *testing.T) {
 	seedCatalogueReady(fr, messaging.Catalogues()["watering"])
 	seedCatalogueReady(fr, messaging.Catalogues()["plant-health"])
 	svc := messaging.NewService(messagingEnabledConfig().Messaging, fr)
-	r := NewRouter(messagingEnabledConfig(), nil, nil, nil, nil, nil, nil, svc)
+	r := NewRouter(messagingEnabledConfig(), nil, nil, nil, nil, nil, nil, svc, nil)
 
 	unknownReq := httptest.NewRequest(http.MethodPost, "/api/messaging/templates/nope/publish", bytes.NewReader([]byte(`{"payload":{},"confirmed":true}`)))
 	unknownResp := httptest.NewRecorder()
@@ -169,7 +169,7 @@ func TestMessagingTemplatePublishStrictBodyValidation(t *testing.T) {
 	fr := &apiFakeRabbit{exchanges: map[string]rabbitmq.Exchange{}, queues: map[string]rabbitmq.Queue{}, bindings: map[string][]rabbitmq.Binding{}, publish: rabbitmq.PublishResponse{Routed: true}}
 	seedCatalogueReady(fr, messaging.Catalogues()["watering"])
 	svc := messaging.NewService(messagingEnabledConfig().Messaging, fr)
-	r := NewRouter(messagingEnabledConfig(), nil, nil, nil, nil, nil, nil, svc)
+	r := NewRouter(messagingEnabledConfig(), nil, nil, nil, nil, nil, nil, svc, nil)
 
 	badField := httptest.NewRecorder()
 	r.ServeHTTP(badField, httptest.NewRequest(http.MethodPost, "/api/messaging/templates/watering-skip/publish", bytes.NewReader([]byte(`{"payload":{"plant":"basil","action":"skip","value":10},"confirmed":true,"confirmd":true}`))))
@@ -194,7 +194,7 @@ func TestMessagingTemplatePublishStrictBodyValidation(t *testing.T) {
 func TestMessagingTemplatePublishTopologyNotReadyAndUnavailable(t *testing.T) {
 	fr := &apiFakeRabbit{exchanges: map[string]rabbitmq.Exchange{}, queues: map[string]rabbitmq.Queue{}, bindings: map[string][]rabbitmq.Binding{}, publish: rabbitmq.PublishResponse{Routed: true}}
 	svc := messaging.NewService(messagingEnabledConfig().Messaging, fr)
-	r := NewRouter(messagingEnabledConfig(), nil, nil, nil, nil, nil, nil, svc)
+	r := NewRouter(messagingEnabledConfig(), nil, nil, nil, nil, nil, nil, svc, nil)
 
 	notReady := httptest.NewRecorder()
 	r.ServeHTTP(notReady, httptest.NewRequest(http.MethodPost, "/api/messaging/templates/watering-skip/publish", bytes.NewReader([]byte(`{"payload":{"plant":"basil","action":"skip","value":10},"confirmed":true}`))))

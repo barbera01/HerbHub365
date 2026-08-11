@@ -146,7 +146,7 @@ func (f *routerFakeRabbit) Publish(_ context.Context, req rabbitmq.PublishReques
 }
 
 func TestMessagingRoutesUnknownAndDisabled(t *testing.T) {
-	r := NewRouter(config.Config{Auth: config.AuthConfig{Disabled: true}}, nil, nil, nil, nil, nil, nil, nil)
+	r := NewRouter(config.Config{Auth: config.AuthConfig{Disabled: true}}, nil, nil, nil, nil, nil, nil, nil, nil)
 	req := httptest.NewRequest(http.MethodPost, "/api/messaging/catalogues/watering/provision", nil)
 	resp := httptest.NewRecorder()
 	r.ServeHTTP(resp, req)
@@ -173,7 +173,7 @@ func TestMessagingRoutesStatusCodes(t *testing.T) {
 		}
 	}
 	msvc := messaging.NewService(config.MessagingConfig{Management: config.RabbitMQManagementConfig{Enabled: true, URL: "http://rabbitmq:15672", VHost: "/", User: "admin", Password: "secret", Timeout: 10 * time.Second}}, fr)
-	r := NewRouter(config.Config{Auth: config.AuthConfig{Disabled: true}, Messaging: config.MessagingConfig{Management: config.RabbitMQManagementConfig{Enabled: true, URL: "http://rabbitmq:15672", VHost: "/", User: "admin", Password: "secret"}}}, nil, nil, nil, nil, nil, nil, msvc)
+	r := NewRouter(config.Config{Auth: config.AuthConfig{Disabled: true}, Messaging: config.MessagingConfig{Management: config.RabbitMQManagementConfig{Enabled: true, URL: "http://rabbitmq:15672", VHost: "/", User: "admin", Password: "secret"}}}, nil, nil, nil, nil, nil, nil, msvc, nil)
 
 	unknownCatalogue := httptest.NewRecorder()
 	r.ServeHTTP(unknownCatalogue, httptest.NewRequest(http.MethodPost, "/api/messaging/catalogues/nope/provision", nil))

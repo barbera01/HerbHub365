@@ -14,7 +14,8 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/herbhub-man
 FROM alpine:3.20
 
 RUN apk add --no-cache ca-certificates
-RUN addgroup -S app && adduser -S -G app app
+RUN addgroup -g 10001 -S app && adduser -u 10001 -S -G app app
+RUN mkdir -p /var/lib/herbhub-manager && chown -R 10001:10001 /var/lib/herbhub-manager
 
 WORKDIR /app
 COPY --from=builder /out/herbhub-manager /usr/local/bin/herbhub-manager

@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -27,6 +28,8 @@ var (
 	ErrConfirmationNeeded = errors.New("messaging: confirmation required")
 	ErrDrift              = errors.New("messaging: topology drift")
 	ErrTopologyNotReady   = errors.New("messaging: topology not ready")
+	ErrPublishUncertain   = errors.New("messaging: publish uncertain")
+	ErrPublishFailed      = errors.New("messaging: publish failed")
 )
 
 const maxGenericJSONBytes = 64 * 1024
@@ -117,6 +120,14 @@ type PublishResult struct {
 	Exchange   string `json:"exchange"`
 	RoutingKey string `json:"routing_key"`
 	Routed     bool   `json:"routed"`
+}
+
+type AutomaticWaterResult struct {
+	MessageID   string
+	Exchange    string
+	RoutingKey  string
+	Routed      bool
+	PublishedAt time.Time
 }
 
 type publishContext struct {
@@ -338,9 +349,9 @@ func (s *Service) PublishTemplate(ctx context.Context, templateID string, req Pu
 
 	if spec.ID == "watering-water" {
 		queueState, ok := status.Queues[Catalogues()["watering"].MainQueue.Name]
-		if !ok || queueState.Consumers < 1 {
+		if !ok || queueState.Consumers != 1 {
 			outcome = "unavailable"
-			return PublishResult{}, fmt.Errorf("%w: watering consumer unavailable", ErrUnavailable)
+			return PublishResult{}, fmt.Errorf("%w: watering consumer count must be exactly one", ErrUnavailable)
 		}
 	}
 
@@ -378,6 +389,74 @@ func (s *Service) PublishTemplate(ctx context.Context, templateID string, req Pu
 
 	outcome = "success"
 	return PublishResult{MessageID: msgID, Exchange: spec.Exchange, RoutingKey: route, Routed: resp.Routed}, nil
+}
+
+func (s *Service) PublishAutomaticWater(ctx context.Context, plant string, moisture float64, expiry time.Duration) (AutomaticWaterResult, error) {
+	out := AutomaticWaterResult{}
+	if !s.Enabled() {
+		return out, ErrDisabled
+	}
+	if err := s.rabbit.Ping(ctx); err != nil {
+		return out, fmt.Errorf("%w: broker unavailable", ErrUnavailable)
+	}
+	spec := templates()["watering-water"]
+	catalogue := Catalogues()[spec.CatalogueID]
+	status, err := s.catalogueStatus(ctx, catalogue)
+	if err != nil {
+		return out, fmt.Errorf("%w: topology unavailable", ErrUnavailable)
+	}
+	if status.State == "drifted" {
+		return out, &DriftError{Details: status.Drift}
+	}
+	if status.State != "ready" {
+		return out, ErrTopologyNotReady
+	}
+	queueState, ok := status.Queues[catalogue.MainQueue.Name]
+	if !ok || queueState.Consumers != 1 {
+		return out, fmt.Errorf("%w: watering consumer count must be exactly one", ErrUnavailable)
+	}
+
+	body, route, err := validateWateringTemplate("water", false)(PublishRequest{
+		Payload:    mustMarshal(map[string]any{"plant": plant, "action": "water", "value": moisture}),
+		RoutingKey: "",
+		Confirmed:  true,
+	})
+	if err != nil {
+		return out, err
+	}
+
+	msgID, err := newMessageID()
+	if err != nil {
+		return out, fmt.Errorf("%w: message id generation failed", ErrUnavailable)
+	}
+	expiration := strconv.FormatInt(expiry.Milliseconds(), 10)
+	timestamp := time.Now().UTC()
+	out = AutomaticWaterResult{MessageID: msgID, Exchange: spec.Exchange, RoutingKey: route, Routed: false, PublishedAt: timestamp}
+
+	resp, err := s.rabbit.Publish(ctx, rabbitmq.PublishRequest{
+		Exchange:     spec.Exchange,
+		RoutingKey:   route,
+		Payload:      string(body),
+		DeliveryMode: 2,
+		ContentType:  "application/json",
+		AppID:        "herbhub-manager",
+		MessageID:    msgID,
+		Timestamp:    timestamp,
+		Expiration:   expiration,
+	})
+	if err != nil {
+		return out, fmt.Errorf("%w: publish failed", ErrPublishUncertain)
+	}
+	if !resp.Routed {
+		return out, fmt.Errorf("%w: message was not routed", ErrPublishFailed)
+	}
+	out.Routed = true
+	return out, nil
+}
+
+func mustMarshal(v any) json.RawMessage {
+	encoded, _ := json.Marshal(v)
+	return encoded
 }
 
 func (s *Service) catalogueStatus(ctx context.Context, c Catalogue) (CatalogueStatus, error) {

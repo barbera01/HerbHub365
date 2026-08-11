@@ -13,6 +13,7 @@ import (
 
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
+	"HerbHub365/services/herbhub-manager/internal/messaging"
 	"HerbHub365/services/herbhub-manager/internal/post"
 	"HerbHub365/services/herbhub-manager/internal/publisher"
 	"HerbHub365/services/herbhub-manager/internal/queue"
@@ -27,6 +28,7 @@ type handlers struct {
 	timelapseClient *timelapse.Client
 	pubClient       *publisher.Client
 	queueManager    *queue.Manager
+	messagingSvc    *messaging.Service
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────

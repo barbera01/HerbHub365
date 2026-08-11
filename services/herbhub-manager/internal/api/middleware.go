@@ -1,12 +1,23 @@
 package api
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
 	"HerbHub365/services/herbhub-manager/internal/auth"
 	"HerbHub365/services/herbhub-manager/internal/config"
 )
+
+type authSubjectContextKey struct{}
+
+func authSubjectFromContext(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	v, _ := ctx.Value(authSubjectContextKey{}).(string)
+	return strings.TrimSpace(v)
+}
 
 func withMiddleware(cfg config.Config, next http.Handler) http.Handler {
 	return withSecurityHeaders(withCORS(cfg.AllowedOrigin, next))
@@ -68,7 +79,7 @@ func withAuth(cfg config.AuthConfig, verifier *auth.Verifier, next http.Handler)
 			return
 		}
 
-		_, err := verifier.Verify(r.Context(), token)
+		verified, err := verifier.Verify(r.Context(), token)
 		if err == auth.ErrForbidden {
 			writeError(w, http.StatusForbidden, "forbidden")
 			return
@@ -78,6 +89,7 @@ func withAuth(cfg config.AuthConfig, verifier *auth.Verifier, next http.Handler)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), authSubjectContextKey{}, verified.Subject)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

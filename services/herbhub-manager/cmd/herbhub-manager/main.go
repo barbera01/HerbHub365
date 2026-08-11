@@ -15,8 +15,10 @@ import (
 	"HerbHub365/services/herbhub-manager/internal/auth"
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
+	"HerbHub365/services/herbhub-manager/internal/messaging"
 	"HerbHub365/services/herbhub-manager/internal/publisher"
 	"HerbHub365/services/herbhub-manager/internal/queue"
+	"HerbHub365/services/herbhub-manager/internal/rabbitmq"
 	"HerbHub365/services/herbhub-manager/internal/timelapse"
 	"HerbHub365/services/herbhub-manager/internal/video"
 )
@@ -34,6 +36,7 @@ func main() {
 	log.Printf("  llm-service:  %s", cfg.Blog.LLMServiceURL)
 	log.Printf("  timelapse:    %s", cfg.Timelapse.ServiceURL)
 	log.Printf("  auth enabled: %t", !cfg.Auth.Disabled)
+	log.Printf("  messaging mgmt enabled flag: %t", cfg.Messaging.Management.Enabled)
 
 	if err := validateAuthConfig(cfg.Auth); err != nil {
 		log.Fatalf("invalid auth configuration: %v", err)
@@ -58,7 +61,24 @@ func main() {
 	queueManager := queue.NewManager(videoClient, cfg.Post.PostsDir)
 	go queueManager.Run(ctx)
 
-	router := api.NewRouter(cfg, verifier, videoClient, blogClient, timelapseClient, pubClient, queueManager)
+	var messagingSvc *messaging.Service
+	if cfg.Messaging.Management.Enabled {
+		rabbitClient, err := rabbitmq.NewClient(rabbitmq.Config{
+			URL:      cfg.Messaging.Management.URL,
+			VHost:    cfg.Messaging.Management.VHost,
+			User:     cfg.Messaging.Management.User,
+			Password: cfg.Messaging.Management.Password,
+			Timeout:  cfg.Messaging.Management.Timeout,
+		})
+		if err != nil {
+			log.Printf("messaging management client init failed: %v", err)
+		} else {
+			messagingSvc = messaging.NewService(cfg.Messaging, rabbitClient)
+			log.Printf("  rabbitmq management url: %s", cfg.Messaging.Management.URL)
+		}
+	}
+
+	router := api.NewRouter(cfg, verifier, videoClient, blogClient, timelapseClient, pubClient, queueManager, messagingSvc)
 	server := &http.Server{
 		Addr:         cfg.ListenAddr,
 		Handler:      router,

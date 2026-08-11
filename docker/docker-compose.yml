@@ -160,6 +160,15 @@ services:
       TIMELAPSE_INTERNAL_URL: ${TIMELAPSE_INTERNAL_URL:-http://herbhub-manager-api:8080}
       RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-video.produced}
+      RABBITMQ_MANAGEMENT_ENABLED: ${RABBITMQ_MANAGEMENT_ENABLED:-false}
+      RABBITMQ_MANAGEMENT_URL: ${RABBITMQ_MANAGEMENT_URL:-http://rabbitmq:15672}
+      RABBITMQ_MANAGEMENT_VHOST: ${RABBITMQ_MANAGEMENT_VHOST:-/}
+      RABBITMQ_MANAGEMENT_USER: ${RABBITMQ_MANAGEMENT_USER:-}
+      RABBITMQ_MANAGEMENT_PASSWORD: ${RABBITMQ_MANAGEMENT_PASSWORD:-}
+      RABBITMQ_MANAGEMENT_TIMEOUT: ${RABBITMQ_MANAGEMENT_TIMEOUT:-10s}
+      PROMETHEUS_URL: ${PROMETHEUS_URL:-}
+      PROMETHEUS_TIMEOUT: ${PROMETHEUS_TIMEOUT:-10s}
+      GRAFANA_URL: ${GRAFANA_URL:-}
       AUTH_DISABLED: ${MANAGER_AUTH_DISABLED:-false}
       AUTH_ISSUER_URL: ${MANAGER_AUTH_ISSUER_URL:-}
       AUTH_DISCOVERY_URL: ${MANAGER_AUTH_DISCOVERY_URL:-}
@@ -356,36 +365,6 @@ services:
       - "traefik.http.routers.rabbitmq-metrics.tls=true"
       - "traefik.http.routers.rabbitmq-metrics.service=rabbitmq-metrics"
       - "traefik.http.services.rabbitmq-metrics.loadbalancer.server.port=15692"
-  watering:
-    build:
-      context: ../services/watering
-      dockerfile: dockerfile
-    container_name: watering
-    restart: unless-stopped
-    networks:
-      - herbhub
-    environment:
-      SOIL_MOISTURE_THRESHOLD: ${WATERING_SOIL_MOISTURE_THRESHOLD:-40.0}
-      RABBITMQ_URL: ${WATERING_RABBITMQ_URL:-amqp://admin:yourpassword@rabbitmq:5672/}
-      METRICS_URL: ${WATERING_METRICS_URL:-http://hh-02:9100/metrics}
-      MONITOR_INTERVAL: ${WATERING_MONITOR_INTERVAL:-30m}
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget --no-verbose --tries=1 --spider http://localhost:8787/health || exit 1",
-        ]
-      interval: 30s
-      timeout: 10s
-      start_period: 5s
-      retries: 3
-    depends_on:
-      - rabbitmq
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-
   dashboard:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: dashboard

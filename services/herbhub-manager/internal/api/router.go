@@ -9,6 +9,7 @@ import (
 
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
+	"HerbHub365/services/herbhub-manager/internal/messaging"
 	"HerbHub365/services/herbhub-manager/internal/publisher"
 	"HerbHub365/services/herbhub-manager/internal/queue"
 	"HerbHub365/services/herbhub-manager/internal/timelapse"
@@ -16,10 +17,10 @@ import (
 )
 
 // NewRouter builds the HTTP mux with API routes only.
-func NewRouter(cfg config.Config, verifier *auth.Verifier, videoClient *video.Client, blogClient *blogpost.Client, timelapseClient *timelapse.Client, pubClient *publisher.Client, queueManager *queue.Manager) http.Handler {
+func NewRouter(cfg config.Config, verifier *auth.Verifier, videoClient *video.Client, blogClient *blogpost.Client, timelapseClient *timelapse.Client, pubClient *publisher.Client, queueManager *queue.Manager, messagingSvc *messaging.Service) http.Handler {
 	root := http.NewServeMux()
 	apiMux := http.NewServeMux()
-	h := &handlers{cfg: cfg, videoClient: videoClient, blogClient: blogClient, timelapseClient: timelapseClient, pubClient: pubClient, queueManager: queueManager}
+	h := &handlers{cfg: cfg, videoClient: videoClient, blogClient: blogClient, timelapseClient: timelapseClient, pubClient: pubClient, queueManager: queueManager, messagingSvc: messagingSvc}
 
 	root.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -65,6 +66,11 @@ func NewRouter(cfg config.Config, verifier *auth.Verifier, videoClient *video.Cl
 	apiMux.HandleFunc("/api/timelapse/config", h.handleTimelapseProxy)
 	apiMux.HandleFunc("/api/timelapse/health", h.handleTimelapseProxy)
 	apiMux.HandleFunc("/internal/timelapse/videos/", h.handleInternalTimelapseVideo)
+
+	// Curated messaging management routes.
+	apiMux.HandleFunc("/api/messaging/overview", h.handleMessagingOverview)
+	apiMux.HandleFunc("/api/messaging/catalogues/", h.handleMessagingProvision)
+	apiMux.HandleFunc("/api/messaging/templates/", h.handleMessagingTemplatePublish)
 
 	authenticated := withAuth(cfg.Auth, verifier, apiMux)
 	root.Handle("/api/", authenticated)

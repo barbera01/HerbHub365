@@ -18,6 +18,7 @@ type Config struct {
 	Blog           BlogConfig
 	Timelapse      TimelapseConfig
 	RabbitMQ       RabbitMQConfig
+	Messaging      MessagingConfig
 	Auth           AuthConfig
 }
 
@@ -36,6 +37,29 @@ type AuthConfig struct {
 type RabbitMQConfig struct {
 	URL   string // RABBITMQ_URL (amqp://...)
 	Queue string // RABBITMQ_QUEUE
+}
+
+// MessagingConfig holds settings for curated RabbitMQ management operations.
+type MessagingConfig struct {
+	Management RabbitMQManagementConfig
+	Prometheus PrometheusConfig
+	GrafanaURL string
+}
+
+// RabbitMQManagementConfig holds RabbitMQ Management API settings.
+type RabbitMQManagementConfig struct {
+	Enabled  bool
+	URL      string
+	VHost    string
+	User     string
+	Password string
+	Timeout  time.Duration
+}
+
+// PrometheusConfig holds optional Prometheus query settings.
+type PrometheusConfig struct {
+	URL     string
+	Timeout time.Duration
 }
 
 // PostConfig describes where Jekyll posts live.
@@ -88,6 +112,22 @@ func Load() Config {
 		RabbitMQ: RabbitMQConfig{
 			URL:   os.Getenv("RABBITMQ_URL"),
 			Queue: getEnv("RABBITMQ_QUEUE", "video.produced"),
+		},
+
+		Messaging: MessagingConfig{
+			Management: RabbitMQManagementConfig{
+				Enabled:  getBoolEnv("RABBITMQ_MANAGEMENT_ENABLED", false),
+				URL:      getEnv("RABBITMQ_MANAGEMENT_URL", "http://rabbitmq:15672"),
+				VHost:    getEnv("RABBITMQ_MANAGEMENT_VHOST", "/"),
+				User:     strings.TrimSpace(os.Getenv("RABBITMQ_MANAGEMENT_USER")),
+				Password: os.Getenv("RABBITMQ_MANAGEMENT_PASSWORD"),
+				Timeout:  getDurationEnv("RABBITMQ_MANAGEMENT_TIMEOUT", 10*time.Second),
+			},
+			Prometheus: PrometheusConfig{
+				URL:     strings.TrimSpace(os.Getenv("PROMETHEUS_URL")),
+				Timeout: getDurationEnv("PROMETHEUS_TIMEOUT", 10*time.Second),
+			},
+			GrafanaURL: strings.TrimSpace(os.Getenv("GRAFANA_URL")),
 		},
 
 		Blog: BlogConfig{

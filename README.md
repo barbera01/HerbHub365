@@ -37,7 +37,7 @@ The daily content loop:
 5. **video-publisher** uploads finished videos to YouTube and links them back into the blog post.
 6. Pushing to `main` triggers the static site deploy of the `hub/` Jekyll site.
 
-The watering loop runs independently: the **watering** service polls soil-moisture metrics and publishes watering commands to `watering.queue`; a consumer on the greenhouse Pi pulls commands and pulses the correct relay via GPIO. The **watering-tui** support tool provides manual control.
+The watering loop runs independently on the greenhouse Pi: a Pi-side GPIO API + RabbitMQ consumer processes `watering.queue` commands and pulses relays locally. The old central Compose `watering` service was an earlier producer path and is no longer the active deployment model. The **watering-tui** support tool provides manual control.
 
 ## Repository layout
 
@@ -54,7 +54,7 @@ The watering loop runs independently: the **watering** service polls soil-moistu
 
 ## Services
 
-All services are Go, each with its own `dockerfile`, wired together in `docker/docker-compose.yml`.
+All services are Go, each with its own `dockerfile`. Most platform services are wired in `docker/docker-compose.yml`, while some operational components (notably watering GPIO/consumer processes) are Pi-side/systemd-managed.
 
 | Service             | Role                                                                                                                                                                                | Docs                                                    |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
@@ -65,7 +65,7 @@ All services are Go, each with its own `dockerfile`, wired together in `docker/d
 | `video-narrator`    | Produces avatar-narrated videos from posts (TTS + MuseTalk lip-sync, chroma key, intro/outro concat). Runs on the main server or a GPU machine.                                     | [Migration guide](docs/gpu-video-narrator-migration.md) |
 | `video-publisher`   | Consumes `video.produced`, uploads videos to YouTube, and links them back into blog posts.                                                                                          | —                                                       |
 | `herbhub-manager`   | Web UI/API at manager.herbhub365.com orchestrating post, timelapse, and video generation.                                                                                           | —                                                       |
-| `watering`          | Monitors soil-moisture metrics and publishes watering commands when plants are dry.                                                                                                 | —                                                       |
+| `watering`          | Pi-side GPIO API and RabbitMQ queue consumer for relay control (deployed on greenhouse Pi; not part of central Compose runtime).                                                   | [README](services/watering/README.md)                   |
 
 ## Running the stack
 

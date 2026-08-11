@@ -12,6 +12,7 @@ set -euo pipefail
 [[ $EUID -eq 0 ]] || { echo "run as root: sudo bash $0" >&2; exit 1; }
 
 BIN="$(dirname "$(readlink -f "$0")")/watering"
+ENV_EXAMPLE="$(dirname "$(readlink -f "$0")")/watering.env.example"
 INSTALL_DIR=/opt/herbhub
 SVC=watering
 
@@ -32,6 +33,10 @@ mkdir -p "$INSTALL_DIR"
 systemctl stop "$SVC" 2>/dev/null || true
 install -m 0755 "$BIN" "$INSTALL_DIR/watering"
 
+if [[ -f "$ENV_EXAMPLE" ]] && [[ ! -f /etc/default/$SVC ]]; then
+  install -m 0640 "$ENV_EXAMPLE" "/etc/default/$SVC"
+fi
+
 cat > /etc/systemd/system/$SVC.service <<'EOF'
 [Unit]
 Description=HerbHub365 watering relay API
@@ -41,6 +46,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 ExecStart=/opt/herbhub/watering
+EnvironmentFile=-/etc/default/watering
 Restart=always
 RestartSec=3
 
@@ -54,6 +60,7 @@ NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
+StateDirectory=herbhub-watering
 DeviceAllow=/dev/gpiochip0 rw
 DevicePolicy=closed
 

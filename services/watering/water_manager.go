@@ -15,13 +15,13 @@ import (
 	"sync"
 	"syscall"
 	"time"
-
-	"github.com/warthog618/go-gpiocdev"
 )
 
 const (
 	chip       = "gpiochip0"
 	listenAddr = ":8181"
+	// Queue-triggered watering pulse duration.
+	wateringPulseDuration = 15 * time.Second
 	// Safety cap: no single pulse/cycle may run longer than this.
 	maxDuration = 10 * time.Minute
 )
@@ -51,7 +51,7 @@ type job struct {
 
 type controller struct {
 	mu     sync.Mutex
-	lines  *gpiocdev.Lines
+	lines  gpioLines
 	index  map[string]int  // channel -> offset position in request
 	state  map[string]bool // channel -> currently on?
 	values []int           // shadow of hardware line values, indexed by index
@@ -72,12 +72,7 @@ func newController() (*controller, error) {
 		initial[i] = offValue
 	}
 
-	lines, err := gpiocdev.RequestLines(
-		chip,
-		offsets,
-		gpiocdev.AsOutput(initial...),
-		gpiocdev.WithConsumer("relay-api"),
-	)
+	lines, err := requestLines(chip, offsets, initial)
 	if err != nil {
 		return nil, err
 	}
@@ -194,6 +189,65 @@ func (c *controller) Pulse(channels []string, d time.Duration) error {
 			}
 		}
 	}()
+	return nil
+}
+
+// PulseSync turns channels on for d and then switches them off before returning.
+// If the context is cancelled or another operation takes ownership of a channel,
+// the pulse is treated as interrupted and returns an error.
+func (c *controller) PulseSync(ctx context.Context, channels []string, d time.Duration) error {
+	c.mu.Lock()
+
+	jobCtx, cancel := context.WithCancel(context.Background())
+	j := &job{cancel: cancel}
+	for i, ch := range channels {
+		c.cancelJobLocked(ch)
+		if err := c.setLocked(ch, true); err != nil {
+			cancel()
+			for _, prev := range channels[:i] {
+				if c.jobs[prev] == j {
+					delete(c.jobs, prev)
+					_ = c.setLocked(prev, false)
+				}
+			}
+			c.mu.Unlock()
+			return err
+		}
+		c.jobs[ch] = j
+	}
+	c.mu.Unlock()
+
+	timer := time.NewTimer(d)
+	defer timer.Stop()
+
+	var interrupted error
+	select {
+	case <-timer.C:
+	case <-ctx.Done():
+		interrupted = ctx.Err()
+	case <-jobCtx.Done():
+		interrupted = errors.New("pulse interrupted")
+	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	var offErr error
+	for _, ch := range channels {
+		if c.jobs[ch] == j {
+			delete(c.jobs, ch)
+			if err := c.setLocked(ch, false); err != nil && offErr == nil {
+				offErr = err
+			}
+		}
+	}
+
+	if offErr != nil {
+		return offErr
+	}
+	if interrupted != nil {
+		return interrupted
+	}
 	return nil
 }
 
@@ -486,6 +540,9 @@ func logMiddleware(next http.Handler) http.Handler {
 // ---------------------------------------------------------------------------
 
 func main() {
+	rootCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	ctrl, err := newController()
 	if err != nil {
 		log.Fatalf("failed to request GPIO lines: %v", err)
@@ -498,17 +555,32 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
+	serverErr := make(chan error, 1)
 	go func() {
 		log.Printf("relay API listening on %s", listenAddr)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("server error: %v", err)
+			serverErr <- err
+		}
+	}()
+
+	consumerErr := make(chan error, 1)
+	go func() {
+		if err := runRabbitConsumer(rootCtx, ctrl, wateringPulseDuration); err != nil && !errors.Is(err, context.Canceled) {
+			consumerErr <- err
 		}
 	}()
 
 	// Graceful shutdown: relays off, lines released.
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
-	<-sig
+	select {
+	case <-rootCtx.Done():
+	case err := <-serverErr:
+		log.Printf("http server error: %v", err)
+		stop()
+	case err := <-consumerErr:
+		log.Printf("rabbit consumer error: %v", err)
+		stop()
+	}
+
 	log.Println("shutting down...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

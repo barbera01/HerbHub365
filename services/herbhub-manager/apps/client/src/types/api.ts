@@ -91,3 +91,65 @@ export type NarratorConfig = {
   poll_interval?: string
   max_wait?: string
 }
+
+export type MessagingQueueCounters = {
+  ready: number
+  unacked: number
+  consumers: number
+}
+
+export type MessagingDriftDetail = {
+  resource: string
+  field: string
+  expected: string
+  actual: string
+}
+
+export type MessagingCatalogueStatus = {
+  id: string
+  name: string
+  state: 'ready' | 'missing' | 'drifted' | 'unavailable' | 'disabled'
+  queues?: Record<string, MessagingQueueCounters>
+  drift?: MessagingDriftDetail[]
+  error?: string
+}
+
+export type MessagingTemplateInfo = {
+  id: string
+  name: string
+  catalogue_id: string
+  description: string
+  requires_confirmation: boolean
+  allowed_routing_keys?: string[]
+  default_routing_key?: string
+  default_payload: Record<string, unknown>
+}
+
+export type MessagingPrometheusSummary = {
+  available: boolean
+  queues?: Record<string, MessagingQueueCounters>
+  error?: string
+}
+
+export type MessagingOverview = {
+  enabled: boolean
+  broker_status: string
+  grafana_url?: string
+  catalogues: MessagingCatalogueStatus[]
+  templates: MessagingTemplateInfo[]
+  prometheus?: MessagingPrometheusSummary
+  error?: string
+}
+
+export type MessagingPublishRequest = {
+  payload: Record<string, unknown>
+  routing_key?: string
+  confirmed: boolean
+}
+
+export type MessagingPublishResult = {
+  message_id: string
+  exchange: string
+  routing_key: string
+  routed: boolean
+}

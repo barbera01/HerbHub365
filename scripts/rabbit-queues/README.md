@@ -1,6 +1,12 @@
 # RabbitMQ Queue Setup Scripts
 
-This directory contains scripts for setting up RabbitMQ exchanges, queues, and bindings for HerbHub365 services.
+> ⚠️ **Legacy / Deprecated**
+>
+> These scripts are now legacy. Queue/exchange provisioning and curated message publishing
+> are handled by the `herbhub-manager-api` messaging endpoints (`/api/messaging/*`) using a
+> static server-owned catalogue. Keep scripts for historical/manual fallback only.
+
+This directory contains legacy scripts for manually setting up RabbitMQ exchanges, queues, and bindings for HerbHub365 services.
 
 ## Scripts
 

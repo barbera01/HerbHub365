@@ -1,12 +1,27 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { apiFetch } from '@/api/client'
+import { ApiError, apiFetch } from '@/api/client'
 import StatePanel from '@/components/StatePanel.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  AUTOMATIC_PLANTS,
+  createAutomaticDraft,
+  formatDateTime,
+  formatDecision,
+  formatDurationSeconds,
+  isAutomaticDraftDirty,
+  normalizeAutomaticWateringRepresentation,
+  requiresEnableConfirmation,
+  sampleAgeSeconds,
+  shouldResetEnableConfirmation,
+  validateAutomaticDraft,
+} from '@/lib/automatic-watering'
+import type { AutomaticWateringDraft } from '@/lib/automatic-watering'
 import {
   canProvisionCatalogue,
   derivePublishRoute,
@@ -19,14 +34,23 @@ import {
   requiresDangerConfirmation,
   validateWateringPayload,
 } from '@/lib/messaging'
-import type { MessagingOverview, MessagingPublishResult, MessagingTemplateInfo } from '@/types/api'
+import type {
+  AutomaticPlantKey,
+  AutomaticWateringRepresentation,
+  MessagingOverview,
+  MessagingPublishResult,
+  MessagingTemplateInfo,
+} from '@/types/api'
 
-type TabKey = 'topology' | 'publish' | 'metrics'
+type TabKey = 'topology' | 'publish' | 'metrics' | 'automatic'
+
+const AUTOMATIC_ENDPOINT = '/api/messaging/automatic-watering'
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: 'topology', label: 'Topology' },
   { key: 'publish', label: 'Publish' },
   { key: 'metrics', label: 'Metrics' },
+  { key: 'automatic', label: 'Automatic' },
 ]
 
 const activeTab = ref<TabKey>('topology')
@@ -34,6 +58,17 @@ const loading = ref(true)
 const refreshing = ref(false)
 const error = ref('')
 const overview = ref<MessagingOverview | null>(null)
+
+const automaticLoading = ref(true)
+const automaticRefreshing = ref(false)
+const automaticSaving = ref(false)
+const automaticError = ref('')
+const automaticSuccess = ref('')
+const automaticStaleMessage = ref('')
+const automaticData = ref<AutomaticWateringRepresentation | null>(null)
+const automaticDraft = ref<AutomaticWateringDraft | null>(null)
+const automaticValidationErrors = ref<Record<string, string>>({})
+const automaticEnableConfirm = ref(false)
 
 const provisioningCatalogue = ref('')
 const provisionConfirmFor = ref('')
@@ -86,6 +121,60 @@ const canSubmitPublish = computed(() => {
   return true
 })
 
+const automaticValidation = computed(() => {
+  if (!automaticDraft.value) return { errors: {} }
+  return validateAutomaticDraft(automaticDraft.value)
+})
+
+const automaticNeedsEnableConfirmation = computed(() => {
+  if (!automaticData.value || !automaticDraft.value) return false
+  return requiresEnableConfirmation(automaticData.value.config.enabled, automaticDraft.value.enabled)
+})
+
+const automaticDirty = computed(() => {
+  if (!automaticData.value || !automaticDraft.value) return false
+  return isAutomaticDraftDirty(automaticData.value.config, automaticDraft.value)
+})
+
+const automaticCanSave = computed(() => {
+  if (!automaticData.value || !automaticDraft.value || automaticSaving.value || automaticLoading.value) return false
+  if (!automaticDirty.value) return false
+  if (Object.keys(automaticValidation.value.errors).length > 0) return false
+  if (automaticNeedsEnableConfirmation.value && !automaticEnableConfirm.value) return false
+  return true
+})
+
+function fieldError(path: string): string {
+  return automaticValidationErrors.value[path] || ''
+}
+
+function onAutomaticDraftEdited() {
+  const enableTransitionPending = automaticNeedsEnableConfirmation.value
+  if (shouldResetEnableConfirmation({ fieldPath: 'draft', isEnableTransitionPending: enableTransitionPending })) {
+    automaticEnableConfirm.value = false
+  }
+  automaticSuccess.value = ''
+  automaticStaleMessage.value = ''
+  automaticValidationErrors.value = automaticValidation.value.errors
+}
+
+function onAutomaticEnableConfirmChanged() {
+  automaticSuccess.value = ''
+  automaticStaleMessage.value = ''
+}
+
+function formatHoursHint(minutesInput: string): string {
+  const parsed = Number(minutesInput)
+  if (!Number.isFinite(parsed)) return '—'
+  return `${(parsed / 60).toFixed(2).replace(/\.00$/, '')}h`
+}
+
+function formatHoursValue(hoursInput: string): string {
+  const parsed = Number(hoursInput)
+  if (!Number.isFinite(parsed)) return '—'
+  return `${parsed.toFixed(2).replace(/\.00$/, '')}h`
+}
+
 async function loadOverview() {
   error.value = ''
   try {
@@ -102,10 +191,95 @@ async function loadOverview() {
   }
 }
 
+async function loadAutomaticWatering() {
+  automaticError.value = ''
+  try {
+    const raw = await apiFetch<unknown>(AUTOMATIC_ENDPOINT)
+    const normalized = normalizeAutomaticWateringRepresentation(raw)
+    automaticData.value = normalized
+    automaticDraft.value = createAutomaticDraft(normalized.config)
+    automaticValidationErrors.value = {}
+    automaticEnableConfirm.value = false
+  } catch (e) {
+    automaticError.value = (e as Error).message
+    automaticData.value = null
+    automaticDraft.value = null
+  }
+}
+
 async function refreshOverview() {
   refreshing.value = true
   await loadOverview()
   refreshing.value = false
+}
+
+async function refreshAutomaticWatering() {
+  automaticRefreshing.value = true
+  automaticSuccess.value = ''
+  automaticStaleMessage.value = ''
+  await loadAutomaticWatering()
+  automaticRefreshing.value = false
+}
+
+async function saveAutomaticWatering() {
+  if (!automaticData.value || !automaticDraft.value) return
+
+  automaticError.value = ''
+  automaticSuccess.value = ''
+  automaticStaleMessage.value = ''
+  const validation = validateAutomaticDraft(automaticDraft.value)
+  automaticValidationErrors.value = validation.errors
+
+  if (!validation.parsedConfig) {
+    automaticError.value = 'Fix validation errors before saving. Server-side validation still applies.'
+    automaticEnableConfirm.value = false
+    return
+  }
+
+  const mustConfirmEnable = requiresEnableConfirmation(automaticData.value.config.enabled, validation.parsedConfig.enabled)
+  if (mustConfirmEnable && !automaticEnableConfirm.value) {
+    automaticError.value = 'Enable confirmation is required before turning on automatic watering.'
+    automaticEnableConfirm.value = false
+    return
+  }
+
+  const revision = automaticData.value.config_revision
+  if (!Number.isFinite(revision) || revision < 1) {
+    automaticError.value = 'Cannot save because configuration revision is missing. Refresh and try again.'
+    automaticEnableConfirm.value = false
+    return
+  }
+
+  automaticSaving.value = true
+  try {
+    const ifMatch = `"${Math.trunc(revision)}"`
+    const raw = await apiFetch<unknown>(AUTOMATIC_ENDPOINT, {
+      method: 'PUT',
+      headers: {
+        'If-Match': ifMatch,
+      },
+      body: {
+        config: validation.parsedConfig,
+        confirm_enable: mustConfirmEnable ? automaticEnableConfirm.value : false,
+      },
+    })
+    const normalized = normalizeAutomaticWateringRepresentation(raw)
+    automaticData.value = normalized
+    automaticDraft.value = createAutomaticDraft(normalized.config)
+    automaticValidationErrors.value = {}
+    automaticSuccess.value = 'Automatic watering configuration saved.'
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 412) {
+      automaticStaleMessage.value = 'Configuration changed on the server (stale revision). Refresh automatic status and review differences before saving again.'
+    } else if (e instanceof ApiError && e.status === 428) {
+      automaticError.value = 'Server rejected the save because a precondition header is missing. Refresh and retry.'
+    } else {
+      automaticError.value = (e as Error).message
+    }
+  } finally {
+    automaticSaving.value = false
+    automaticEnableConfirm.value = false
+  }
 }
 
 function selectTemplate(templateId: string) {
@@ -239,10 +413,31 @@ function badgeVariantForState(state: string): 'success' | 'warning' | 'danger' |
   return 'secondary'
 }
 
+function automaticServiceStateClass(): string {
+  if (!automaticData.value) return 'text-slate-900 bg-slate-50 border-slate-300'
+  const status = automaticData.value.status
+  if (status.faulted) return 'text-red-900 bg-red-50 border-red-300'
+  if (status.running) return 'text-emerald-900 bg-emerald-50 border-emerald-300'
+  return 'text-red-900 bg-red-50 border-red-300'
+}
+
+function automaticServiceLabel(): string {
+  if (!automaticData.value) return 'unknown'
+  const status = automaticData.value.status
+  if (status.faulted) return 'faulted'
+  return status.running ? 'running' : 'stopped'
+}
+
+function plantRuntime(plant: AutomaticPlantKey) {
+  return automaticData.value?.status.plants[plant]
+}
+
 onMounted(async () => {
   loading.value = true
-  await loadOverview()
+  automaticLoading.value = true
+  await Promise.all([loadOverview(), loadAutomaticWatering()])
   loading.value = false
+  automaticLoading.value = false
 })
 </script>
 
@@ -251,10 +446,10 @@ onMounted(async () => {
     <header class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <h1 class="text-lg font-semibold">Messaging</h1>
-        <p class="text-sm text-muted-foreground">Curated RabbitMQ setup, template publishing, and Prometheus summary.</p>
+        <p class="text-sm text-muted-foreground">Curated RabbitMQ setup, template publishing, and automatic watering configuration.</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <Button variant="outline" :disabled="refreshing" @click="refreshOverview">{{ refreshing ? 'Refreshing…' : 'Refresh' }}</Button>
+        <Button variant="outline" :disabled="refreshing" @click="refreshOverview">{{ refreshing ? 'Refreshing…' : 'Refresh overview' }}</Button>
       </div>
     </header>
 
@@ -496,12 +691,267 @@ onMounted(async () => {
               :href="overview.grafana_url"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-semibold hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              class="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-semibold hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Open Grafana dashboard
             </a>
           </CardContent>
         </Card>
+      </section>
+
+      <section
+        v-show="activeTab === 'automatic'"
+        :id="panelId('automatic')"
+        role="tabpanel"
+        :aria-labelledby="tabId('automatic')"
+        class="space-y-3"
+      >
+        <header class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="text-base font-semibold">Automatic watering</h2>
+            <p class="text-sm text-muted-foreground">Configuration and runtime state for fixed plants: basil, chilli, oregano.</p>
+          </div>
+          <Button variant="outline" :disabled="automaticRefreshing || automaticLoading" @click="refreshAutomaticWatering">
+            {{ automaticRefreshing ? 'Refreshing…' : 'Refresh automatic status' }}
+          </Button>
+        </header>
+
+        <p v-if="automaticSuccess" role="status" aria-live="polite" class="rounded border border-emerald-300 bg-emerald-50 p-2 text-sm text-emerald-900">{{ automaticSuccess }}</p>
+        <p v-if="automaticStaleMessage" role="alert" aria-live="assertive" class="rounded border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900">
+          {{ automaticStaleMessage }}
+          <Button size="sm" variant="outline" class="ml-2" :disabled="automaticRefreshing" @click="refreshAutomaticWatering">Refresh now</Button>
+        </p>
+        <p v-if="automaticError" role="alert" aria-live="assertive" class="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">{{ automaticError }}</p>
+
+        <StatePanel v-if="automaticLoading" title="Loading" message="Loading automatic watering status..." kind="loading" />
+        <StatePanel v-else-if="!automaticData || !automaticDraft" title="Unavailable" message="Automatic watering data is unavailable." kind="empty" />
+
+        <template v-else>
+          <Card>
+            <CardContent class="space-y-3 pt-6">
+              <div class="grid gap-2 sm:grid-cols-3">
+                <p
+                  class="rounded border p-2 text-sm"
+                  :class="automaticServiceStateClass()"
+                >
+                  <span class="font-semibold">Service:</span> {{ automaticServiceLabel() }}
+                </p>
+                <p class="rounded border border-border bg-muted/40 p-2 text-sm">
+                  <span class="font-semibold">Next evaluation:</span>
+                  {{ formatDateTime(automaticData.status.next_evaluation_at) }}
+                </p>
+                <p class="rounded border border-border bg-muted/40 p-2 text-sm">
+                  <span class="font-semibold">Config revision:</span> {{ automaticData.config_revision || '—' }}
+                </p>
+              </div>
+              <p v-if="automaticData.status.instance_id" class="rounded border border-border bg-muted/40 p-2 text-xs">
+                <span class="font-semibold">Instance ID:</span> {{ automaticData.status.instance_id }}
+              </p>
+              <p v-if="automaticData.status.fault" class="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
+                <span class="font-semibold">Runtime error:</span> {{ automaticData.status.fault }}
+              </p>
+              <p class="rounded border border-emerald-300 bg-emerald-50 p-2 text-xs text-emerald-900">
+                Automatic publisher behavior: only moisture strictly below threshold publishes <span class="font-semibold">water</span>. Equality, healthy, stale metrics, errors, and cooldown publish nothing. There are no <span class="font-semibold">skip</span> messages. Every water message expires within configured max 5 minutes. Raspberry Pi watering pulse duration is fixed at 15 seconds.
+              </p>
+              <p v-if="automaticData.config.enabled" class="rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
+                Automatic watering is enabled. Configuration edits are allowed and apply to future evaluations only; existing cooldown history remains in effect.
+              </p>
+              <p v-else-if="automaticDraft.enabled" class="rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
+                This unsaved draft enables automatic watering. Automation remains disabled until the configuration is explicitly confirmed and saved.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Global configuration</CardTitle>
+              <CardDescription>Use minutes for interval values (with hours hints). Server accepts integer seconds.</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-4">
+              <label class="flex cursor-pointer items-center gap-2 text-sm font-medium">
+                <input
+                  v-model="automaticDraft.enabled"
+                  type="checkbox"
+                  class="h-4 w-4 cursor-pointer"
+                  @change="onAutomaticDraftEdited"
+                />
+                Enable automatic watering
+              </label>
+
+              <div
+                v-if="automaticNeedsEnableConfirmation"
+                class="space-y-2 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-900"
+              >
+                <p class="font-semibold">Physical automation warning</p>
+                <p>
+                  Enabling this feature allows automated watering messages to be sent without manual publish actions when thresholds are crossed.
+                </p>
+                <label class="flex cursor-pointer items-center gap-2">
+                  <input
+                    v-model="automaticEnableConfirm"
+                    type="checkbox"
+                    class="h-4 w-4 cursor-pointer"
+                    @change="onAutomaticEnableConfirmChanged"
+                  />
+                  I explicitly confirm enabling physical automatic watering now.
+                </label>
+              </div>
+
+              <p v-if="fieldError('plants_metric_label_value_unique')" class="rounded border border-red-300 bg-red-50 p-2 text-xs text-red-700">
+                {{ fieldError('plants_metric_label_value_unique') }}
+              </p>
+
+              <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <div class="space-y-1">
+                  <label for="automatic-evaluation-interval" class="block cursor-pointer text-xs font-semibold">Evaluation interval (minutes)</label>
+                  <Input
+                    id="automatic-evaluation-interval"
+                    v-model="automaticDraft.evaluation_interval_minutes"
+                    inputmode="decimal"
+                    :aria-invalid="!!fieldError('evaluation_interval_minutes')"
+                    @input="onAutomaticDraftEdited"
+                  />
+                  <p class="text-xs text-muted-foreground">~ {{ formatHoursHint(automaticDraft.evaluation_interval_minutes) }}</p>
+                  <p v-if="fieldError('evaluation_interval_minutes')" class="text-xs text-red-700">{{ fieldError('evaluation_interval_minutes') }}</p>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="automatic-cooldown" class="block cursor-pointer text-xs font-semibold">Cooldown (hours)</label>
+                  <Input
+                    id="automatic-cooldown"
+                    v-model="automaticDraft.cooldown_hours"
+                    inputmode="decimal"
+                    :aria-invalid="!!fieldError('cooldown_hours')"
+                    @input="onAutomaticDraftEdited"
+                  />
+                  <p class="text-xs text-muted-foreground">~ {{ formatHoursValue(automaticDraft.cooldown_hours) }}</p>
+                  <p v-if="fieldError('cooldown_hours')" class="text-xs text-red-700">{{ fieldError('cooldown_hours') }}</p>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="automatic-max-age" class="block cursor-pointer text-xs font-semibold">Max metric age (minutes)</label>
+                  <Input
+                    id="automatic-max-age"
+                    v-model="automaticDraft.max_metric_age_minutes"
+                    inputmode="decimal"
+                    :aria-invalid="!!fieldError('max_metric_age_minutes')"
+                    @input="onAutomaticDraftEdited"
+                  />
+                  <p class="text-xs text-muted-foreground">Must be ≥ evaluation interval.</p>
+                  <p v-if="fieldError('max_metric_age_minutes')" class="text-xs text-red-700">{{ fieldError('max_metric_age_minutes') }}</p>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="automatic-prom-timeout" class="block cursor-pointer text-xs font-semibold">Prometheus timeout (seconds)</label>
+                  <Input
+                    id="automatic-prom-timeout"
+                    v-model="automaticDraft.prometheus_timeout_seconds"
+                    inputmode="numeric"
+                    :aria-invalid="!!fieldError('prometheus_timeout_seconds')"
+                    @input="onAutomaticDraftEdited"
+                  />
+                  <p v-if="fieldError('prometheus_timeout_seconds')" class="text-xs text-red-700">{{ fieldError('prometheus_timeout_seconds') }}</p>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="automatic-message-expiry" class="block cursor-pointer text-xs font-semibold">Message expiry (minutes)</label>
+                  <Input
+                    id="automatic-message-expiry"
+                    v-model="automaticDraft.message_expiry_minutes"
+                    inputmode="decimal"
+                    :aria-invalid="!!fieldError('message_expiry_minutes')"
+                    @input="onAutomaticDraftEdited"
+                  />
+                  <p class="text-xs text-muted-foreground">Hard maximum is 5 minutes.</p>
+                  <p v-if="fieldError('message_expiry_minutes')" class="text-xs text-red-700">{{ fieldError('message_expiry_minutes') }}</p>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="automatic-moisture-metric" class="block cursor-pointer text-xs font-semibold">Moisture metric name</label>
+                  <Input
+                    id="automatic-moisture-metric"
+                    v-model="automaticDraft.moisture_metric"
+                    :aria-invalid="!!fieldError('moisture_metric')"
+                    @input="onAutomaticDraftEdited"
+                  />
+                  <p v-if="fieldError('moisture_metric')" class="text-xs text-red-700">{{ fieldError('moisture_metric') }}</p>
+                </div>
+
+                <div class="space-y-1 sm:col-span-2 xl:col-span-3">
+                  <label for="automatic-plant-label" class="block cursor-pointer text-xs font-semibold">Plant label key</label>
+                  <Input
+                    id="automatic-plant-label"
+                    v-model="automaticDraft.plant_label"
+                    :aria-invalid="!!fieldError('plant_label')"
+                    @input="onAutomaticDraftEdited"
+                  />
+                  <p class="text-xs text-muted-foreground">This label key is matched against each plant label value below.</p>
+                  <p v-if="fieldError('plant_label')" class="text-xs text-red-700">{{ fieldError('plant_label') }}</p>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <Button :disabled="!automaticCanSave" @click="saveAutomaticWatering">{{ automaticSaving ? 'Saving…' : 'Save automatic config' }}</Button>
+                <Button variant="outline" :disabled="automaticRefreshing" @click="refreshAutomaticWatering">Revert from server</Button>
+                <p class="text-xs text-muted-foreground">Changes are full replacement saves using revision preconditions.</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <Card v-for="plant in AUTOMATIC_PLANTS" :key="plant">
+              <CardHeader>
+                <CardTitle class="capitalize">{{ plant }}</CardTitle>
+                <CardDescription>Plant configuration and runtime state</CardDescription>
+              </CardHeader>
+              <CardContent class="space-y-3">
+                <label class="flex cursor-pointer items-center gap-2 text-xs font-semibold">
+                  <input
+                    v-model="automaticDraft.plants[plant].enabled"
+                    type="checkbox"
+                    class="h-4 w-4 cursor-pointer"
+                    @change="onAutomaticDraftEdited"
+                  />
+                  Enabled
+                </label>
+
+                <div class="space-y-1">
+                  <label :for="`automatic-${plant}-threshold`" class="block cursor-pointer text-xs font-semibold">Threshold (%)</label>
+                  <Input
+                    :id="`automatic-${plant}-threshold`"
+                    v-model="automaticDraft.plants[plant].threshold_percent"
+                    inputmode="decimal"
+                    :aria-invalid="!!fieldError(`plants.${plant}.threshold_percent`)"
+                    @input="onAutomaticDraftEdited"
+                  />
+                  <p v-if="fieldError(`plants.${plant}.threshold_percent`)" class="text-xs text-red-700">{{ fieldError(`plants.${plant}.threshold_percent`) }}</p>
+                </div>
+
+                <div class="space-y-1">
+                  <label :for="`automatic-${plant}-label-value`" class="block cursor-pointer text-xs font-semibold">Metric label value</label>
+                  <Input
+                    :id="`automatic-${plant}-label-value`"
+                    v-model="automaticDraft.plants[plant].metric_label_value"
+                    :aria-invalid="!!fieldError(`plants.${plant}.metric_label_value`)"
+                    @input="onAutomaticDraftEdited"
+                  />
+                  <p v-if="fieldError(`plants.${plant}.metric_label_value`)" class="text-xs text-red-700">{{ fieldError(`plants.${plant}.metric_label_value`) }}</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-1 rounded border border-border bg-muted/40 p-2 text-xs">
+                  <p><span class="font-semibold">Last measurement:</span> {{ plantRuntime(plant)?.last_value ?? '—' }}</p>
+                  <p><span class="font-semibold">Sample age:</span> {{ formatDurationSeconds(sampleAgeSeconds(plantRuntime(plant)?.last_evaluated_at, plantRuntime(plant)?.last_sample_at)) }}</p>
+                  <p><span class="font-semibold">Sample time:</span> {{ formatDateTime(plantRuntime(plant)?.last_sample_at) }}</p>
+                  <p><span class="font-semibold">Last evaluation:</span> {{ formatDateTime(plantRuntime(plant)?.last_evaluated_at) }}</p>
+                  <p><span class="font-semibold">Decision:</span> {{ formatDecision(plantRuntime(plant)?.last_decision) }}</p>
+                  <p><span class="font-semibold">Cooldown until:</span> {{ formatDateTime(plantRuntime(plant)?.cooldown_until) }}</p>
+                  <p><span class="font-semibold">Last message ID:</span> {{ plantRuntime(plant)?.last_message_id || '—' }}</p>
+                  <p v-if="plantRuntime(plant)?.last_error" class="text-red-700"><span class="font-semibold">Error:</span> {{ plantRuntime(plant)?.last_error }}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </template>
       </section>
     </template>
   </div>

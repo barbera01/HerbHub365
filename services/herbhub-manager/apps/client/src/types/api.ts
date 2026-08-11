@@ -153,3 +153,48 @@ export type MessagingPublishResult = {
   routing_key: string
   routed: boolean
 }
+
+export type AutomaticPlantKey = 'basil' | 'chilli' | 'oregano'
+
+export type AutomaticWateringPlantConfig = {
+  enabled: boolean
+  threshold_percent: number
+  metric_label_value: string
+}
+
+export type AutomaticWateringConfig = {
+  enabled: boolean
+  evaluation_interval_seconds: number
+  cooldown_seconds: number
+  max_metric_age_seconds: number
+  prometheus_timeout_seconds: number
+  message_expiry_seconds: number
+  moisture_metric: string
+  plant_label: string
+  plants: Record<AutomaticPlantKey, AutomaticWateringPlantConfig>
+}
+
+export type AutomaticWateringPlantRuntime = {
+  last_evaluated_at?: string
+  last_sample_at?: string
+  last_value?: number
+  last_decision?: string
+  last_error?: string
+  cooldown_until?: string
+  last_message_id?: string
+}
+
+export type AutomaticWateringStatus = {
+  running: boolean
+  faulted: boolean
+  fault?: string
+  next_evaluation_at?: string
+  instance_id?: string
+  plants: Record<AutomaticPlantKey, AutomaticWateringPlantRuntime>
+}
+
+export type AutomaticWateringRepresentation = {
+  config_revision: number
+  config: AutomaticWateringConfig
+  status: AutomaticWateringStatus
+}

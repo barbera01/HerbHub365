@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"HerbHub365/services/herbhub-manager/internal/autowatering"
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
 	"HerbHub365/services/herbhub-manager/internal/messaging"
@@ -29,6 +30,7 @@ type handlers struct {
 	pubClient       *publisher.Client
 	queueManager    *queue.Manager
 	messagingSvc    *messaging.Service
+	autoManager     *autowatering.Manager
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────

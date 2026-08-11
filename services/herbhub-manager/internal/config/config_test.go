@@ -47,3 +47,11 @@ func TestLoadMessagingOverride(t *testing.T) {
 		t.Fatalf("unexpected grafana URL %q", cfg.Messaging.GrafanaURL)
 	}
 }
+
+func TestLoadAutoWateringStatePath(t *testing.T) {
+	t.Setenv("AUTOWATERING_STATE_PATH", "/tmp/aw.json")
+	cfg := Load()
+	if cfg.AutoWatering.StatePath != "/tmp/aw.json" {
+		t.Fatalf("unexpected state path %q", cfg.AutoWatering.StatePath)
+	}
+}

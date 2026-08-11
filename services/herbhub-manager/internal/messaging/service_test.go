@@ -252,6 +252,17 @@ func TestPhysicalWateringRequiresConsumer(t *testing.T) {
 	}
 }
 
+func TestPhysicalWateringRequiresExactlyOneConsumer(t *testing.T) {
+	fr := readyStateSeed(Catalogues()["watering"])
+	fr.publishResp = rabbitmq.PublishResponse{Routed: true}
+	fr.queues[Catalogues()["watering"].MainQueue.Name] = rabbitmq.Queue{Name: Catalogues()["watering"].MainQueue.Name, Durable: true, AutoDelete: false, Exclusive: false, Arguments: Catalogues()["watering"].MainQueue.Arguments, Consumers: 2}
+	svc := NewService(enabledConfig(), fr)
+	_, err := svc.PublishAutomaticWater(context.Background(), "basil", 20, 5*time.Minute)
+	if !errors.Is(err, ErrUnavailable) {
+		t.Fatalf("expected unavailable when consumers != 1, got %v", err)
+	}
+}
+
 func TestSkipDoesNotRequireConsumer(t *testing.T) {
 	fr := readyStateSeed(Catalogues()["watering"])
 	fr.publishResp = rabbitmq.PublishResponse{Routed: true}
@@ -379,5 +390,36 @@ func TestDisabledService(t *testing.T) {
 	}
 	if _, err := svc.ProvisionCatalogue(context.Background(), "watering"); !errors.Is(err, ErrDisabled) {
 		t.Fatalf("expected disabled error")
+	}
+}
+
+func TestPublishAutomaticWaterSafetyAndErrors(t *testing.T) {
+	fr := readyStateSeed(Catalogues()["watering"])
+	fr.queues[Catalogues()["watering"].MainQueue.Name] = rabbitmq.Queue{Name: Catalogues()["watering"].MainQueue.Name, Durable: true, AutoDelete: false, Exclusive: false, Arguments: Catalogues()["watering"].MainQueue.Arguments, Consumers: 1}
+	fr.publishResp = rabbitmq.PublishResponse{Routed: true}
+	svc := NewService(enabledConfig(), fr)
+
+	res, err := svc.PublishAutomaticWater(context.Background(), "basil", 22.3, 5*time.Minute)
+	if err != nil {
+		t.Fatalf("publish auto water: %v", err)
+	}
+	if res.MessageID == "" || !res.Routed {
+		t.Fatalf("unexpected result %+v", res)
+	}
+	if fr.lastPublish.Expiration != "300000" {
+		t.Fatalf("expected expiry 300000 got %q", fr.lastPublish.Expiration)
+	}
+
+	fr.publishErr = errors.New("timeout")
+	_, err = svc.PublishAutomaticWater(context.Background(), "basil", 22.3, 5*time.Minute)
+	if !errors.Is(err, ErrPublishUncertain) {
+		t.Fatalf("expected uncertain error, got %v", err)
+	}
+
+	fr.publishErr = nil
+	fr.publishResp = rabbitmq.PublishResponse{Routed: false}
+	_, err = svc.PublishAutomaticWater(context.Background(), "basil", 22.3, 5*time.Minute)
+	if !errors.Is(err, ErrPublishFailed) {
+		t.Fatalf("expected publish failed, got %v", err)
 	}
 }

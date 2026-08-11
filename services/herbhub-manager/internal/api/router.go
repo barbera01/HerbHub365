@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"HerbHub365/services/herbhub-manager/internal/auth"
+	"HerbHub365/services/herbhub-manager/internal/autowatering"
 
 	"HerbHub365/services/herbhub-manager/internal/blogpost"
 	"HerbHub365/services/herbhub-manager/internal/config"
@@ -17,10 +18,10 @@ import (
 )
 
 // NewRouter builds the HTTP mux with API routes only.
-func NewRouter(cfg config.Config, verifier *auth.Verifier, videoClient *video.Client, blogClient *blogpost.Client, timelapseClient *timelapse.Client, pubClient *publisher.Client, queueManager *queue.Manager, messagingSvc *messaging.Service) http.Handler {
+func NewRouter(cfg config.Config, verifier *auth.Verifier, videoClient *video.Client, blogClient *blogpost.Client, timelapseClient *timelapse.Client, pubClient *publisher.Client, queueManager *queue.Manager, messagingSvc *messaging.Service, autoManager *autowatering.Manager) http.Handler {
 	root := http.NewServeMux()
 	apiMux := http.NewServeMux()
-	h := &handlers{cfg: cfg, videoClient: videoClient, blogClient: blogClient, timelapseClient: timelapseClient, pubClient: pubClient, queueManager: queueManager, messagingSvc: messagingSvc}
+	h := &handlers{cfg: cfg, videoClient: videoClient, blogClient: blogClient, timelapseClient: timelapseClient, pubClient: pubClient, queueManager: queueManager, messagingSvc: messagingSvc, autoManager: autoManager}
 
 	root.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -71,6 +72,7 @@ func NewRouter(cfg config.Config, verifier *auth.Verifier, videoClient *video.Cl
 	apiMux.HandleFunc("/api/messaging/overview", h.handleMessagingOverview)
 	apiMux.HandleFunc("/api/messaging/catalogues/", h.handleMessagingProvision)
 	apiMux.HandleFunc("/api/messaging/templates/", h.handleMessagingTemplatePublish)
+	apiMux.HandleFunc("/api/messaging/automatic-watering", h.handleAutomaticWatering)
 
 	authenticated := withAuth(cfg.Auth, verifier, apiMux)
 	root.Handle("/api/", authenticated)

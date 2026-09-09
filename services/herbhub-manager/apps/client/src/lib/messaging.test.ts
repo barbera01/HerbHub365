@@ -209,6 +209,19 @@ describe('publish readiness gating', () => {
     expect(reason).toContain('no active watering consumer')
   })
 
+  it('blocks watering-water publish when more than one consumer is active', () => {
+    const reason = getPublishReadinessBlockReason({
+      overview: {
+        enabled: true,
+        broker_status: 'ok',
+        catalogues: [{ id: 'watering', name: 'Watering', state: 'ready', queues: { 'watering.queue': { ready: 0, unacked: 0, consumers: 2 } } }],
+        templates: [],
+      },
+      template,
+    })
+    expect(reason).toContain('expected exactly one active watering consumer, but found 2')
+  })
+
   it('does not block non-watering-water templates when consumer count is zero', () => {
     const reason = getPublishReadinessBlockReason({
       overview: {

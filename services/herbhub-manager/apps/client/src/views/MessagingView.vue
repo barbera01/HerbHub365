@@ -111,14 +111,19 @@ const publishReadinessReason = computed(() =>
   }),
 )
 
+const publishBlockReason = computed(() => {
+  if (publishing.value) return ''
+  if (publishReadinessReason.value) return publishReadinessReason.value
+  if (parsedPayload.value.error) return parsedPayload.value.error
+  if (!parsedPayload.value.value) return 'Enter a valid JSON object payload.'
+  if (wateringErrors.value.length > 0) return 'Fix the payload validation errors before publishing.'
+  if (!publishConfirmed.value) return 'Acknowledge that this publishes directly to RabbitMQ.'
+  if (confirmationNeeded.value && !dangerConfirmed.value) return 'Confirm that the physical watering command should be sent now.'
+  return ''
+})
+
 const canSubmitPublish = computed(() => {
-  if (!selectedTemplate.value || publishing.value) return false
-  if (publishReadinessReason.value) return false
-  if (parsedPayload.value.error || !parsedPayload.value.value) return false
-  if (wateringErrors.value.length > 0) return false
-  if (!publishConfirmed.value) return false
-  if (confirmationNeeded.value && (!publishConfirmed.value || !dangerConfirmed.value)) return false
-  return true
+  return !!selectedTemplate.value && !publishing.value && !publishBlockReason.value
 })
 
 const automaticValidation = computed(() => {
@@ -618,8 +623,8 @@ onMounted(async () => {
               </div>
             </div>
 
-            <p v-if="publishReadinessReason" role="status" aria-live="polite" class="rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
-              {{ publishReadinessReason }}
+            <p v-if="publishBlockReason" role="status" aria-live="polite" class="rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
+              {{ publishBlockReason }}
             </p>
             <p v-if="publishError" role="alert" aria-live="assertive" class="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">{{ publishError }}</p>
             <p v-if="publishResult" role="status" aria-live="polite" class="rounded border border-emerald-300 bg-emerald-50 p-2 text-sm text-emerald-900">

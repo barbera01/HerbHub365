@@ -216,8 +216,11 @@ export function getPublishReadinessBlockReason(args: {
   if (template.id === 'watering-water') {
     const wateringQueue = catalogue.queues?.['watering.queue']
     const consumers = wateringQueue?.consumers ?? 0
-    if (consumers < 1) {
+    if (consumers === 0) {
       return 'Publishing is blocked: no active watering consumer.'
+    }
+    if (consumers !== 1) {
+      return `Publishing is blocked: expected exactly one active watering consumer, but found ${consumers}.`
     }
   }
 
